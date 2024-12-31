@@ -1,10 +1,14 @@
 import React, { useState, useRef } from 'react'
 import { usePortfolio } from '../context/PortfolioContext'
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { Plus, X, Upload, Settings2 } from 'lucide-react'
 =======
 import { Plus, X, Upload } from 'lucide-react'
 >>>>>>> 56907ed71f91868b814009125b8de65a178d87f7
+=======
+import { Plus, X, Upload, Settings2 } from 'lucide-react'
+>>>>>>> 9a119ee (Actualización del portfolio)
 
 const Editor: React.FC = () => {
   const {
@@ -21,9 +25,13 @@ const Editor: React.FC = () => {
   } = usePortfolio()
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   const [activeTab, setActiveTab] = useState('personal')
 =======
 >>>>>>> 56907ed71f91868b814009125b8de65a178d87f7
+=======
+  const [activeTab, setActiveTab] = useState('personal')
+>>>>>>> 9a119ee (Actualización del portfolio)
   const [newProject, setNewProject] = useState({ name: '', description: '' })
   const [newExperience, setNewExperience] = useState({ company: '', position: '', duration: '' })
   const [newSkill, setNewSkill] = useState('')
@@ -63,6 +71,9 @@ const Editor: React.FC = () => {
 
   return (
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 9a119ee (Actualización del portfolio)
     <div className="w-[500px] bg-white shadow-lg overflow-y-auto">
       <div className="p-4 bg-gray-800 text-white sticky top-0 z-10">
         <div className="flex items-center gap-2 mb-4">
@@ -290,6 +301,7 @@ const Editor: React.FC = () => {
           </div>
         )}
       </div>
+<<<<<<< HEAD
 =======
     <div className="w-full md:w-1/2 p-4 bg-white shadow-md overflow-y-auto">
       <h2 className="text-2xl font-bold mb-4">Editar Portafolio</h2>
@@ -539,6 +551,8 @@ const Editor: React.FC = () => {
         </div>
       </form>
 >>>>>>> 56907ed71f91868b814009125b8de65a178d87f7
+=======
+>>>>>>> 9a119ee (Actualización del portfolio)
     </div>
   )
 }

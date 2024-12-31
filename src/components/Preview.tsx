@@ -1,15 +1,23 @@
 import React from 'react'
 import { usePortfolio } from '../context/PortfolioContext'
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { FileText, Download, Share2 } from 'lucide-react'
 import html2pdf from 'html2pdf.js'
 =======
 >>>>>>> 56907ed71f91868b814009125b8de65a178d87f7
+=======
+import { FileText, Download, Share2 } from 'lucide-react'
+import html2pdf from 'html2pdf.js'
+>>>>>>> 9a119ee (Actualización del portfolio)
 
 const Preview: React.FC = () => {
   const { portfolioData } = usePortfolio()
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 9a119ee (Actualización del portfolio)
   const exportPDF = () => {
     const element = document.querySelector('.preview-content')
     if (element) {
@@ -106,6 +114,7 @@ const Preview: React.FC = () => {
             </div>
           </div>
         </div>
+<<<<<<< HEAD
 =======
   return (
     <div className="w-full md:w-1/2 p-4 bg-gray-50 overflow-y-auto">
@@ -163,6 +172,8 @@ const Preview: React.FC = () => {
           <p>LinkedIn: <a href={portfolioData.contact.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{portfolioData.contact.linkedin}</a></p>
         </div>
 >>>>>>> 56907ed71f91868b814009125b8de65a178d87f7
+=======
+>>>>>>> 9a119ee (Actualización del portfolio)
       </div>
     </div>
   )
