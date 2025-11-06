@@ -6,9 +6,11 @@ import Preview from './components/Preview'
 function App() {
   return (
     <PortfolioProvider>
-      <div className="h-screen flex bg-gray-50">
+      <div className="h-screen flex flex-col md:flex-row bg-gray-50">
         <Editor />
-        <Preview />
+        <div className="hidden md:block md:flex-1">
+          <Preview />
+        </div>
       </div>
     </PortfolioProvider>
   )

@@ -1,6 +1,200 @@
 import React, { useState, useRef } from 'react'
 import { usePortfolio } from '../context/PortfolioContext'
-import { Plus, X, Upload, Settings2 } from 'lucide-react'
+import { Plus, X, Upload, Settings2, Phone, MapPin, Mail, Globe } from 'lucide-react'
+import Preview from './Preview'
+
+type TranslationsShape = {
+  editorTitle: string
+  tabs: Record<string, string>
+  changePhoto: string
+  includePhoto: string
+  addProject: string
+  addExperience: string
+  addEducation: string
+  addSkill: string
+  newProjectSkillPlaceholder: string
+  previewTitle?: string
+
+  
+  personal_photoLabel: string
+  personal_noPhoto: string
+  personal_nameLabel: string
+  personal_titleLabel: string
+  personal_aboutLabel: string
+  personal_colorLabel: string
+
+  
+  project_namePlaceholder: string
+  project_descriptionPlaceholder: string
+  project_monthStartPlaceholder: string
+  project_yearStartPlaceholder: string
+  project_monthEndPlaceholder: string
+  project_yearEndPlaceholder: string
+  project_addSkillPlaceholder: string
+  project_newNamePlaceholder: string
+
+  
+  exp_companyPlaceholder: string
+  exp_positionPlaceholder: string
+  exp_monthStartPlaceholder: string
+  exp_yearStartPlaceholder: string
+  exp_monthEndPlaceholder: string
+  exp_yearEndPlaceholder: string
+  exp_descriptionPlaceholder: string
+
+  
+  skills_newPlaceholder: string
+
+  
+  edu_institutionPlaceholder: string
+  edu_degreePlaceholder: string
+  edu_monthStartPlaceholder: string
+  edu_yearStartPlaceholder: string
+  edu_monthEndPlaceholder: string
+  edu_yearEndPlaceholder: string
+  edu_descriptionPlaceholder: string
+  
+  contact_phoneLabel: string
+  contact_addressLabel: string
+  contact_emailLabel: string
+  contact_websiteLabel: string
+  
+  languages_title: string
+  language_namePlaceholder: string
+  language_levelPlaceholder: string
+  addLanguage: string
+}
+
+const translations: Record<string, TranslationsShape> = {
+  es: {
+    editorTitle: 'Editor',
+    tabs: {
+        personal: 'Personal',
+        contact: 'Contacto',
+        projects: 'Proyectos',
+        experience: 'Experiencia',
+        education: 'Educación',
+        skills: 'Habilidades',
+        languages: 'Idiomas'
+    },
+    changePhoto: 'Cambiar foto',
+    includePhoto: 'Incluir foto',
+    addProject: 'Agregar proyecto',
+    addExperience: 'Agregar experiencia',
+    addEducation: 'Agregar educación',
+    addSkill: 'Agregar habilidad',
+    newProjectSkillPlaceholder: 'Skill para el nuevo proyecto',
+    previewTitle: 'Vista previa',
+
+    personal_photoLabel: 'Foto de perfil',
+    personal_noPhoto: 'Sin foto',
+    personal_nameLabel: 'Nombre',
+    personal_titleLabel: 'Título',
+    personal_aboutLabel: 'Acerca de mí',
+    personal_colorLabel: 'Color principal',
+
+    project_namePlaceholder: 'Nombre del proyecto',
+    project_descriptionPlaceholder: 'Descripción',
+    project_monthStartPlaceholder: 'Mes inicio (ej: Ene)',
+    project_yearStartPlaceholder: 'Año inicio (ej: 2023)',
+    project_monthEndPlaceholder: 'Mes fin',
+    project_yearEndPlaceholder: 'Año fin',
+    project_addSkillPlaceholder: 'Agregar skill al proyecto',
+    project_newNamePlaceholder: 'Nombre del nuevo proyecto',
+
+    exp_companyPlaceholder: 'Empresa',
+    exp_positionPlaceholder: 'Cargo',
+    exp_monthStartPlaceholder: 'Mes inicio',
+    exp_yearStartPlaceholder: 'Año inicio',
+    exp_monthEndPlaceholder: 'Mes fin',
+    exp_yearEndPlaceholder: 'Año fin',
+    exp_descriptionPlaceholder: 'Descripción de la experiencia',
+
+    skills_newPlaceholder: 'Nueva habilidad',
+
+    edu_institutionPlaceholder: 'Institución',
+    edu_degreePlaceholder: 'Título / Grado',
+    edu_monthStartPlaceholder: 'Mes inicio',
+    edu_yearStartPlaceholder: 'Año inicio',
+    edu_monthEndPlaceholder: 'Mes fin',
+    edu_yearEndPlaceholder: 'Año fin',
+    edu_descriptionPlaceholder: 'Descripción / detalles',
+    
+    contact_phoneLabel: 'Teléfono',
+    contact_addressLabel: 'Dirección',
+    contact_emailLabel: 'Correo',
+    contact_websiteLabel: 'Sitio web',
+    
+    languages_title: 'Idiomas',
+    language_namePlaceholder: 'Idioma (ej: Español)',
+    language_levelPlaceholder: 'Nivel (ej: Nativo)',
+    addLanguage: '+',
+  },
+  en: {
+    editorTitle: 'Editor',
+    tabs: {
+        personal: 'Personal',
+        contact: 'Contact',
+        projects: 'Projects',
+        experience: 'Experience',
+        education: 'Education',
+        skills: 'Skills',
+        languages: 'Languages'
+    },
+    changePhoto: 'Change photo',
+    includePhoto: 'Include photo',
+    addProject: 'Add project',
+    addExperience: 'Add experience',
+    addEducation: 'Add education',
+    addSkill: 'Add skill',
+    newProjectSkillPlaceholder: 'Skill for new project',
+    previewTitle: 'Preview',
+
+    personal_photoLabel: 'Profile photo',
+    personal_noPhoto: 'No photo',
+    personal_nameLabel: 'Name',
+    personal_titleLabel: 'Title',
+    personal_aboutLabel: 'About me',
+    personal_colorLabel: 'Primary color',
+    
+    contact_phoneLabel: 'Phone',
+    contact_addressLabel: 'Address',
+    contact_emailLabel: 'Email',
+    contact_websiteLabel: 'Website',
+    
+    languages_title: 'Languages',
+    language_namePlaceholder: 'Language (eg: Spanish)',
+    language_levelPlaceholder: 'Level (eg: Native)',
+    addLanguage: '+',
+
+    project_namePlaceholder: 'Project name',
+    project_descriptionPlaceholder: 'Description',
+    project_monthStartPlaceholder: 'Start month (eg: Jan)',
+    project_yearStartPlaceholder: 'Start year (eg: 2023)',
+    project_monthEndPlaceholder: 'End month',
+    project_yearEndPlaceholder: 'End year',
+    project_addSkillPlaceholder: 'Add skill to project',
+    project_newNamePlaceholder: 'New project name',
+
+    exp_companyPlaceholder: 'Company',
+    exp_positionPlaceholder: 'Position',
+    exp_monthStartPlaceholder: 'Start month',
+    exp_yearStartPlaceholder: 'Start year',
+    exp_monthEndPlaceholder: 'End month',
+    exp_yearEndPlaceholder: 'End year',
+    exp_descriptionPlaceholder: 'Experience description',
+
+    skills_newPlaceholder: 'New skill',
+
+    edu_institutionPlaceholder: 'Institution',
+    edu_degreePlaceholder: 'Degree',
+    edu_monthStartPlaceholder: 'Start month',
+    edu_yearStartPlaceholder: 'Start year',
+    edu_monthEndPlaceholder: 'End month',
+    edu_yearEndPlaceholder: 'End year',
+    edu_descriptionPlaceholder: 'Description / details',
+  }
+}
 
 const Editor: React.FC = () => {
   const {
@@ -12,27 +206,43 @@ const Editor: React.FC = () => {
     addExperience,
     updateExperience,
     removeExperience,
+    addEducation,
+    updateEducation,
+    removeEducation,
+    addLanguage,
+    updateLanguage,
+    removeLanguage,
     addSkill,
-    removeSkill
+    removeSkill,
+    setLanguage
   } = usePortfolio()
 
+
+  const lang = (portfolioData.language as string) || 'es'
+  const t = translations[lang] || translations.es
+
   const [activeTab, setActiveTab] = useState('personal')
-  const [newProject, setNewProject] = useState({ name: '', description: '' })
-  const [newExperience, setNewExperience] = useState({ company: '', position: '', duration: '' })
+  const [newProject, setNewProject] = useState({ name: '', description: '', startMonth: '', startYear: '', endMonth: '', endYear: '', skills: [] as string[] })
+  const [newProjectSkill, setNewProjectSkill] = useState('')
+  const [projectSkillInputs, setProjectSkillInputs] = useState<Record<string, string>>({})
+
+  const [newExperience, setNewExperience] = useState({ company: '', position: '', duration: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' })
   const [newSkill, setNewSkill] = useState('')
+  const [newEducation, setNewEducation] = useState({ institution: '', degree: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' })
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [newLangName, setNewLangName] = useState('')
+  const [newLangLevel, setNewLangLevel] = useState('')
 
   const handleAddProject = () => {
-    if (newProject.name && newProject.description) {
-      addProject(newProject)
-      setNewProject({ name: '', description: '' })
-    }
+    addProject(newProject)
+    setNewProject({ name: '', description: '', startMonth: '', startYear: '', endMonth: '', endYear: '', skills: [] })
+    setNewProjectSkill('')
   }
 
   const handleAddExperience = () => {
-    if (newExperience.company && newExperience.position && newExperience.duration) {
+    if (newExperience.company || newExperience.position) {
       addExperience(newExperience)
-      setNewExperience({ company: '', position: '', duration: '' })
+      setNewExperience({ company: '', position: '', duration: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' })
     }
   }
 
@@ -40,6 +250,28 @@ const Editor: React.FC = () => {
     if (newSkill) {
       addSkill(newSkill)
       setNewSkill('')
+    }
+  }
+
+  const handleAddProjectSkill = () => {
+    if (!newProjectSkill) return
+    setNewProject(prev => ({ ...prev, skills: [...(prev.skills || []), newProjectSkill] }))
+    setNewProjectSkill('')
+  }
+
+  const handleAddSkillToProject = (projectId: string) => {
+    const val = projectSkillInputs[projectId]
+    if (!val) return
+    const proj = portfolioData.projects.find(p => p.id === projectId)
+    const updatedSkills = [...(proj?.skills || []), val]
+    updateProject(projectId, { skills: updatedSkills })
+    setProjectSkillInputs(prev => ({ ...prev, [projectId]: '' }))
+  }
+
+  const handleAddEducation = () => {
+    if (newEducation.institution || newEducation.degree) {
+      addEducation(newEducation)
+      setNewEducation({ institution: '', degree: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' })
     }
   }
 
@@ -54,101 +286,195 @@ const Editor: React.FC = () => {
     }
   }
 
+  const editorWidthClass = lang === 'es' ? 'md:w-[550px]' : 'md:w-[500px]'
+
   return (
-    <div className="w-[500px] bg-white shadow-lg overflow-y-auto">
+    <div className={`w-full ${editorWidthClass} bg-white shadow-lg overflow-y-auto h-full`}>
       <div className="p-4 bg-gray-800 text-white sticky top-0 z-10">
-        <div className="flex items-center gap-2 mb-4">
-          <Settings2 size={20} />
-          <h2 className="text-lg font-semibold">Editor</h2>
-        </div>
-        <div className="flex gap-2">
-          {['personal', 'projects', 'experience', 'skills'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded text-sm flex-1 ${
-                activeTab === tab ? 'bg-blue-500' : 'bg-gray-700 hover:bg-gray-600'
-              }`}
+        <div className="flex items-center gap-2 mb-4 justify-between">
+          <div className="flex items-center gap-2">
+            <Settings2 size={20} />
+            <h2 className="text-lg font-semibold">{t.editorTitle}</h2>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <select
+              value={lang}
+              onChange={(e) => setLanguage?.(e.target.value)}
+              className="bg-gray-700 text-white px-2 py-1 rounded"
+              aria-label="Seleccionar idioma"
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
+              <option value="es">ES</option>
+              <option value="en">EN</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto -mx-2 px-2 pb-2 custom-scrollbar">
+          <div className="flex gap-2 whitespace-nowrap">
+            {['personal', 'contact', 'projects', 'experience', 'education', 'skills', 'languages'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`min-w-max px-2 py-1 rounded text-xs ${activeTab === tab ? 'bg-blue-500' : 'bg-gray-700 hover:bg-gray-600'}`}
+              >
+                {t.tabs[tab]}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="p-4 space-y-6">
         {activeTab === 'personal' && (
-          <>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Foto de perfil</label>
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    {portfolioData.photo ? (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t.personal_photoLabel}</label>
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  {portfolioData.showPhoto ? (
+                    portfolioData.photo ? (
                       <img src={portfolioData.photo} alt="Profile" className="w-20 h-20 rounded-full object-cover" />
                     ) : (
                       <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
                         <Upload className="text-gray-400" size={24} />
                       </div>
-                    )}
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handlePhotoUpload}
-                      accept="image/*"
-                      className="hidden"
-                    />
-                  </div>
+                    )
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-sm text-gray-500">{t.personal_noPhoto}</div>
+                  )}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handlePhotoUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
                   >
-                    Cambiar foto
+                    {t.changePhoto}
                   </button>
+
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={!!portfolioData.showPhoto}
+                      onChange={(e) => updatePortfolioData({ showPhoto: e.target.checked })}
+                      className="form-checkbox"
+                    />
+                    {t.includePhoto}
+                  </label>
                 </div>
               </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t.personal_nameLabel}</label>
+              <input
+                type="text"
+                value={portfolioData.name}
+                onChange={(e) => updatePortfolioData({ name: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t.personal_titleLabel}</label>
+              <input
+                type="text"
+                value={portfolioData.title}
+                onChange={(e) => updatePortfolioData({ title: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t.personal_aboutLabel}</label>
+              <textarea
+                value={portfolioData.about}
+                onChange={(e) => updatePortfolioData({ about: e.target.value })}
+                rows={4}
+                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t.personal_colorLabel}</label>
+              <input
+                type="color"
+                value={portfolioData.theme.primaryColor}
+                onChange={(e) => updatePortfolioData({ theme: { ...portfolioData.theme, primaryColor: e.target.value } })}
+                className="color-picker"
+                aria-label={t.personal_colorLabel}
+              />
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'contact' && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-3">
+              <label className="text-sm font-medium text-gray-700">{t.tabs.contact}</label>
+              <div className="flex items-center gap-2">
+                <Mail size={18} />
+                <input
+                  type="email"
+                  placeholder={t.contact_emailLabel}
+                  value={portfolioData.contact.email}
+                  onChange={(e) => updatePortfolioData({ contact: { ...portfolioData.contact, email: e.target.value } })}
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Phone size={18} />
                 <input
                   type="text"
-                  value={portfolioData.name}
-                  onChange={(e) => updatePortfolioData({ name: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                  placeholder={t.contact_phoneLabel}
+                  value={portfolioData.contact.phone}
+                  onChange={(e) => updatePortfolioData({ contact: { ...portfolioData.contact, phone: e.target.value } })}
+                  className="w-full px-3 py-2 border rounded-md"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
+              <div className="flex items-center gap-2">
+                <MapPin size={18} />
                 <input
                   type="text"
-                  value={portfolioData.title}
-                  onChange={(e) => updatePortfolioData({ title: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                  placeholder={t.contact_addressLabel}
+                  value={portfolioData.contact.address || ''}
+                  onChange={(e) => updatePortfolioData({ contact: { ...portfolioData.contact, address: e.target.value } })}
+                  className="w-full px-3 py-2 border rounded-md"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Acerca de mí</label>
-                <textarea
-                  value={portfolioData.about}
-                  onChange={(e) => updatePortfolioData({ about: e.target.value })}
-                  rows={4}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Color principal</label>
+              <div className="flex items-center gap-2">
+                <Globe size={18} />
                 <input
-                  type="color"
-                  value={portfolioData.theme.primaryColor}
-                  onChange={(e) => updatePortfolioData({ theme: { ...portfolioData.theme, primaryColor: e.target.value } })}
-                  className="w-full h-10 p-1 rounded-md"
+                  type="text"
+                  placeholder={t.contact_websiteLabel}
+                  value={portfolioData.contact.website || ''}
+                  onChange={(e) => updatePortfolioData({ contact: { ...portfolioData.contact, website: e.target.value } })}
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Globe size={18} />
+                <input
+                  type="text"
+                  placeholder="LinkedIn"
+                  value={portfolioData.contact.linkedin || ''}
+                  onChange={(e) => updatePortfolioData({ contact: { ...portfolioData.contact, linkedin: e.target.value } })}
+                  className="w-full px-3 py-2 border rounded-md"
                 />
               </div>
             </div>
-          </>
+          </div>
         )}
 
         {activeTab === 'projects' && (
@@ -166,31 +492,168 @@ const Editor: React.FC = () => {
                   value={project.name}
                   onChange={(e) => updateProject(project.id, { name: e.target.value })}
                   className="w-full mb-2 px-3 py-2 border rounded-md"
-                  placeholder="Nombre del proyecto"
+                  placeholder={t.project_namePlaceholder}
                 />
+
                 <textarea
                   value={project.description}
                   onChange={(e) => updateProject(project.id, { description: e.target.value })}
                   className="w-full px-3 py-2 border rounded-md"
-                  placeholder="Descripción"
+                  placeholder={t.project_descriptionPlaceholder}
                   rows={2}
                 />
+
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <input
+                    type="text"
+                    value={project.startMonth || ''}
+                    onChange={(e) => updateProject(project.id, { startMonth: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                    placeholder={t.project_monthStartPlaceholder}
+                  />
+                  <input
+                    type="text"
+                    value={project.startYear || ''}
+                    onChange={(e) => updateProject(project.id, { startYear: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                    placeholder={t.project_yearStartPlaceholder}
+                  />
+                  <input
+                    type="text"
+                    value={project.endMonth || ''}
+                    onChange={(e) => updateProject(project.id, { endMonth: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                    placeholder={t.project_monthEndPlaceholder}
+                  />
+                  <input
+                    type="text"
+                    value={project.endYear || ''}
+                    onChange={(e) => updateProject(project.id, { endYear: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                    placeholder={t.project_yearEndPlaceholder}
+                  />
+                </div>
+
+                <div className="mt-3">
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {(project.skills || []).map((s, i) => (
+                      <span key={i} className="px-3 py-1 bg-gray-100 rounded-full flex items-center gap-2">
+                        {s}
+                        <button
+                          onClick={() => updateProject(project.id, { skills: (project.skills || []).filter(x => x !== s) })}
+                          className="text-red-500"
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder={t.project_addSkillPlaceholder}
+                      value={projectSkillInputs[project.id] || ''}
+                      onChange={(e) => setProjectSkillInputs(prev => ({ ...prev, [project.id]: e.target.value }))}
+                      className="flex-grow px-3 py-2 border rounded-md"
+                    />
+                    <button
+                      onClick={() => handleAddSkillToProject(project.id)}
+                      className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
-            <div className="flex gap-2">
+
+            <div className="space-y-2">
+            
+              <div className="flex flex-wrap gap-2">
+                {(newProject.skills || []).map((s, i) => (
+                  <span key={i} className="px-3 py-1 bg-gray-100 rounded-full flex items-center gap-2">
+                    {s}
+                    <button
+                      onClick={() => setNewProject(prev => ({ ...prev, skills: (prev.skills || []).filter(x => x !== s) }))}
+                      className="text-red-500"
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+
               <input
                 type="text"
-                placeholder="Nuevo proyecto"
+                placeholder={t.project_newNamePlaceholder}
                 value={newProject.name}
                 onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
-                className="flex-grow px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border rounded-md"
               />
-              <button
-                onClick={handleAddProject}
-                className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-              >
-                <Plus size={20} />
-              </button>
+              <textarea
+                placeholder={t.project_descriptionPlaceholder}
+                value={newProject.description}
+                onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md"
+                rows={2}
+              />
+
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="text"
+                  placeholder={t.project_monthStartPlaceholder}
+                  value={newProject.startMonth}
+                  onChange={(e) => setNewProject({ ...newProject, startMonth: e.target.value })}
+                  className="px-3 py-2 border rounded-md"
+                />
+                <input
+                  type="text"
+                  placeholder={t.project_yearStartPlaceholder}
+                  value={newProject.startYear}
+                  onChange={(e) => setNewProject({ ...newProject, startYear: e.target.value })}
+                  className="px-3 py-2 border rounded-md"
+                />
+                <input
+                  type="text"
+                  placeholder={t.project_monthEndPlaceholder}
+                  value={newProject.endMonth}
+                  onChange={(e) => setNewProject({ ...newProject, endMonth: e.target.value })}
+                  className="px-3 py-2 border rounded-md"
+                />
+                <input
+                  type="text"
+                  placeholder={t.project_yearEndPlaceholder}
+                  value={newProject.endYear}
+                  onChange={(e) => setNewProject({ ...newProject, endYear: e.target.value })}
+                  className="px-3 py-2 border rounded-md"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder={t.newProjectSkillPlaceholder}
+                  value={newProjectSkill}
+                  onChange={(e) => setNewProjectSkill(e.target.value)}
+                  className="flex-grow px-3 py-2 border rounded-md"
+                />
+                <button
+                  onClick={handleAddProjectSkill}
+                  className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                >
+                  <Plus size={20} />
+                </button>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={handleAddProject}
+                  className="p-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                >
+                  {t.addProject}
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -210,38 +673,115 @@ const Editor: React.FC = () => {
                   value={exp.company}
                   onChange={(e) => updateExperience(exp.id, { company: e.target.value })}
                   className="w-full mb-2 px-3 py-2 border rounded-md"
-                  placeholder="Empresa"
+                  placeholder={t.exp_companyPlaceholder}
                 />
                 <input
                   type="text"
                   value={exp.position}
                   onChange={(e) => updateExperience(exp.id, { position: e.target.value })}
                   className="w-full mb-2 px-3 py-2 border rounded-md"
-                  placeholder="Cargo"
+                  placeholder={t.exp_positionPlaceholder}
                 />
-                <input
-                  type="text"
-                  value={exp.duration}
-                  onChange={(e) => updateExperience(exp.id, { duration: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-md"
-                  placeholder="Duración"
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    value={exp.startMonth || ''}
+                    onChange={(e) => updateExperience(exp.id, { startMonth: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                    placeholder={t.exp_monthStartPlaceholder}
+                  />
+                  <input
+                    type="text"
+                    value={exp.startYear || ''}
+                    onChange={(e) => updateExperience(exp.id, { startYear: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                    placeholder={t.exp_yearStartPlaceholder}
+                  />
+                  <input
+                    type="text"
+                    value={exp.endMonth || ''}
+                    onChange={(e) => updateExperience(exp.id, { endMonth: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                    placeholder={t.exp_monthEndPlaceholder}
+                  />
+                  <input
+                    type="text"
+                    value={exp.endYear || ''}
+                    onChange={(e) => updateExperience(exp.id, { endYear: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                    placeholder={t.exp_yearEndPlaceholder}
+                  />
+                </div>
+                <textarea
+                  value={exp.description || ''}
+                  onChange={(e) => updateExperience(exp.id, { description: e.target.value })}
+                  className="w-full mt-2 px-3 py-2 border rounded-md"
+                  placeholder={t.exp_descriptionPlaceholder}
+                  rows={2}
                 />
               </div>
             ))}
-            <div className="flex gap-2">
+
+            <div className="space-y-2">
               <input
                 type="text"
-                placeholder="Nueva experiencia"
+                placeholder={t.exp_companyPlaceholder}
                 value={newExperience.company}
                 onChange={(e) => setNewExperience({ ...newExperience, company: e.target.value })}
-                className="flex-grow px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border rounded-md"
               />
-              <button
-                onClick={handleAddExperience}
-                className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-              >
-                <Plus size={20} />
-              </button>
+              <input
+                type="text"
+                placeholder={t.exp_positionPlaceholder}
+                value={newExperience.position}
+                onChange={(e) => setNewExperience({ ...newExperience, position: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="text"
+                  placeholder={t.exp_monthStartPlaceholder}
+                  value={newExperience.startMonth}
+                  onChange={(e) => setNewExperience({ ...newExperience, startMonth: e.target.value })}
+                  className="px-3 py-2 border rounded-md"
+                />
+                <input
+                  type="text"
+                  placeholder={t.exp_yearStartPlaceholder}
+                  value={newExperience.startYear}
+                  onChange={(e) => setNewExperience({ ...newExperience, startYear: e.target.value })}
+                  className="px-3 py-2 border rounded-md"
+                />
+                <input
+                  type="text"
+                  placeholder={t.exp_monthEndPlaceholder}
+                  value={newExperience.endMonth}
+                  onChange={(e) => setNewExperience({ ...newExperience, endMonth: e.target.value })}
+                  className="px-3 py-2 border rounded-md"
+                />
+                <input
+                  type="text"
+                  placeholder={t.exp_yearEndPlaceholder}
+                  value={newExperience.endYear}
+                  onChange={(e) => setNewExperience({ ...newExperience, endYear: e.target.value })}
+                  className="px-3 py-2 border rounded-md"
+                />
+              </div>
+              <textarea
+                placeholder={t.exp_descriptionPlaceholder}
+                value={newExperience.description}
+                onChange={(e) => setNewExperience({ ...newExperience, description: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md"
+                rows={2}
+              />
+              <div className="flex justify-end">
+                <button
+                  onClick={handleAddExperience}
+                  className="p-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                >
+                  {t.addExperience}
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -267,7 +807,7 @@ const Editor: React.FC = () => {
             <div className="flex gap-2">
               <input
                 type="text"
-                placeholder="Nueva habilidad"
+                placeholder={t.skills_newPlaceholder}
                 value={newSkill}
                 onChange={(e) => setNewSkill(e.target.value)}
                 className="flex-grow px-3 py-2 border rounded-md"
@@ -281,6 +821,200 @@ const Editor: React.FC = () => {
             </div>
           </div>
         )}
+
+        {activeTab === 'languages' && (
+          <div className="space-y-4">
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-wrap gap-2">
+                {(portfolioData.languages || []).map((langItem) => (
+                  <div key={langItem.id} className="p-2 border rounded-md flex items-center gap-2">
+                    <Globe size={16} />
+                    <input
+                      type="text"
+                      value={langItem.name}
+                      onChange={(e) => updateLanguage(langItem.id, { name: e.target.value })}
+                      className="px-2 py-1 border rounded-md"
+                      placeholder={t.language_namePlaceholder}
+                    />
+                    <input
+                      type="text"
+                      value={langItem.level || ''}
+                      onChange={(e) => updateLanguage(langItem.id, { level: e.target.value })}
+                      className="px-2 py-1 border rounded-md"
+                      placeholder={t.language_levelPlaceholder}
+                    />
+                    <button onClick={() => removeLanguage(langItem.id)} className="text-red-500"><X size={14} /></button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  placeholder={t.language_namePlaceholder}
+                  value={newLangName}
+                  onChange={(e) => setNewLangName(e.target.value)}
+                  className="px-2 py-1 border rounded-md"
+                />
+                <input
+                  type="text"
+                  placeholder={t.language_levelPlaceholder}
+                  value={newLangLevel}
+                  onChange={(e) => setNewLangLevel(e.target.value)}
+                  className="px-2 py-1 border rounded-md"
+                />
+                <button
+                  onClick={() => {
+                    if (!newLangName) return
+                    addLanguage({ name: newLangName, level: newLangLevel })
+                    setNewLangName('')
+                    setNewLangLevel('')
+                  }}
+                  className="px-3 py-1 bg-blue-500 text-white rounded-md"
+                >
+                  {t.addLanguage}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'education' && (
+          <div className="space-y-4">
+            
+            {portfolioData.education && portfolioData.education.map((ed) => (
+              <div key={ed.id} className="p-3 border rounded-md relative group">
+                <button
+                  onClick={() => removeEducation(ed.id)}
+                  className="absolute top-2 right-2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X size={16} />
+                </button>
+                <input
+                  type="text"
+                  value={ed.institution}
+                  onChange={(e) => updateEducation(ed.id, { institution: e.target.value })}
+                  className="w-full mb-2 px-3 py-2 border rounded-md"
+                  placeholder={t.edu_institutionPlaceholder}
+                />
+                <input
+                  type="text"
+                  value={ed.degree}
+                  onChange={(e) => updateEducation(ed.id, { degree: e.target.value })}
+                  className="w-full mb-2 px-3 py-2 border rounded-md"
+                  placeholder={t.edu_degreePlaceholder}
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    value={ed.startMonth || ''}
+                    onChange={(e) => updateEducation(ed.id, { startMonth: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                    placeholder={t.edu_monthStartPlaceholder}
+                  />
+                  <input
+                    type="text"
+                    value={ed.startYear || ''}
+                    onChange={(e) => updateEducation(ed.id, { startYear: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                    placeholder={t.edu_yearStartPlaceholder}
+                  />
+                  <input
+                    type="text"
+                    value={ed.endMonth || ''}
+                    onChange={(e) => updateEducation(ed.id, { endMonth: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                    placeholder={t.edu_monthEndPlaceholder}
+                  />
+                  <input
+                    type="text"
+                    value={ed.endYear || ''}
+                    onChange={(e) => updateEducation(ed.id, { endYear: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                    placeholder={t.edu_yearEndPlaceholder}
+                  />
+                </div>
+                <textarea
+                  value={ed.description || ''}
+                  onChange={(e) => updateEducation(ed.id, { description: e.target.value })}
+                  className="w-full mt-2 px-3 py-2 border rounded-md"
+                  placeholder={t.edu_descriptionPlaceholder}
+                  rows={2}
+                />
+              </div>
+            ))}
+
+            <div className="space-y-2">
+              <input
+                type="text"
+                placeholder={t.edu_institutionPlaceholder}
+                value={newEducation.institution}
+                onChange={(e) => setNewEducation({ ...newEducation, institution: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md"
+              />
+              <input
+                type="text"
+                placeholder={t.edu_degreePlaceholder}
+                value={newEducation.degree}
+                onChange={(e) => setNewEducation({ ...newEducation, degree: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="text"
+                  placeholder={t.edu_monthStartPlaceholder}
+                  value={newEducation.startMonth}
+                  onChange={(e) => setNewEducation({ ...newEducation, startMonth: e.target.value })}
+                  className="px-3 py-2 border rounded-md"
+                />
+                <input
+                  type="text"
+                  placeholder={t.edu_yearStartPlaceholder}
+                  value={newEducation.startYear}
+                  onChange={(e) => setNewEducation({ ...newEducation, startYear: e.target.value })}
+                  className="px-3 py-2 border rounded-md"
+                />
+                <input
+                  type="text"
+                  placeholder={t.edu_monthEndPlaceholder}
+                  value={newEducation.endMonth}
+                  onChange={(e) => setNewEducation({ ...newEducation, endMonth: e.target.value })}
+                  className="px-3 py-2 border rounded-md"
+                />
+                <input
+                  type="text"
+                  placeholder={t.edu_yearEndPlaceholder}
+                  value={newEducation.endYear}
+                  onChange={(e) => setNewEducation({ ...newEducation, endYear: e.target.value })}
+                  className="px-3 py-2 border rounded-md"
+                />
+              </div>
+              <textarea
+                placeholder={t.edu_descriptionPlaceholder}
+                value={newEducation.description}
+                onChange={(e) => setNewEducation({ ...newEducation, description: e.target.value })}
+                className="w-full px-3 py-2 border rounded-md"
+                rows={2}
+              />
+              <div className="flex justify-end">
+                <button
+                  onClick={handleAddEducation}
+                  className="p-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                >
+                  {t.addEducation}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      
+      <div className="sm:hidden p-3 border-t">
+        <h3 className="text-sm font-medium mb-2">{t.previewTitle}</h3>
+        <div className="h-56 overflow-auto bg-gray-50 rounded p-2">
+          <Preview />
+        </div>
       </div>
     </div>
   )
