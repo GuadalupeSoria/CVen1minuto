@@ -28,10 +28,10 @@ function App() {
               <div className="text-xs text-gray-400 text-center mb-2">Publicidad</div>
               <ins className="adsbygoogle"
                    style={{ display: 'block' }}
-                   data-ad-client="ca-pub-XXXXXXXXXX"
-                   data-ad-slot="XXXXXXXXX"
-                   data-ad-format="vertical"
-                   data-full-width-responsive="false"></ins>
+                   data-ad-client="ca-pub-2152317919633317"
+                   data-ad-slot="4314723833"
+                   data-ad-format="auto"
+                   data-full-width-responsive="true"></ins>
               <script>
                 (adsbygoogle = window.adsbygoogle || []).push({});
               </script>

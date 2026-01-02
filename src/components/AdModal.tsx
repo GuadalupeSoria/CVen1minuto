@@ -174,8 +174,8 @@ export const AdModal: React.FC<AdModalProps> = ({
               <div className="bg-white rounded-lg p-4 min-h-[280px] flex items-center justify-center">
                 <ins className="adsbygoogle"
                      style={{ display: 'block' }}
-                     data-ad-client="ca-pub-2152317519213317"
-                     data-ad-slot="XXXXXXXXX"
+                     data-ad-client="ca-pub-2152317919633317"
+                     data-ad-slot={action === 'download' ? '3107429852' : '6910943499'}
                      data-ad-format="auto"
                      data-full-width-responsive="true"></ins>
               </div>
