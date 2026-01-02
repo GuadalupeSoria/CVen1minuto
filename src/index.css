@@ -78,3 +78,45 @@ body {
   padding-top: 2px;
   padding-bottom: 2px;
 }
+
+/* A4 Page simulation - 210mm x 297mm at 96 DPI */
+.a4-page {
+  width: 210mm;
+  min-height: 270mm;
+  max-width: 100%;
+  margin: 0 auto 20px auto;
+  background: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  position: relative;
+  padding: 5mm;
+  box-sizing: border-box;
+}
+
+.page-indicator {
+  position: absolute;
+  bottom: 2mm;
+  right: 5mm;
+  font-size: 10px;
+  color: #999;
+  background: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+@media screen and (max-width: 640px) {
+  .a4-page {
+    width: 100%;
+    min-height: auto;
+    margin-bottom: 10px;
+    box-shadow: none;
+  }
+  
+  .a4-page::after {
+    display: none;
+  }
+  
+  .page-indicator {
+    display: none;
+  }
+}

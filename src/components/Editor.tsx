@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react'
 import { usePortfolio } from '../context/PortfolioContext'
-import { Plus, X, Upload, Settings2, Phone, MapPin, Mail, Globe } from 'lucide-react'
+import { Plus, X, Upload, Phone, MapPin, Mail, Globe, Edit3, Sparkles } from 'lucide-react'
 import Preview from './Preview'
+import AIOptimizer from './AIOptimizer'
 
 type TranslationsShape = {
   editorTitle: string
@@ -221,6 +222,7 @@ const Editor: React.FC = () => {
   const lang = (portfolioData.language as string) || 'es'
   const t = translations[lang] || translations.es
 
+  const [viewMode, setViewMode] = useState<'editor' | 'optimizer'>('editor')
   const [activeTab, setActiveTab] = useState('personal')
   const [newProject, setNewProject] = useState({ name: '', description: '', startMonth: '', startYear: '', endMonth: '', endYear: '', skills: [] as string[] })
   const [newProjectSkill, setNewProjectSkill] = useState('')
@@ -286,46 +288,80 @@ const Editor: React.FC = () => {
     }
   }
 
-  const editorWidthClass = lang === 'es' ? 'md:w-[550px]' : 'md:w-[500px]'
-
   return (
-    <div className={`w-full ${editorWidthClass} bg-white shadow-lg overflow-y-auto h-full`}>
-      <div className="p-4 bg-gray-800 text-white sticky top-0 z-10">
-        <div className="flex items-center gap-2 mb-4 justify-between">
+    <div className="w-full bg-white overflow-y-auto h-full">
+      {/* Toggle between Editor and AI Optimizer */}
+      <div className="p-4 bg-gradient-to-r from-gray-800 to-gray-900 text-white sticky top-0 z-10 shadow-lg">
+        {/* Logo and Language selector at top */}
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Settings2 size={20} />
-            <h2 className="text-lg font-semibold">{t.editorTitle}</h2>
+            <img src="/assets/logonew.png" alt="CV ATS" className="w-16 h-16 rounded-lg shadow-md" />
+            
           </div>
-
-          <div className="flex items-center gap-2">
-            <select
-              value={lang}
-              onChange={(e) => setLanguage?.(e.target.value)}
-              className="bg-gray-700 text-white px-2 py-1 rounded"
-              aria-label="Seleccionar idioma"
-            >
-              <option value="es">ES</option>
-              <option value="en">EN</option>
-            </select>
-          </div>
+          <select
+            value={lang}
+            onChange={(e) => setLanguage?.(e.target.value)}
+            className="bg-gray-700 text-white px-3 py-1.5 rounded-lg border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            aria-label="Seleccionar idioma"
+          >
+            <option value="es">ES</option>
+            <option value="en">EN</option>
+          </select>
         </div>
 
-        <div className="overflow-x-auto -mx-2 px-2 pb-2 custom-scrollbar">
-          <div className="flex gap-2 whitespace-nowrap">
-            {['personal', 'contact', 'projects', 'experience', 'education', 'skills', 'languages'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`min-w-max px-2 py-1 rounded text-xs ${activeTab === tab ? 'bg-blue-500' : 'bg-gray-700 hover:bg-gray-600'}`}
-              >
-                {t.tabs[tab]}
-              </button>
-            ))}
-          </div>
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setViewMode('editor')}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all ${
+              viewMode === 'editor'
+                ? 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg shadow-blue-500/50'
+                : 'bg-gray-700 hover:bg-gray-600'
+            }`}
+          >
+            <Edit3 size={20} />
+            Editor
+          </button>
+          <button
+            onClick={() => setViewMode('optimizer')}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all ${
+              viewMode === 'optimizer'
+                ? 'bg-gradient-to-r from-purple-500 to-purple-600 shadow-lg shadow-purple-500/50'
+                : 'bg-gray-700 hover:bg-gray-600'
+            }`}
+          >
+            <Sparkles size={20} />
+            Optimizador IA
+          </button>
         </div>
+
+        {/* Show editor controls only when in editor mode */}
+        {viewMode === 'editor' && (
+          <div className="overflow-x-auto -mx-2 px-2 pb-2 custom-scrollbar">
+            <div className="flex gap-2 whitespace-nowrap">
+              {['personal', 'contact', 'projects', 'experience', 'education', 'skills', 'languages'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`min-w-max px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    activeTab === tab 
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-md' 
+                      : 'bg-gray-700 hover:bg-gray-600'
+                  }`}
+                >
+                  {t.tabs[tab]}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
+      {/* Content Area */}
       <div className="p-4 space-y-6">
+        {viewMode === 'optimizer' ? (
+          <AIOptimizer />
+        ) : (
+          <>
         {activeTab === 'personal' && (
           <div className="space-y-4">
             <div>
@@ -360,14 +396,17 @@ const Editor: React.FC = () => {
                     {t.changePhoto}
                   </button>
 
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={!!portfolioData.showPhoto}
-                      onChange={(e) => updatePortfolioData({ showPhoto: e.target.checked })}
-                      className="form-checkbox"
-                    />
-                    {t.includePhoto}
+                  <label className="flex items-center gap-3 text-sm cursor-pointer">
+                    <div className="relative inline-block w-11 h-6">
+                      <input
+                        type="checkbox"
+                        checked={!!portfolioData.showPhoto}
+                        onChange={(e) => updatePortfolioData({ showPhoto: e.target.checked })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                    </div>
+                    <span>{t.includePhoto}</span>
                   </label>
                 </div>
               </div>
@@ -569,21 +608,6 @@ const Editor: React.FC = () => {
             ))}
 
             <div className="space-y-2">
-            
-              <div className="flex flex-wrap gap-2">
-                {(newProject.skills || []).map((s, i) => (
-                  <span key={i} className="px-3 py-1 bg-gray-100 rounded-full flex items-center gap-2">
-                    {s}
-                    <button
-                      onClick={() => setNewProject(prev => ({ ...prev, skills: (prev.skills || []).filter(x => x !== s) }))}
-                      className="text-red-500"
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                ))}
-              </div>
-
               <input
                 type="text"
                 placeholder={t.project_newNamePlaceholder}
@@ -630,20 +654,36 @@ const Editor: React.FC = () => {
                 />
               </div>
 
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder={t.newProjectSkillPlaceholder}
-                  value={newProjectSkill}
-                  onChange={(e) => setNewProjectSkill(e.target.value)}
-                  className="flex-grow px-3 py-2 border rounded-md"
-                />
-                <button
-                  onClick={handleAddProjectSkill}
-                  className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                >
-                  <Plus size={20} />
-                </button>
+              <div className="mt-3">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Skills del proyecto</label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {(newProject.skills || []).map((s, i) => (
+                    <span key={i} className="px-3 py-1 bg-gray-100 rounded-full flex items-center gap-2">
+                      {s}
+                      <button
+                        onClick={() => setNewProject(prev => ({ ...prev, skills: (prev.skills || []).filter(x => x !== s) }))}
+                        className="text-red-500"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder={t.newProjectSkillPlaceholder}
+                    value={newProjectSkill}
+                    onChange={(e) => setNewProjectSkill(e.target.value)}
+                    className="flex-grow px-3 py-2 border rounded-md"
+                  />
+                  <button
+                    onClick={handleAddProjectSkill}
+                    className="p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                  >
+                    <Plus size={20} />
+                  </button>
+                </div>
               </div>
 
               <div className="flex justify-end">
@@ -1006,6 +1046,8 @@ const Editor: React.FC = () => {
               </div>
             </div>
           </div>
+        )}
+        </>
         )}
       </div>
 
