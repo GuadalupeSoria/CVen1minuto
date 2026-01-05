@@ -139,10 +139,10 @@ const Preview: React.FC = () => {
               ) : null}
 
               <div>
-                <h1 className="text-2xl sm:text-4xl font-bold mb-1">{portfolioData.name}</h1>
-                <h2 className="text-base sm:text-2xl text-gray-600 mb-2">{portfolioData.title}</h2>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1">{portfolioData.name}</h1>
+                <h2 className="text-base sm:text-xl lg:text-2xl text-gray-600 mb-2">{portfolioData.title}</h2>
 
-                <div className="flex flex-col md:flex-row gap-3 text-sm text-gray-700">
+                <div className="flex flex-col md:flex-row gap-2 lg:gap-3 text-xs lg:text-sm text-gray-700">
                   {portfolioData.contact?.email && (
                     <div className="flex items-center gap-2">
                       <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -197,20 +197,20 @@ const Preview: React.FC = () => {
             return (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-12">
                 <div>
-                  <section className="mb-8" style={{ pageBreakInside: 'avoid' }}>
-                    <h3 className="text-sm sm:text-xl font-semibold mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.aboutTitle}</h3>
-                    <p className="text-xs sm:text-base text-gray-700 leading-relaxed">{portfolioData.about}</p>
+                  <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid' }}>
+                    <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.aboutTitle}</h3>
+                    <p className="text-xs sm:text-sm lg:text-base text-gray-700 leading-relaxed">{portfolioData.about}</p>
                   </section>
 
-                  <section className="mb-8">
-                    <h3 className="text-sm sm:text-xl font-semibold mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.experienceTitle}</h3>
-                    <div className="space-y-4">
+                  <section className="mb-6 lg:mb-8">
+                    <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.experienceTitle}</h3>
+                    <div className="space-y-3 lg:space-y-4">
                       {portfolioData.experience.map((exp) => (
-                        <div key={exp.id} className="border-l-2 pl-4" style={{ borderColor: portfolioData.theme.primaryColor, pageBreakInside: 'avoid' }}>
-                          <h4 className="font-semibold text-xs sm:text-base">{exp.position}</h4>
-                          <p className="text-gray-600 text-xs sm:text-sm">{exp.company}</p>
+                        <div key={exp.id} className="border-l-2 pl-3 lg:pl-4" style={{ borderColor: portfolioData.theme.primaryColor, pageBreakInside: 'avoid' }}>
+                          <h4 className="font-semibold text-xs sm:text-sm lg:text-base">{exp.position}</h4>
+                          <p className="text-gray-600 text-xs lg:text-sm">{exp.company}</p>
                           <p className="text-xs text-gray-500">{[exp.startMonth, exp.startYear].filter(Boolean).join(' ')} {exp.startMonth || exp.startYear ? '-' : ''} {[exp.endMonth, exp.endYear].filter(Boolean).join(' ') } {exp.duration ? exp.duration : ''}</p>
-                          {exp.description && <p className="text-xs sm:text-sm text-gray-700 mt-2">{exp.description}</p>}
+                          {exp.description && <p className="text-xs lg:text-sm text-gray-700 mt-2">{exp.description}</p>}
                         </div>
                       ))}
                     </div>
@@ -218,9 +218,9 @@ const Preview: React.FC = () => {
 
                   {/* Education in left column when shouldMoveEducationAndSkills or shouldMoveSkillsOnly */}
                   {(shouldMoveEducationAndSkills) && (
-                    <section className="mb-8" style={{ pageBreakInside: 'avoid' }}>
-                      <h3 className="text-sm sm:text-xl font-semibold mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.educationTitle}</h3>
-                      <div className="space-y-4">
+                    <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid' }}>
+                      <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.educationTitle}</h3>
+                      <div className="space-y-3 lg:space-y-4">
                         {portfolioData.education && portfolioData.education.length > 0 ? (
                           portfolioData.education.map((ed) => (
                             <div key={ed.id} className="bg-gray-50 p-3 rounded-lg" style={{ pageBreakInside: 'avoid' }}>
@@ -239,13 +239,13 @@ const Preview: React.FC = () => {
 
                   {/* Skills in left column when shouldMoveEducationAndSkills or shouldMoveSkillsOnly */}
                   {(shouldMoveEducationAndSkills || shouldMoveSkillsOnly) && portfolioData.skills && portfolioData.skills.length > 0 && (
-                    <section className="mb-8" style={{ pageBreakInside: 'avoid' }}>
-                      <h3 className="text-sm sm:text-xl font-semibold mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.skillsTitle}</h3>
+                    <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid' }}>
+                      <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.skillsTitle}</h3>
                       <div className="w-full flex flex-wrap gap-2">
                         {portfolioData.skills.map((skill, index) => (
                           <span
                             key={index}
-                            className="skill-badge inline-flex items-center px-2 py-1 rounded-full text-xs sm:text-sm max-w-full break-words"
+                            className="skill-badge inline-flex items-center px-2 py-0.5 lg:py-1 rounded-full text-xs max-w-full break-words"
                             style={{
                               backgroundColor: `${portfolioData.theme.primaryColor}15`,
                               color: portfolioData.theme.primaryColor,
@@ -263,19 +263,19 @@ const Preview: React.FC = () => {
                 <div>
                   {/* Projects ALWAYS in right column */}
                   {portfolioData.projects && portfolioData.projects.some(p => (p.name && p.name.trim()) || (p.description && p.description.trim()) || (p.skills && p.skills.length > 0)) && (
-                    <section className="mb-8" style={{ pageBreakInside: 'avoid' }}>
-                      <h3 className="text-sm sm:text-xl font-semibold mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.projectsTitle}</h3>
-                      <div className="space-y-4">
+                    <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid' }}>
+                      <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.projectsTitle}</h3>
+                      <div className="space-y-3 lg:space-y-4">
                         {portfolioData.projects.map((project) => (
                           (project.name || project.description || (project.skills && project.skills.length)) ? (
-                            <div key={project.id} className="bg-gray-50 p-4 rounded-lg" style={{ pageBreakInside: 'avoid' }}>
-                              <h4 className="font-semibold mb-2 text-xs sm:text-base">{project.name}</h4>
-                              <p className="text-xs sm:text-sm text-gray-500 mb-2">{[project.startMonth, project.startYear].filter(Boolean).join(' ')} {project.startMonth || project.startYear ? '-' : ''} {[project.endMonth, project.endYear].filter(Boolean).join(' ')}</p>
-                              <p className="text-gray-600 text-xs sm:text-sm">{project.description}</p>
+                            <div key={project.id} className="bg-gray-50 p-3 lg:p-4 rounded-lg" style={{ pageBreakInside: 'avoid' }}>
+                              <h4 className="font-semibold mb-2 text-xs sm:text-sm lg:text-base">{project.name}</h4>
+                              <p className="text-xs lg:text-sm text-gray-500 mb-2">{[project.startMonth, project.startYear].filter(Boolean).join(' ')} {project.startMonth || project.startYear ? '-' : ''} {[project.endMonth, project.endYear].filter(Boolean).join(' ')}</p>
+                              <p className="text-gray-600 text-xs lg:text-sm">{project.description}</p>
                               {project.skills && project.skills.length > 0 && (
                                 <div className="w-full flex flex-wrap gap-2 mt-3 justify-start">
                                   {project.skills.map((s, i) => (
-                                    <span key={i} className="skill-badge inline-flex items-center px-2 py-1 rounded-full text-xs sm:text-sm bg-gray-100 max-w-full break-words" style={{ color: portfolioData.theme.primaryColor }}>
+                                    <span key={i} className="skill-badge inline-flex items-center px-2 py-0.5 lg:py-1 rounded-full text-xs bg-gray-100 max-w-full break-words" style={{ color: portfolioData.theme.primaryColor }}>
                                       {s}
                                     </span>
                                   ))}
@@ -290,9 +290,9 @@ const Preview: React.FC = () => {
 
                   {/* Education in right column when NOT moved to left */}
                   {!shouldMoveEducationAndSkills && (
-                    <section className="mb-8" style={{ pageBreakInside: 'avoid' }}>
-                      <h3 className="text-sm sm:text-xl font-semibold mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.educationTitle}</h3>
-                      <div className="space-y-4">
+                    <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid' }}>
+                      <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.educationTitle}</h3>
+                      <div className="space-y-3 lg:space-y-4">
                         {portfolioData.education && portfolioData.education.length > 0 ? (
                           portfolioData.education.map((ed) => (
                             <div key={ed.id} className="bg-gray-50 p-3 rounded-lg" style={{ pageBreakInside: 'avoid' }}>
@@ -312,12 +312,12 @@ const Preview: React.FC = () => {
                   {/* Skills in right column when NOT moved to left */}
                   {!shouldMoveEducationAndSkills && !shouldMoveSkillsOnly && portfolioData.skills && portfolioData.skills.length > 0 && (
                     <section style={{ pageBreakInside: 'avoid' }}>
-                      <h3 className="text-sm sm:text-xl font-semibold mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.skillsTitle}</h3>
+                      <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.skillsTitle}</h3>
                         <div className="w-full flex flex-wrap gap-2">
                         {portfolioData.skills.map((skill, index) => (
                           <span
                             key={index}
-                            className="skill-badge inline-flex items-center px-2 py-1 rounded-full text-xs sm:text-sm max-w-full break-words"
+                            className="skill-badge inline-flex items-center px-2 py-0.5 lg:py-1 rounded-full text-xs max-w-full break-words"
                             style={{
                               backgroundColor: `${portfolioData.theme.primaryColor}15`,
                               color: portfolioData.theme.primaryColor,
@@ -333,7 +333,7 @@ const Preview: React.FC = () => {
 
                   {portfolioData.languages && portfolioData.languages.length > 0 && (
                     <section className="mt-4" style={{ pageBreakInside: 'avoid' }}>
-                      <h3 className="text-sm sm:text-xl font-semibold mb-4" style={{ pageBreakAfter: 'avoid' }}>Idiomas</h3>
+                      <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>Idiomas</h3>
                       <div className="flex flex-col gap-2">
                         {portfolioData.languages.map((l) => (
                           <div key={l.id} className="flex items-center justify-between">

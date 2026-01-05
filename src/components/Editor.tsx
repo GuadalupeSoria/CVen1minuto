@@ -309,27 +309,27 @@ const Editor: React.FC = () => {
           </select>
         </div>
 
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-3 lg:mb-4">
           <button
             onClick={() => setViewMode('editor')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 lg:py-3 px-3 lg:px-4 rounded-xl text-sm lg:text-base font-semibold transition-all ${
               viewMode === 'editor'
                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg shadow-blue-500/50'
                 : 'bg-gray-700 hover:bg-gray-600'
             }`}
           >
-            <Edit3 size={20} />
+            <Edit3 size={18} />
             Editor
           </button>
           <button
             onClick={() => setViewMode('optimizer')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 lg:py-3 px-3 lg:px-4 rounded-xl text-sm lg:text-base font-semibold transition-all ${
               viewMode === 'optimizer'
                 ? 'bg-gradient-to-r from-purple-500 to-purple-600 shadow-lg shadow-purple-500/50'
                 : 'bg-gray-700 hover:bg-gray-600'
             }`}
           >
-            <Sparkles size={20} />
+            <Sparkles size={18} />
             Optimizador IA
           </button>
         </div>
@@ -342,7 +342,7 @@ const Editor: React.FC = () => {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`min-w-max px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`min-w-max px-3 lg:px-4 py-1.5 lg:py-2 rounded-lg text-xs lg:text-sm font-medium transition-all ${
                     activeTab === tab 
                       ? 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-md' 
                       : 'bg-gray-700 hover:bg-gray-600'
@@ -1049,14 +1049,6 @@ const Editor: React.FC = () => {
         )}
         </>
         )}
-      </div>
-
-      
-      <div className="sm:hidden p-3 border-t">
-        <h3 className="text-sm font-medium mb-2">{t.previewTitle}</h3>
-        <div className="h-56 overflow-auto bg-gray-50 rounded p-2">
-          <Preview />
-        </div>
       </div>
     </div>
   )
