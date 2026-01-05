@@ -942,11 +942,9 @@ const Editor: React.FC = () => {
                         >
                           <option value="">{lang === 'es' ? 'Seleccionar nivel...' : 'Select level...'}</option>
                           <option value={lang === 'es' ? 'Nativo' : 'Native'}>{lang === 'es' ? 'Nativo' : 'Native'}</option>
-                          <option value={lang === 'es' ? 'Bilingüe' : 'Bilingual'}>{lang === 'es' ? 'Bilingüe' : 'Bilingual'}</option>
-                          <option value={lang === 'es' ? 'Competencia profesional completa' : 'Full professional proficiency'}>{lang === 'es' ? 'Competencia profesional completa' : 'Full professional proficiency'}</option>
-                          <option value={lang === 'es' ? 'Competencia profesional' : 'Professional working proficiency'}>{lang === 'es' ? 'Competencia profesional' : 'Professional working proficiency'}</option>
-                          <option value={lang === 'es' ? 'Competencia laboral limitada' : 'Limited working proficiency'}>{lang === 'es' ? 'Competencia laboral limitada' : 'Limited working proficiency'}</option>
-                          <option value={lang === 'es' ? 'Básico' : 'Elementary'}>{lang === 'es' ? 'Básico' : 'Elementary'}</option>
+                          <option value={lang === 'es' ? 'Avanzado' : 'Advanced'}>{lang === 'es' ? 'Avanzado' : 'Advanced'}</option>
+                          <option value={lang === 'es' ? 'Intermedio' : 'Intermediate'}>{lang === 'es' ? 'Intermedio' : 'Intermediate'}</option>
+                          <option value={lang === 'es' ? 'Básico' : 'Basic'}>{lang === 'es' ? 'Básico' : 'Basic'}</option>
                         </select>
                       </div>
                       <button 
@@ -976,11 +974,9 @@ const Editor: React.FC = () => {
                   >
                     <option value="">{lang === 'es' ? 'Seleccionar nivel...' : 'Select level...'}</option>
                     <option value={lang === 'es' ? 'Nativo' : 'Native'}>{lang === 'es' ? 'Nativo' : 'Native'}</option>
-                    <option value={lang === 'es' ? 'Bilingüe' : 'Bilingual'}>{lang === 'es' ? 'Bilingüe' : 'Bilingual'}</option>
-                    <option value={lang === 'es' ? 'Competencia profesional completa' : 'Full professional proficiency'}>{lang === 'es' ? 'Competencia profesional completa' : 'Full professional proficiency'}</option>
-                    <option value={lang === 'es' ? 'Competencia profesional' : 'Professional working proficiency'}>{lang === 'es' ? 'Competencia profesional' : 'Professional working proficiency'}</option>
-                    <option value={lang === 'es' ? 'Competencia laboral limitada' : 'Limited working proficiency'}>{lang === 'es' ? 'Competencia laboral limitada' : 'Limited working proficiency'}</option>
-                    <option value={lang === 'es' ? 'Básico' : 'Elementary'}>{lang === 'es' ? 'Básico' : 'Elementary'}</option>
+                    <option value={lang === 'es' ? 'Avanzado' : 'Advanced'}>{lang === 'es' ? 'Avanzado' : 'Advanced'}</option>
+                    <option value={lang === 'es' ? 'Intermedio' : 'Intermediate'}>{lang === 'es' ? 'Intermedio' : 'Intermediate'}</option>
+                    <option value={lang === 'es' ? 'Básico' : 'Basic'}>{lang === 'es' ? 'Básico' : 'Basic'}</option>
                   </select>
                   <button
                     onClick={() => {
