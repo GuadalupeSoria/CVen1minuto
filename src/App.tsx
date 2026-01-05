@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { PortfolioProvider } from './context/PortfolioContext'
 import Editor from './components/Editor'
 import Preview from './components/Preview'
-import AIOptimizer from './components/AIOptimizer'
-import { FileText, Edit3, Eye, Sparkles } from 'lucide-react'
+import { Edit3, Eye } from 'lucide-react'
 
 function App() {
   const [mobileTab, setMobileTab] = useState<'editor' | 'preview'>('editor')
@@ -50,7 +49,7 @@ function App() {
         {/* Main Content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Left Panel - Editor with toggle */}
-          <div className={`w-full md:w-[480px] lg:w-[500px] xl:w-[550px] bg-white border-r border-gray-200 overflow-y-auto ${
+          <div className={`w-full md:w-[380px] lg:w-[400px] xl:w-[420px] bg-white border-r border-gray-200 overflow-y-auto ${
             mobileTab === 'editor' ? 'block' : 'hidden md:block'
           }`}>
             <Editor />
@@ -64,7 +63,7 @@ function App() {
           </div>
 
           {/* Right Panel - Vertical AdSense Banner */}
-          <div className="hidden lg:block w-[120px] xl:w-[160px] bg-white border-l border-gray-200 p-2 overflow-hidden">
+          <div className="hidden xl:block w-[100px] bg-white border-l border-gray-200 p-2 overflow-hidden">
             <div className="sticky top-4">
               {/* AdSense Vertical Banner */}
               <div className="text-xs text-gray-400 text-center mb-2">Publicidad</div>

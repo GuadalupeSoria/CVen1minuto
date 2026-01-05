@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { usePortfolio } from '../context/PortfolioContext'
-import { Plus, X, Upload, Phone, MapPin, Mail, Globe, Edit3, Sparkles } from 'lucide-react'
-import Preview from './Preview'
+import { Plus, X, Upload, Phone, MapPin, Mail, Globe, Edit3, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
 import AIOptimizer from './AIOptimizer'
 
 type TranslationsShape = {
@@ -232,8 +231,42 @@ const Editor: React.FC = () => {
   const [newSkill, setNewSkill] = useState('')
   const [newEducation, setNewEducation] = useState({ institution: '', degree: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' })
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const tabsScrollRef = useRef<HTMLDivElement>(null)
   const [newLangName, setNewLangName] = useState('')
   const [newLangLevel, setNewLangLevel] = useState('')
+  const [showLeftArrow, setShowLeftArrow] = useState(false)
+  const [showRightArrow, setShowRightArrow] = useState(false)
+
+  const checkScrollButtons = () => {
+    if (tabsScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tabsScrollRef.current
+      setShowLeftArrow(scrollLeft > 0)
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10)
+    }
+  }
+
+  const scrollTabs = (direction: 'left' | 'right') => {
+    if (tabsScrollRef.current) {
+      const scrollAmount = 200
+      tabsScrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      })
+    }
+  }
+
+  React.useEffect(() => {
+    checkScrollButtons()
+    const handleScroll = () => checkScrollButtons()
+    const ref = tabsScrollRef.current
+    ref?.addEventListener('scroll', handleScroll)
+    window.addEventListener('resize', checkScrollButtons)
+    
+    return () => {
+      ref?.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', checkScrollButtons)
+    }
+  }, [viewMode])
 
   const handleAddProject = () => {
     addProject(newProject)
@@ -291,66 +324,90 @@ const Editor: React.FC = () => {
   return (
     <div className="w-full bg-white overflow-y-auto h-full">
       {/* Toggle between Editor and AI Optimizer */}
-      <div className="p-4 bg-gradient-to-r from-gray-800 to-gray-900 text-white sticky top-0 z-10 shadow-lg">
+      <div className="p-3 md:p-4 bg-gradient-to-r from-slate-800 to-slate-900 text-white sticky top-0 z-10 shadow-xl">
         {/* Logo and Language selector at top */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <img src="/assets/logonew.png" alt="CV ATS" className="w-16 h-16 rounded-lg shadow-md" />
+            <img src="/assets/logonew.png" alt="CV ATS" className="w-12 h-12 md:w-14 md:h-14 rounded-xl shadow-lg" />
             
           </div>
           <select
             value={lang}
             onChange={(e) => setLanguage?.(e.target.value)}
-            className="bg-gray-700 text-white px-3 py-1.5 rounded-lg border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            className="bg-slate-700 text-white px-3 py-2 rounded-xl border border-slate-600 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all shadow-md hover:bg-slate-600 cursor-pointer"
             aria-label="Seleccionar idioma"
           >
-            <option value="es">ES</option>
-            <option value="en">EN</option>
+            <option value="es">🇪🇸 ES</option>
+            <option value="en">🇬🇧 EN</option>
           </select>
         </div>
 
-        <div className="flex gap-2 mb-3 lg:mb-4">
+        <div className="flex gap-2 mb-3">
           <button
             onClick={() => setViewMode('editor')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 lg:py-3 px-3 lg:px-4 rounded-xl text-sm lg:text-base font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-semibold transition-all transform hover:scale-[1.02] ${
               viewMode === 'editor'
-                ? 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg shadow-blue-500/50'
-                : 'bg-gray-700 hover:bg-gray-600'
+                ? 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30 ring-2 ring-blue-400/50'
+                : 'bg-slate-700 hover:bg-slate-600'
             }`}
           >
-            <Edit3 size={18} />
+            <Edit3 size={16} />
             Editor
           </button>
           <button
             onClick={() => setViewMode('optimizer')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 lg:py-3 px-3 lg:px-4 rounded-xl text-sm lg:text-base font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-semibold transition-all transform hover:scale-[1.02] ${
               viewMode === 'optimizer'
-                ? 'bg-gradient-to-r from-purple-500 to-purple-600 shadow-lg shadow-purple-500/50'
-                : 'bg-gray-700 hover:bg-gray-600'
+                ? 'bg-gradient-to-r from-purple-500 to-purple-600 shadow-lg shadow-purple-500/30 ring-2 ring-purple-400/50'
+                : 'bg-slate-700 hover:bg-slate-600'
             }`}
           >
-            <Sparkles size={18} />
+            <Sparkles size={16} />
             Optimizador IA
           </button>
         </div>
 
         {/* Show editor controls only when in editor mode */}
         {viewMode === 'editor' && (
-          <div className="overflow-x-auto -mx-2 px-2 pb-2 custom-scrollbar">
-            <div className="flex gap-2 whitespace-nowrap">
-              {['personal', 'contact', 'projects', 'experience', 'education', 'skills', 'languages'].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`min-w-max px-3 lg:px-4 py-1.5 lg:py-2 rounded-lg text-xs lg:text-sm font-medium transition-all ${
-                    activeTab === tab 
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-md' 
-                      : 'bg-gray-700 hover:bg-gray-600'
-                  }`}
-                >
-                  {t.tabs[tab]}
-                </button>
-              ))}
+          <div className="relative group">
+            {/* Left Arrow - Desktop only */}
+            {showLeftArrow && (
+              <button
+                onClick={() => scrollTabs('left')}
+                className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-slate-800/90 backdrop-blur-sm p-1.5 rounded-r-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-slate-700"
+                aria-label="Scroll left"
+              >
+                <ChevronLeft size={18} className="text-white" />
+              </button>
+            )}
+            
+            {/* Right Arrow - Desktop only */}
+            {showRightArrow && (
+              <button
+                onClick={() => scrollTabs('right')}
+                className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-slate-800/90 backdrop-blur-sm p-1.5 rounded-l-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-slate-700"
+                aria-label="Scroll right"
+              >
+                <ChevronRight size={18} className="text-white" />
+              </button>
+            )}
+            
+            <div ref={tabsScrollRef} className="overflow-x-auto -mx-2 px-2 pb-2 custom-scrollbar">
+              <div className="flex gap-2 whitespace-nowrap">
+                {['personal', 'contact', 'projects', 'experience', 'education', 'skills', 'languages'].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`min-w-max px-3 py-2 rounded-lg text-xs font-medium transition-all transform hover:scale-105 ${
+                      activeTab === tab 
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 shadow-md ring-2 ring-blue-400/50' 
+                        : 'bg-slate-700 hover:bg-slate-600'
+                    }`}
+                  >
+                    {t.tabs[tab]}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -391,12 +448,12 @@ const Editor: React.FC = () => {
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
                   >
                     {t.changePhoto}
                   </button>
 
-                  <label className="flex items-center gap-3 text-sm cursor-pointer">
+                  <label className="flex items-center gap-3 text-sm cursor-pointer group">
                     <div className="relative inline-block w-11 h-6">
                       <input
                         type="checkbox"
@@ -404,41 +461,41 @@ const Editor: React.FC = () => {
                         onChange={(e) => updatePortfolioData({ showPhoto: e.target.checked })}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-blue-400 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500 shadow-inner"></div>
                     </div>
-                    <span>{t.includePhoto}</span>
+                    <span className="group-hover:text-blue-600 transition-colors">{t.includePhoto}</span>
                   </label>
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t.personal_nameLabel}</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">{t.personal_nameLabel}</label>
               <input
                 type="text"
                 value={portfolioData.name}
                 onChange={(e) => updatePortfolioData({ name: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm hover:border-gray-400"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t.personal_titleLabel}</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">{t.personal_titleLabel}</label>
               <input
                 type="text"
                 value={portfolioData.title}
                 onChange={(e) => updatePortfolioData({ title: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm hover:border-gray-400"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t.personal_aboutLabel}</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">{t.personal_aboutLabel}</label>
               <textarea
                 value={portfolioData.about}
                 onChange={(e) => updatePortfolioData({ about: e.target.value })}
                 rows={4}
-                className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm hover:border-gray-400 resize-none"
               />
             </div>
 
@@ -865,55 +922,79 @@ const Editor: React.FC = () => {
         {activeTab === 'languages' && (
           <div className="space-y-4">
             <div className="flex flex-col gap-3">
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-1 gap-3">
                 {(portfolioData.languages || []).map((langItem) => (
-                  <div key={langItem.id} className="p-2 border rounded-md flex items-center gap-2">
-                    <Globe size={16} />
-                    <input
-                      type="text"
-                      value={langItem.name}
-                      onChange={(e) => updateLanguage(langItem.id, { name: e.target.value })}
-                      className="px-2 py-1 border rounded-md"
-                      placeholder={t.language_namePlaceholder}
-                    />
-                    <input
-                      type="text"
-                      value={langItem.level || ''}
-                      onChange={(e) => updateLanguage(langItem.id, { level: e.target.value })}
-                      className="px-2 py-1 border rounded-md"
-                      placeholder={t.language_levelPlaceholder}
-                    />
-                    <button onClick={() => removeLanguage(langItem.id)} className="text-red-500"><X size={14} /></button>
+                  <div key={langItem.id} className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all">
+                    <div className="flex items-start gap-3">
+                      <Globe size={20} className="text-blue-500 mt-2" />
+                      <div className="flex-1 space-y-3">
+                        <input
+                          type="text"
+                          value={langItem.name}
+                          onChange={(e) => updateLanguage(langItem.id, { name: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm"
+                          placeholder={t.language_namePlaceholder}
+                        />
+                        <select
+                          value={langItem.level || ''}
+                          onChange={(e) => updateLanguage(langItem.id, { level: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm cursor-pointer"
+                        >
+                          <option value="">{lang === 'es' ? 'Seleccionar nivel...' : 'Select level...'}</option>
+                          <option value={lang === 'es' ? 'Nativo' : 'Native'}>{lang === 'es' ? 'Nativo' : 'Native'}</option>
+                          <option value={lang === 'es' ? 'Bilingüe' : 'Bilingual'}>{lang === 'es' ? 'Bilingüe' : 'Bilingual'}</option>
+                          <option value={lang === 'es' ? 'Competencia profesional completa' : 'Full professional proficiency'}>{lang === 'es' ? 'Competencia profesional completa' : 'Full professional proficiency'}</option>
+                          <option value={lang === 'es' ? 'Competencia profesional' : 'Professional working proficiency'}>{lang === 'es' ? 'Competencia profesional' : 'Professional working proficiency'}</option>
+                          <option value={lang === 'es' ? 'Competencia laboral limitada' : 'Limited working proficiency'}>{lang === 'es' ? 'Competencia laboral limitada' : 'Limited working proficiency'}</option>
+                          <option value={lang === 'es' ? 'Básico' : 'Elementary'}>{lang === 'es' ? 'Básico' : 'Elementary'}</option>
+                        </select>
+                      </div>
+                      <button 
+                        onClick={() => removeLanguage(langItem.id)} 
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-all"
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
 
-              <div className="flex gap-2 items-center">
-                <input
-                  type="text"
-                  placeholder={t.language_namePlaceholder}
-                  value={newLangName}
-                  onChange={(e) => setNewLangName(e.target.value)}
-                  className="px-2 py-1 border rounded-md"
-                />
-                <input
-                  type="text"
-                  placeholder={t.language_levelPlaceholder}
-                  value={newLangLevel}
-                  onChange={(e) => setNewLangLevel(e.target.value)}
-                  className="px-2 py-1 border rounded-md"
-                />
-                <button
-                  onClick={() => {
-                    if (!newLangName) return
-                    addLanguage({ name: newLangName, level: newLangLevel })
-                    setNewLangName('')
-                    setNewLangLevel('')
-                  }}
-                  className="px-3 py-1 bg-blue-500 text-white rounded-md"
-                >
-                  {t.addLanguage}
-                </button>
+              <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-dashed border-blue-300">
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    placeholder={t.language_namePlaceholder}
+                    value={newLangName}
+                    onChange={(e) => setNewLangName(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm"
+                  />
+                  <select
+                    value={newLangLevel}
+                    onChange={(e) => setNewLangLevel(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm cursor-pointer"
+                  >
+                    <option value="">{lang === 'es' ? 'Seleccionar nivel...' : 'Select level...'}</option>
+                    <option value={lang === 'es' ? 'Nativo' : 'Native'}>{lang === 'es' ? 'Nativo' : 'Native'}</option>
+                    <option value={lang === 'es' ? 'Bilingüe' : 'Bilingual'}>{lang === 'es' ? 'Bilingüe' : 'Bilingual'}</option>
+                    <option value={lang === 'es' ? 'Competencia profesional completa' : 'Full professional proficiency'}>{lang === 'es' ? 'Competencia profesional completa' : 'Full professional proficiency'}</option>
+                    <option value={lang === 'es' ? 'Competencia profesional' : 'Professional working proficiency'}>{lang === 'es' ? 'Competencia profesional' : 'Professional working proficiency'}</option>
+                    <option value={lang === 'es' ? 'Competencia laboral limitada' : 'Limited working proficiency'}>{lang === 'es' ? 'Competencia laboral limitada' : 'Limited working proficiency'}</option>
+                    <option value={lang === 'es' ? 'Básico' : 'Elementary'}>{lang === 'es' ? 'Básico' : 'Elementary'}</option>
+                  </select>
+                  <button
+                    onClick={() => {
+                      if (!newLangName) return
+                      addLanguage({ name: newLangName, level: newLangLevel })
+                      setNewLangName('')
+                      setNewLangLevel('')
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+                  >
+                    <Plus size={18} />
+                    {t.addLanguage === '+' ? (lang === 'es' ? 'Agregar idioma' : 'Add language') : t.addLanguage}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
