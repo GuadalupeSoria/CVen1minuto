@@ -1,9 +1,12 @@
 import React, { useState } from 'react'
 import { usePortfolio } from '../context/PortfolioContext'
-import { Download } from 'lucide-react'
-import { Phone, MapPin, Mail, Globe } from 'lucide-react'
+import { Download, LayoutTemplate } from 'lucide-react'
 import html2pdf from 'html2pdf.js'
 import { AdModal } from './AdModal'
+import { OriginalTemplate } from './templates/OriginalTemplate'
+import { ModernTemplate } from './templates/ModernTemplate'
+import { ClassicTemplate } from './templates/ClassicTemplate'
+import type { CVTemplate } from '../context/PortfolioContext'
 
 type PreviewTranslations = {
   exportPdf: string
@@ -40,10 +43,11 @@ const previewTranslations: Record<string, PreviewTranslations> = {
 }
 
 const Preview: React.FC = () => {
-  const { portfolioData } = usePortfolio()
+  const { portfolioData, setTemplate } = usePortfolio()
   const lang = (portfolioData.language as string) || 'es'
   const t = previewTranslations[lang] || previewTranslations.es
   const [showAdModal, setShowAdModal] = useState(false)
+  const currentTemplate: CVTemplate = portfolioData.template || 'original'
 
   const handleExportPDFClick = () => {
     // Verificar si es usuario premium (implementar lógica después)
@@ -63,34 +67,28 @@ const Preview: React.FC = () => {
 
       // Remove UI elements that shouldn't be in PDF
       clone.querySelectorAll('.page-indicator').forEach(el => el.remove())
-      clone.querySelectorAll('svg').forEach(s => s.remove())
 
-      // Remove page styling (borders, shadows, etc)
-      clone.classList.remove('a4-page')
+      // Style adjustments for PDF
       clone.style.boxShadow = 'none'
       clone.style.margin = '0'
+      clone.style.padding = '0'
       clone.style.minHeight = 'auto'
-
-      ;(clone.querySelectorAll('*') as NodeListOf<HTMLElement>).forEach((el) => {
-        // Remove backgrounds
-        const bg = el.style && (el.style.background || el.style.backgroundColor)
-        if (bg) {
-          el.style.background = 'transparent'
-          el.style.backgroundColor = 'transparent'
-        }
-        
-        // Remove ::after pseudo-element effects by removing classes
-        el.classList.remove('a4-page')
-      })
+      clone.style.width = '100%'
 
       const container = document.createElement('div')
+      container.style.width = '210mm'
       container.appendChild(clone)
 
       const opt = {
-        margin: [10, 10],
-        filename: 'mi-portafolio.pdf',
+        margin: [8, 8, 8, 8],
+        filename: `cv-${portfolioData.name.toLowerCase().replace(/\s+/g, '-')}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          logging: false
+        },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       }
 
@@ -112,244 +110,39 @@ const Preview: React.FC = () => {
       />
       
       <div className="max-w-[210mm] mx-auto">
-        <div className="flex justify-end gap-4 mb-6">
+        <div className="flex justify-between items-center gap-4 mb-6">
+          {/* Template Selector */}
+          <div className="flex items-center gap-2">
+            <LayoutTemplate className="text-gray-600" size={20} />
+            <select
+              value={currentTemplate}
+              onChange={(e) => setTemplate?.(e.target.value as CVTemplate)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer"
+            >
+              <option value="original">{lang === 'es' ? 'Plantilla Original' : 'Original Template'}</option>
+              <option value="modern">{lang === 'es' ? 'Plantilla Moderna' : 'Modern Template'}</option>
+              <option value="classic">{lang === 'es' ? 'Plantilla Clásica' : 'Classic Template'}</option>
+            </select>
+          </div>
+
           <button
             onClick={handleExportPDFClick}
             className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-lg shadow-green-500/50 font-medium"
           >
             <Download size={20} />
-            Exportar PDF
+            {t.exportPdf}
           </button>
         </div>
 
-        {/* Página 1 */}
-        <div className="a4-page preview-content" style={{ color: portfolioData.theme.primaryColor }}>
-          <div className="flex items-center gap-6 mb-12">
-            <div className="flex items-center gap-4">
-              {portfolioData.showPhoto ? (
-                portfolioData.photo ? (
-                  <img
-                    src={portfolioData.photo}
-                    alt={portfolioData.name}
-                    className="w-20 h-20 sm:w-32 sm:h-32 rounded-full object-cover shadow-lg"
-                  />
-                ) : (
-                  <div className="w-20 h-20 sm:w-32 sm:h-32 rounded-full bg-gray-200 flex items-center justify-center">{t.noPhoto}</div>
-                )
-              ) : null}
-
-              <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1">{portfolioData.name}</h1>
-                <h2 className="text-base sm:text-xl lg:text-2xl text-gray-600 mb-2">{portfolioData.title}</h2>
-
-                <div className="flex flex-col md:flex-row gap-2 lg:gap-3 text-xs lg:text-sm text-gray-700">
-                  {portfolioData.contact?.email && (
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <a className="underline" href={`mailto:${portfolioData.contact.email}`}>{portfolioData.contact.email}</a>
-                    </div>
-                  )}
-
-                  {portfolioData.contact?.phone && (
-                    <div className="flex items-center gap-2">
-                      <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span>{portfolioData.contact.phone}</span>
-                    </div>
-                  )}
-
-                  {portfolioData.contact?.address && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span>{portfolioData.contact.address}</span>
-                    </div>
-                  )}
-
-                  {portfolioData.contact?.website && (
-                    <div className="flex items-center gap-2">
-                      <Globe className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <a className="underline" href={(portfolioData.contact.website.startsWith('http') ? portfolioData.contact.website : `https://${portfolioData.contact.website}`)} target="_blank" rel="noreferrer">{portfolioData.contact.website}</a>
-                    </div>
-                  )}
-
-                  {portfolioData.contact?.linkedin && (
-                    <div className="flex items-center gap-2">
-                      <Globe className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <a className="underline" href={(portfolioData.contact.linkedin.startsWith('http') ? portfolioData.contact.linkedin : `https://${portfolioData.contact.linkedin}`)} target="_blank" rel="noreferrer">{portfolioData.contact.linkedin}</a>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {(() => {
-            const projectsCount = portfolioData.projects?.filter(p => 
-              (p.name && p.name.trim()) || (p.description && p.description.trim()) || (p.skills && p.skills.length > 0)
-            ).length || 0;
-            const experiencesCount = portfolioData.experience?.length || 0;
-            
-            // Logic:
-            // - >=2 projects and <3 experiences: move Education and Skills to left
-            // - >=4 experiences: move only Skills to left
-            const shouldMoveEducationAndSkills = projectsCount >= 2 && experiencesCount < 3;
-            const shouldMoveSkillsOnly = experiencesCount >= 4;
-
-            return (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-12">
-                <div>
-                  <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid' }}>
-                    <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.aboutTitle}</h3>
-                    <p className="text-xs sm:text-sm lg:text-base text-gray-700 leading-relaxed">{portfolioData.about}</p>
-                  </section>
-
-                  <section className="mb-6 lg:mb-8">
-                    <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.experienceTitle}</h3>
-                    <div className="space-y-3 lg:space-y-4">
-                      {portfolioData.experience.map((exp) => (
-                        <div key={exp.id} className="border-l-2 pl-3 lg:pl-4" style={{ borderColor: portfolioData.theme.primaryColor, pageBreakInside: 'avoid' }}>
-                          <h4 className="font-semibold text-xs sm:text-sm lg:text-base">{exp.position}</h4>
-                          <p className="text-gray-600 text-xs lg:text-sm">{exp.company}</p>
-                          <p className="text-xs text-gray-500">{[exp.startMonth, exp.startYear].filter(Boolean).join(' ')} {exp.startMonth || exp.startYear ? '-' : ''} {[exp.endMonth, exp.endYear].filter(Boolean).join(' ') } {exp.duration ? exp.duration : ''}</p>
-                          {exp.description && <p className="text-xs lg:text-sm text-gray-700 mt-2">{exp.description}</p>}
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-
-                  {/* Education in left column when shouldMoveEducationAndSkills or shouldMoveSkillsOnly */}
-                  {(shouldMoveEducationAndSkills) && (
-                    <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid' }}>
-                      <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.educationTitle}</h3>
-                      <div className="space-y-3 lg:space-y-4">
-                        {portfolioData.education && portfolioData.education.length > 0 ? (
-                          portfolioData.education.map((ed) => (
-                            <div key={ed.id} className="bg-gray-50 p-3 rounded-lg" style={{ pageBreakInside: 'avoid' }}>
-                              <h4 className="font-semibold text-xs sm:text-base">{ed.institution}</h4>
-                              <p className="text-xs sm:text-sm text-gray-500">{ed.degree}</p>
-                              <p className="text-xs sm:text-sm text-gray-500">{[ed.startMonth, ed.startYear].filter(Boolean).join(' ')} {ed.startMonth || ed.startYear ? '-' : ''} {[ed.endMonth, ed.endYear].filter(Boolean).join(' ')}</p>
-                              {ed.description && <p className="text-xs sm:text-sm text-gray-700 mt-2">{ed.description}</p>}
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-gray-500">{t.noEducation}</p>
-                        )}
-                      </div>
-                    </section>
-                  )}
-
-                  {/* Skills in left column when shouldMoveEducationAndSkills or shouldMoveSkillsOnly */}
-                  {(shouldMoveEducationAndSkills || shouldMoveSkillsOnly) && portfolioData.skills && portfolioData.skills.length > 0 && (
-                    <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid' }}>
-                      <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.skillsTitle}</h3>
-                      <div className="w-full flex flex-wrap gap-2">
-                        {portfolioData.skills.map((skill, index) => (
-                          <span
-                            key={index}
-                            className="skill-badge inline-flex items-center px-2 py-0.5 lg:py-1 rounded-full text-xs max-w-full break-words"
-                            style={{
-                              backgroundColor: `${portfolioData.theme.primaryColor}15`,
-                              color: portfolioData.theme.primaryColor,
-                              lineHeight: 1
-                            }}
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-                </div>
-
-                <div>
-                  {/* Projects ALWAYS in right column */}
-                  {portfolioData.projects && portfolioData.projects.some(p => (p.name && p.name.trim()) || (p.description && p.description.trim()) || (p.skills && p.skills.length > 0)) && (
-                    <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid' }}>
-                      <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.projectsTitle}</h3>
-                      <div className="space-y-3 lg:space-y-4">
-                        {portfolioData.projects.map((project) => (
-                          (project.name || project.description || (project.skills && project.skills.length)) ? (
-                            <div key={project.id} className="bg-gray-50 p-3 lg:p-4 rounded-lg" style={{ pageBreakInside: 'avoid' }}>
-                              <h4 className="font-semibold mb-2 text-xs sm:text-sm lg:text-base">{project.name}</h4>
-                              <p className="text-xs lg:text-sm text-gray-500 mb-2">{[project.startMonth, project.startYear].filter(Boolean).join(' ')} {project.startMonth || project.startYear ? '-' : ''} {[project.endMonth, project.endYear].filter(Boolean).join(' ')}</p>
-                              <p className="text-gray-600 text-xs lg:text-sm">{project.description}</p>
-                              {project.skills && project.skills.length > 0 && (
-                                <div className="w-full flex flex-wrap gap-2 mt-3 justify-start">
-                                  {project.skills.map((s, i) => (
-                                    <span key={i} className="skill-badge inline-flex items-center px-2 py-0.5 lg:py-1 rounded-full text-xs bg-gray-100 max-w-full break-words" style={{ color: portfolioData.theme.primaryColor }}>
-                                      {s}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          ) : null
-                        ))}
-                      </div>
-                    </section>
-                  )}
-
-                  {/* Education in right column when NOT moved to left */}
-                  {!shouldMoveEducationAndSkills && (
-                    <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid' }}>
-                      <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.educationTitle}</h3>
-                      <div className="space-y-3 lg:space-y-4">
-                        {portfolioData.education && portfolioData.education.length > 0 ? (
-                          portfolioData.education.map((ed) => (
-                            <div key={ed.id} className="bg-gray-50 p-3 rounded-lg" style={{ pageBreakInside: 'avoid' }}>
-                              <h4 className="font-semibold text-xs sm:text-base">{ed.institution}</h4>
-                              <p className="text-xs sm:text-sm text-gray-500">{ed.degree}</p>
-                              <p className="text-xs sm:text-sm text-gray-500">{[ed.startMonth, ed.startYear].filter(Boolean).join(' ')} {ed.startMonth || ed.startYear ? '-' : ''} {[ed.endMonth, ed.endYear].filter(Boolean).join(' ')}</p>
-                              {ed.description && <p className="text-xs sm:text-sm text-gray-700 mt-2">{ed.description}</p>}
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-gray-500">{t.noEducation}</p>
-                        )}
-                      </div>
-                    </section>
-                  )}
-
-                  {/* Skills in right column when NOT moved to left */}
-                  {!shouldMoveEducationAndSkills && !shouldMoveSkillsOnly && portfolioData.skills && portfolioData.skills.length > 0 && (
-                    <section style={{ pageBreakInside: 'avoid' }}>
-                      <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.skillsTitle}</h3>
-                        <div className="w-full flex flex-wrap gap-2">
-                        {portfolioData.skills.map((skill, index) => (
-                          <span
-                            key={index}
-                            className="skill-badge inline-flex items-center px-2 py-0.5 lg:py-1 rounded-full text-xs max-w-full break-words"
-                            style={{
-                              backgroundColor: `${portfolioData.theme.primaryColor}15`,
-                              color: portfolioData.theme.primaryColor,
-                              lineHeight: 1
-                            }}
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-
-                  {portfolioData.languages && portfolioData.languages.length > 0 && (
-                    <section className="mt-4" style={{ pageBreakInside: 'avoid' }}>
-                      <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>Idiomas</h3>
-                      <div className="flex flex-col gap-2">
-                        {portfolioData.languages.map((l) => (
-                          <div key={l.id} className="flex items-center justify-between">
-                            <div className="text-sm">
-                              <strong>{l.name}</strong>
-                              {l.level && <span className="ml-2 text-gray-600">{l.level}</span>}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-                </div>
-              </div>
-              );
-            })()}
+        {/* CV Preview */}
+        <div className="preview-content shadow-2xl rounded-lg overflow-hidden">
+          {currentTemplate === 'original' ? (
+            <OriginalTemplate data={portfolioData} t={t} />
+          ) : currentTemplate === 'modern' ? (
+            <ModernTemplate data={portfolioData} t={t} />
+          ) : (
+            <ClassicTemplate data={portfolioData} t={t} />
+          )}
         </div>
       </div>
     </div>

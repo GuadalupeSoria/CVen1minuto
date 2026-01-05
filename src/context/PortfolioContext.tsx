@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react'
+import { AIService } from '../services/AIService'
 
 interface Project {
   id: string
@@ -46,6 +47,8 @@ interface Theme {
   primaryColor: string
 }
 
+type CVTemplate = 'original' | 'modern' | 'classic'
+
 interface PortfolioData {
   name: string
   title: string
@@ -53,6 +56,7 @@ interface PortfolioData {
   photo: string
   showPhoto?: boolean
   language?: string
+  template?: CVTemplate
   languages?: { id: string; name: string; level?: string }[]
   projects: Project[]
   experience: Experience[]
@@ -66,6 +70,7 @@ interface PortfolioContextType {
   portfolioData: PortfolioData
   updatePortfolioData: (data: Partial<PortfolioData>) => void
   setLanguage: (lang: string) => void
+  setTemplate: (template: CVTemplate) => void
   addProject: (project: Omit<Project, 'id'>) => void
   updateProject: (id: string, project: Partial<Project>) => void
   removeProject: (id: string) => void
@@ -80,7 +85,10 @@ interface PortfolioContextType {
   removeLanguage: (id: string) => void
   addSkill: (skill: string) => void
   removeSkill: (skill: string) => void
+  importFromPDF: (file: File) => Promise<void>
 }
+
+export type { CVTemplate }
 
 const defaultPortfolioData: PortfolioData = {
   name: 'Tu Nombre',
@@ -88,6 +96,7 @@ const defaultPortfolioData: PortfolioData = {
   about: 'Escribe una breve descripción sobre ti...',
   photo: '',
   showPhoto: true,
+  template: 'original',
   projects: [{ id: '1', name: 'Proyecto 1', description: 'Descripción del proyecto 1', skills: ['JavaScript', 'React'] }],
   experience: [{ id: '1', company: 'Empresa', position: 'Cargo', duration: '2020 - Presente' }],
   education: [],
@@ -126,6 +135,10 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const setLanguage = (lang: string) => {
     setPortfolioData(prev => ({ ...prev, language: lang }))
+  }
+
+  const setTemplate = (template: CVTemplate) => {
+    setPortfolioData(prev => ({ ...prev, template }))
   }
 
   const addProject = (project: Omit<Project, 'id'>) => {
@@ -226,11 +239,74 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }))
   }
 
+  const importFromPDF = async (file: File) => {
+    try {
+      const language = portfolioData.language === 'en' ? 'en' : 'es';
+      const parsedData = await AIService.importCVFromPDF(file, language);
+      
+      // Update portfolio data with parsed information
+      const updatedData: Partial<PortfolioData> = {};
+      
+      if (parsedData.name) updatedData.name = parsedData.name;
+      if (parsedData.title) updatedData.title = parsedData.title;
+      if (parsedData.about) updatedData.about = parsedData.about;
+      if (parsedData.skills && parsedData.skills.length > 0) updatedData.skills = parsedData.skills;
+      
+      // Update contact information
+      if (parsedData.email || parsedData.phone || parsedData.linkedin || parsedData.address || parsedData.website) {
+        updatedData.contact = {
+          ...portfolioData.contact,
+          ...(parsedData.email && { email: parsedData.email }),
+          ...(parsedData.phone && { phone: parsedData.phone }),
+          ...(parsedData.linkedin && { linkedin: parsedData.linkedin }),
+          ...(parsedData.address && { address: parsedData.address }),
+          ...(parsedData.website && { website: parsedData.website }),
+        };
+      }
+      
+      // Clear existing data arrays and add new ones
+      if (parsedData.experience && parsedData.experience.length > 0) {
+        updatedData.experience = parsedData.experience.map(exp => ({
+          ...exp,
+          id: Date.now().toString() + Math.random()
+        }));
+      }
+      
+      if (parsedData.education && parsedData.education.length > 0) {
+        updatedData.education = parsedData.education.map(edu => ({
+          ...edu,
+          id: Date.now().toString() + Math.random(),
+          duration: edu.duration || ''
+        }));
+      }
+      
+      if (parsedData.projects && parsedData.projects.length > 0) {
+        updatedData.projects = parsedData.projects.map(proj => ({
+          ...proj,
+          id: Date.now().toString() + Math.random()
+        }));
+      }
+      
+      if (parsedData.languages && parsedData.languages.length > 0) {
+        updatedData.languages = parsedData.languages.map(lang => ({
+          ...lang,
+          id: Date.now().toString() + Math.random()
+        }));
+      }
+      
+      updatePortfolioData(updatedData);
+    } catch (error) {
+      console.error('Error importing PDF:', error);
+      throw error;
+    }
+  };
+
   return (
     <PortfolioContext.Provider value={{
       portfolioData,
       updatePortfolioData,
       setLanguage,
+      setTemplate,
       addProject,
       updateProject,
       removeProject,
@@ -244,7 +320,8 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       updateLanguage,
       removeLanguage,
       addSkill,
-      removeSkill
+      removeSkill,
+      importFromPDF
     }}>
       {children}
     </PortfolioContext.Provider>

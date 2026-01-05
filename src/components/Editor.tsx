@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react'
 import { usePortfolio } from '../context/PortfolioContext'
-import { Plus, X, Upload, Phone, MapPin, Mail, Globe, Edit3, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, X, Upload, Phone, MapPin, Mail, Globe, Edit3, Sparkles, ChevronLeft, ChevronRight, FileUp } from 'lucide-react'
 import AIOptimizer from './AIOptimizer'
+import PDFImporter from './PDFImporter'
 
 type TranslationsShape = {
   editorTitle: string
@@ -214,7 +215,8 @@ const Editor: React.FC = () => {
     removeLanguage,
     addSkill,
     removeSkill,
-    setLanguage
+    setLanguage,
+    importFromPDF
   } = usePortfolio()
 
 
@@ -236,6 +238,7 @@ const Editor: React.FC = () => {
   const [newLangLevel, setNewLangLevel] = useState('')
   const [showLeftArrow, setShowLeftArrow] = useState(false)
   const [showRightArrow, setShowRightArrow] = useState(false)
+  const [showPDFImporter, setShowPDFImporter] = useState(false)
 
   const checkScrollButtons = () => {
     if (tabsScrollRef.current) {
@@ -321,6 +324,10 @@ const Editor: React.FC = () => {
     }
   }
 
+  const handlePDFImport = async (file: File) => {
+    await importFromPDF(file);
+  }
+
   return (
     <div className="w-full bg-white overflow-y-auto h-full">
       {/* Toggle between Editor and AI Optimizer */}
@@ -340,6 +347,20 @@ const Editor: React.FC = () => {
             <option value="es">🇪🇸 ES</option>
             <option value="en">🇬🇧 EN</option>
           </select>
+        </div>
+
+        {/* Import CV Button */}
+        <div className="mb-3 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 rounded-xl p-3">
+          <p className="text-sm text-emerald-100 mb-2 font-medium">
+            {lang === 'es' ? '¿Ya tenés un CV creado?' : 'Do you already have a CV?'}
+          </p>
+          <button
+            onClick={() => setShowPDFImporter(true)}
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold transition-all transform hover:scale-[1.02] shadow-lg shadow-emerald-500/30"
+          >
+            <FileUp size={18} />
+            {lang === 'es' ? 'Importar desde PDF' : 'Import from PDF'}
+          </button>
         </div>
 
         <div className="flex gap-2 mb-3">
@@ -1127,6 +1148,14 @@ const Editor: React.FC = () => {
         </>
         )}
       </div>
+
+      {/* PDF Importer Modal */}
+      <PDFImporter
+        isOpen={showPDFImporter}
+        onClose={() => setShowPDFImporter(false)}
+        onImport={handlePDFImport}
+        language={lang}
+      />
     </div>
   )
 }
