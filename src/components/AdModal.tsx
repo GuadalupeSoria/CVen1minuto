@@ -114,15 +114,15 @@ export const AdModal: React.FC<AdModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl max-w-xl w-full p-8 relative shadow-2xl">
+      <div className="bg-white rounded-2xl max-w-xl w-full max-h-[90vh] flex flex-col relative shadow-2xl">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
         >
           <X size={24} />
         </button>
 
-        <div className="text-center mb-6">
+        <div className="flex-shrink-0 p-8 pb-4 text-center">
           <div className="w-20 h-20 bg-gray-700 rounded-2xl flex items-center justify-center mb-4 mx-auto shadow-xl">
             <img src="/assets/logonew.png" alt="Logo" className="w-14 h-14" />
           </div>
@@ -136,6 +136,7 @@ export const AdModal: React.FC<AdModalProps> = ({
           </p>
         </div>
 
+        <div className="flex-1 overflow-y-auto px-8">
         {!showingAd ? (
           <div className="mb-6">
             <div className="border-2 border-blue-500 rounded-xl p-6 bg-gradient-to-br from-blue-50 to-purple-50">
@@ -199,10 +200,13 @@ export const AdModal: React.FC<AdModalProps> = ({
             </div>
           </div>
         )}
+        </div>
 
-        <p className="text-center text-sm text-gray-500">
-          {t.supportMessage}
-        </p>
+        <div className="flex-shrink-0 p-8 pt-4">
+          <p className="text-center text-sm text-gray-500">
+            {t.supportMessage}
+          </p>
+        </div>
       </div>
     </div>
   );

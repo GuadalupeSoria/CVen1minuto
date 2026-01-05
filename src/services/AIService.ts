@@ -63,8 +63,8 @@ export const AIService = {
       // Dynamically import PDF.js
       const pdfjsLib = await import('pdfjs-dist');
       
-      // Set worker source - use CDN with matching version
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.530/build/pdf.worker.min.mjs`;
+      // Set worker source - use unpkg for better Vercel compatibility
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.530/build/pdf.worker.min.mjs`;
 
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
