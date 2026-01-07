@@ -35,7 +35,7 @@ export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t }) =
   const shouldMoveSkillsOnly = experiencesCount >= 4;
 
   return (
-    <div className="a4-page bg-white min-h-[297mm] p-8" style={{ color: data.theme.primaryColor }}>
+    <div className="a4-page bg-white" style={{ width: '210mm', minHeight: '297mm', padding: '15mm', boxSizing: 'border-box', color: data.theme.primaryColor }}>
       <div className="flex items-center gap-6 mb-12">
         <div className="flex items-center gap-4">
           {data.showPhoto ? (
@@ -80,13 +80,6 @@ export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t }) =
                 <div className="flex items-center gap-1.5 min-w-0">
                   <Globe className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                   <span className="break-all">{data.contact.website}</span>
-                </div>
-              )}
-
-              {data.contact?.linkedin && (
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <Globe className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                  <span className="break-all">{data.contact.linkedin}</span>
                 </div>
               )}
             </div>

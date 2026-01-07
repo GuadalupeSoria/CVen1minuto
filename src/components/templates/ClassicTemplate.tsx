@@ -24,11 +24,11 @@ interface ClassicTemplateProps {
 
 export const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, t }) => {
   return (
-    <div className="bg-white min-h-[297mm] flex">
+    <div className="bg-white flex" style={{ width: '210mm', minHeight: '297mm' }}>
       {/* Left Sidebar */}
       <div
-        className="w-1/3 p-6 text-white min-h-[297mm]"
-        style={{ backgroundColor: data.theme.primaryColor }}
+        className="w-1/3 text-white"
+        style={{ backgroundColor: data.theme.primaryColor, padding: '20mm 8mm', boxSizing: 'border-box' }}
       >
           {/* Photo */}
           {data.showPhoto && data.photo && (
@@ -46,32 +46,32 @@ export const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, t }) => 
             <h3 className="text-sm font-bold mb-3 uppercase tracking-wide">Contacto</h3>
             <div className="space-y-3 text-xs">
               {data.contact?.email && (
-                <div className="flex items-start gap-2">
-                  <Mail className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 flex-shrink-0" />
                   <span className="break-all">{data.contact.email}</span>
                 </div>
               )}
               {data.contact?.phone && (
-                <div className="flex items-start gap-2">
-                  <Phone className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 flex-shrink-0" />
                   <span className="break-words">{data.contact.phone}</span>
                 </div>
               )}
               {data.contact?.address && (
-                <div className="flex items-start gap-2">
-                  <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 flex-shrink-0" />
                   <span className="break-words">{data.contact.address}</span>
                 </div>
               )}
               {data.contact?.website && (
-                <div className="flex items-start gap-2">
-                  <Globe className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 flex-shrink-0" />
                   <span className="break-all">{data.contact.website}</span>
                 </div>
               )}
               {data.contact?.linkedin && (
-                <div className="flex items-start gap-2">
-                  <Globe className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 flex-shrink-0" />
                   <span className="break-all">{data.contact.linkedin}</span>
                 </div>
               )}
@@ -109,7 +109,7 @@ export const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, t }) => 
       </div>
 
       {/* Right Content */}
-      <div className="flex-1 p-8 min-h-[297mm]">
+      <div className="flex-1" style={{ padding: '20mm 12mm', boxSizing: 'border-box' }}>
           {/* Header */}
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-1">{data.name}</h1>
@@ -176,8 +176,8 @@ export const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, t }) => 
                       {project.skills.map((skill: string, idx: number) => (
                         <span
                           key={idx}
-                          className="text-xs px-2 py-0.5 rounded border"
-                          style={{ borderColor: data.theme.primaryColor, color: data.theme.primaryColor }}
+                          className="text-xs px-2 py-0.5 rounded"
+                          style={{ backgroundColor: `${data.theme.primaryColor}15`, color: data.theme.primaryColor }}
                         >
                           {skill}
                         </span>

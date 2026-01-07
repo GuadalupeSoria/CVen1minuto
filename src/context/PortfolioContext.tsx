@@ -133,8 +133,22 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }))
   }
 
-  const setLanguage = (lang: string) => {
-    setPortfolioData(prev => ({ ...prev, language: lang }))
+  const setLanguage = async (lang: string) => {
+    const currentLang = portfolioData.language;
+    
+    // If changing language, translate content
+    if (currentLang !== lang && (currentLang === 'es' || currentLang === 'en') && (lang === 'es' || lang === 'en')) {
+      try {
+        const translatedData = await AIService.translateCV(portfolioData, lang as 'es' | 'en');
+        setPortfolioData(prev => ({ ...prev, ...translatedData, language: lang }));
+      } catch (error) {
+        console.error('Translation error:', error);
+        // If translation fails, just change language without translating
+        setPortfolioData(prev => ({ ...prev, language: lang }));
+      }
+    } else {
+      setPortfolioData(prev => ({ ...prev, language: lang }));
+    }
   }
 
   const setTemplate = (template: CVTemplate) => {

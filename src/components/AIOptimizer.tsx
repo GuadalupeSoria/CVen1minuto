@@ -110,6 +110,7 @@ const AIOptimizer: React.FC = () => {
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizationResult, setOptimizationResult] = useState<OptimizationResult | null>(null);
   const [showAdModal, setShowAdModal] = useState(false);
+  const [showLimitReached, setShowLimitReached] = useState(false);
 
   const handleOptimize = async () => {
     if (!company.trim() || !position.trim() || !jobDescription.trim()) {
@@ -122,6 +123,14 @@ const AIOptimizer: React.FC = () => {
       return;
     }
 
+    // Verificar límite de optimizaciones
+    const optimizeStatus = subscriptionService.canOptimize();
+    if (!optimizeStatus.allowed) {
+      setShowLimitReached(true);
+      setShowAdModal(true);
+      return;
+    }
+
     try {
       setIsOptimizing(true);
       const result = await AIService.optimizeCV(portfolioData, {
@@ -130,6 +139,8 @@ const AIOptimizer: React.FC = () => {
         description: jobDescription,
       }, jobLanguage);
       setOptimizationResult(result);
+      
+      // No registrar aquí, se registra después de aplicar cambios
     } catch (error) {
       console.error('Error optimizing CV:', error);
       alert(t.errorMessage);
@@ -140,7 +151,26 @@ const AIOptimizer: React.FC = () => {
 
   const handleApplyChanges = () => {
     if (!optimizationResult) return;
-    setShowAdModal(true);
+    
+    const isPremium = subscriptionService.isPremium();
+    if (isPremium) {
+      applyOptimizationChanges();
+    } else {
+      setShowLimitReached(false);
+      setShowAdModal(true);
+    }
+  };
+
+  const handleSubscribe = () => {
+    setShowAdModal(false);
+    if (window.confirm(lang === 'es' 
+      ? '¿Activar suscripción Premium? (Simulado - $5/mes)' 
+      : 'Activate Premium subscription? (Simulated - $5/month)')) {
+      subscriptionService.activatePremium(1);
+      alert(lang === 'es' 
+        ? '¡Premium activado! Ahora tienes acceso ilimitado.' 
+        : 'Premium activated! You now have unlimited access.');
+    }
   };
 
   const applyOptimizationChanges = () => {
@@ -165,22 +195,31 @@ const AIOptimizer: React.FC = () => {
       });
     }
 
+    // Registrar la optimización
+    subscriptionService.recordOptimization();
+
     alert(t.changesApplied);
     setOptimizationResult(null);
     setCompany('');
     setPosition('');
     setJobDescription('');
     setShowAdModal(false);
+    setShowLimitReached(false);
   };
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <AdModal
         visible={showAdModal}
-        onClose={() => setShowAdModal(false)}
+        onClose={() => {
+          setShowAdModal(false);
+          setShowLimitReached(false);
+        }}
         onWatchAd={applyOptimizationChanges}
+        onSubscribe={handleSubscribe}
         action="optimize"
         language={lang}
+        showLimitReached={showLimitReached}
       />
 
       <div className="bg-gradient-to-r from-purple-500 via-purple-600 to-blue-500 rounded-xl p-4 text-white shadow-xl">

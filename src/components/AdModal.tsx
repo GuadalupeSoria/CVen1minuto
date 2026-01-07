@@ -5,8 +5,10 @@ interface AdModalProps {
   visible: boolean;
   onClose: () => void;
   onWatchAd: () => void;
-  action: 'download' | 'optimize';
+  onSubscribe?: () => void;
+  action: 'download' | 'optimize' | 'translate';
   language?: string;
+  showLimitReached?: boolean;
 }
 
 const translations = {
@@ -23,6 +25,12 @@ const translations = {
       buttonReady: 'Optimizar con IA',
       buttonWaiting: 'Esperá'
     },
+    translate: {
+      title: 'Para traducir tu CV',
+      emoji: '🌍',
+      buttonReady: 'Traducir CV',
+      buttonWaiting: 'Esperá'
+    },
     subtitle: 'Este servicio es completamente gratuito',
     description: 'Para mantener el servicio gratuito, necesitamos mostrar un anuncio breve.',
     instruction: 'Mirá el anuncio durante 15 segundos para continuar:',
@@ -30,7 +38,13 @@ const translations = {
     waitMessage: 'segundo para desbloquear',
     waitMessagePlural: 'segundos para desbloquear',
     ready: '¡Listo! Ya podés continuar',
-    supportMessage: '💚 Gracias por tu apoyo, esto nos ayuda a mantener el servicio gratuito para todos'
+    supportMessage: '💚 Gracias por tu apoyo, esto nos ayuda a mantener el servicio gratuito para todos',
+    limitReached: 'Límite diario alcanzado',
+    limitMessage: 'Ya descargaste tu CV hoy. Volvé mañana o suscribite para descargas ilimitadas.',
+    subscribeCTA: 'Suscribirse - $5/mes',
+    unlimitedDownloads: '✓ Descargas ilimitadas',
+    noAds: '✓ Sin anuncios',
+    aiFeatures: '✓ IA ilimitada'
   },
   en: {
     download: {
@@ -45,6 +59,12 @@ const translations = {
       buttonReady: 'Optimize with AI',
       buttonWaiting: 'Wait'
     },
+    translate: {
+      title: 'To translate your CV',
+      emoji: '🌍',
+      buttonReady: 'Translate CV',
+      buttonWaiting: 'Wait'
+    },
     subtitle: 'This service is completely free',
     description: 'To keep the service free, we need to show a short advertisement.',
     instruction: 'Watch the ad for 15 seconds to continue:',
@@ -52,7 +72,13 @@ const translations = {
     waitMessage: 'second to unlock',
     waitMessagePlural: 'seconds to unlock',
     ready: 'Ready! You can continue',
-    supportMessage: '💚 Thank you for your support, this helps us keep the service free for everyone'
+    supportMessage: '💚 Thank you for your support, this helps us keep the service free for everyone',
+    limitReached: 'Daily limit reached',
+    limitMessage: 'You already downloaded your CV today. Come back tomorrow or subscribe for unlimited downloads.',
+    subscribeCTA: 'Subscribe - $5/month',
+    unlimitedDownloads: '✓ Unlimited downloads',
+    noAds: '✓ No ads',
+    aiFeatures: '✓ Unlimited AI'
   }
 };
 
@@ -60,8 +86,10 @@ export const AdModal: React.FC<AdModalProps> = ({
   visible,
   onClose,
   onWatchAd,
+  onSubscribe,
   action,
-  language = 'es'
+  language = 'es',
+  showLimitReached = false
 }) => {
   const [showingAd, setShowingAd] = useState(false);
   const [countdown, setCountdown] = useState(15);
@@ -137,9 +165,59 @@ export const AdModal: React.FC<AdModalProps> = ({
         </div>
 
         <div className="flex-1 overflow-y-auto px-8">
-        {!showingAd ? (
+        {showLimitReached ? (
+          /* Vista cuando se alcanzó el límite diario */
           <div className="mb-6">
-            <div className="border-2 border-blue-500 rounded-xl p-6 bg-gradient-to-br from-blue-50 to-purple-50">
+            <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-300 mb-6">
+              <h3 className="text-2xl font-bold mb-2 text-center text-orange-700">
+                {t.limitReached}
+              </h3>
+              <p className="text-gray-700 text-center mb-4">
+                {t.limitMessage}
+              </p>
+            </div>
+
+            {/* Opción Premium */}
+            <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-6 border-2 border-purple-300">
+              <div className="text-center mb-4">
+                <h3 className="text-2xl font-bold mb-2 text-purple-700">
+                  🌟 {language === 'es' ? 'Hazte Premium' : 'Go Premium'}
+                </h3>
+                <p className="text-3xl font-bold text-purple-600 mb-1">$5/mes</p>
+                <p className="text-gray-600 text-sm">{language === 'es' ? 'Cancela cuando quieras' : 'Cancel anytime'}</p>
+              </div>
+
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center gap-2 text-gray-700">
+                  <span className="text-green-500 font-bold">✓</span>
+                  <span>{t.unlimitedDownloads}</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <span className="text-green-500 font-bold">✓</span>
+                  <span>{language === 'es' ? 'Traducciones ilimitadas' : 'Unlimited translations'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <span className="text-green-500 font-bold">✓</span>
+                  <span>{t.aiFeatures}</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-700">
+                  <span className="text-green-500 font-bold">✓</span>
+                  <span>{t.noAds}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={onSubscribe}
+                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-4 px-6 rounded-lg font-bold text-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg"
+              >
+                {t.subscribeCTA}
+              </button>
+            </div>
+          </div>
+        ) : !showingAd ? (
+          /* Vista inicial con anuncio */
+          <div className="mb-6">
+            <div className="border-2 border-blue-500 rounded-xl p-6 bg-gradient-to-br from-blue-50 to-purple-50 mb-4">
               <p className="text-gray-700 mb-4 font-medium text-center">
                 {t.instruction}
               </p>
@@ -149,6 +227,19 @@ export const AdModal: React.FC<AdModalProps> = ({
               >
                 <Play size={24} fill="white" />
                 {language === 'es' ? 'Ver Anuncio (15 seg)' : 'Watch Ad (15 sec)'}
+              </button>
+            </div>
+
+            {/* Opción Premium también disponible */}
+            <div className="border-2 border-purple-300 rounded-xl p-4 bg-gradient-to-br from-purple-50 to-indigo-50">
+              <p className="text-center text-sm text-gray-700 mb-3">
+                {language === 'es' ? 'O suscríbete para acceso ilimitado sin anuncios' : 'Or subscribe for unlimited access without ads'}
+              </p>
+              <button
+                onClick={onSubscribe}
+                className="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-3 px-4 rounded-lg font-bold hover:from-purple-600 hover:to-indigo-600 transition-all"
+              >
+                🌟 {language === 'es' ? 'Premium $5/mes' : 'Premium $5/month'}
               </button>
             </div>
           </div>

@@ -21,7 +21,7 @@ interface PortfolioData {
   about: string;
   skills: string[];
   experience: Array<{ position: string; company: string }>;
-  [key: string]: string | string[] | Array<{ position: string; company: string }>;
+  [key: string]: any;
 }
 
 interface ParsedCVData {
@@ -57,13 +57,37 @@ interface ParsedCVData {
   }>;
 }
 
+function createFallbackResponse(
+  currentCV: PortfolioData,
+  jobDescription: JobDescription
+): CVOptimizationResult {
+  return {
+    optimizedAbout: `Experienced professional with expertise in ${currentCV.skills.slice(0, 3).join(', ')}. Seeking ${jobDescription.position} role at ${jobDescription.company} to leverage skills and drive impact.`,
+    suggestedTitle: jobDescription.position,
+    skillsToReplace: [],
+    suggestedSkills: currentCV.skills.slice(0, 5),
+    experienceHighlights: [
+      'Tailor your experience to match job requirements',
+      'Use action verbs and quantify achievements',
+      'Highlight relevant accomplishments',
+    ],
+    projectRecommendations: [
+      'Showcase projects demonstrating required skills',
+      'Include measurable outcomes and impact',
+      'Align projects with company goals',
+    ],
+    atsKeywords: [
+      jobDescription.position,
+      jobDescription.company,
+      ...currentCV.skills.slice(0, 3)
+    ]
+  };
+}
+
 export const AIService = {
   async extractTextFromPDF(file: File): Promise<string> {
     try {
-      // Dynamically import PDF.js
       const pdfjsLib = await import('pdfjs-dist');
-      
-      // Set worker source - use unpkg for better Vercel compatibility
       pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.530/build/pdf.worker.min.mjs`;
 
       const arrayBuffer = await file.arrayBuffer();
@@ -109,38 +133,13 @@ Parse the CV and return this EXACT JSON structure:
   "address": "City, Country",
   "website": "personal website if mentioned",
   "skills": ["skill1", "skill2", "skill3"],
-  "experience": [
-    {
-      "company": "Company name",
-      "position": "Job title",
-      "duration": "2020 - 2023",
-      "description": "Brief description of responsibilities"
-    }
-  ],
-  "education": [
-    {
-      "institution": "University name",
-      "degree": "Degree name",
-      "duration": "2015 - 2019",
-      "description": "Additional details if any"
-    }
-  ],
-  "projects": [
-    {
-      "name": "Project name",
-      "description": "Project description",
-      "skills": ["tech1", "tech2"]
-    }
-  ],
-  "languages": [
-    {
-      "name": "Language name",
-      "level": "Proficiency level"
-    }
-  ]
+  "experience": [{"company": "Company name", "position": "Job title", "duration": "2020 - 2023", "description": "Brief description"}],
+  "education": [{"institution": "University name", "degree": "Degree name", "duration": "2015 - 2019"}],
+  "projects": [{"name": "Project name", "description": "Project description", "skills": ["tech1", "tech2"]}],
+  "languages": [{"name": "Language name", "level": "Proficiency level"}]
 }
 
-Extract as much relevant information as possible. If a field is not found, omit it. Be thorough and accurate.`;
+Extract as much relevant information as possible. If a field is not found, omit it.`;
 
       const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
@@ -302,31 +301,122 @@ All text fields must be in ${responseLanguage}:
     const apiKey = import.meta.env.VITE_GROQ_API_KEY;
     return !!apiKey && apiKey.length > 10 && !apiKey.includes('xxx');
   },
-};
 
-function createFallbackResponse(
-  currentCV: PortfolioData,
-  jobDescription: JobDescription
-): CVOptimizationResult {
-  return {
-    optimizedAbout: `Experienced professional with expertise in ${currentCV.skills.slice(0, 3).join(', ')}. Seeking ${jobDescription.position} role at ${jobDescription.company} to leverage skills and drive impact.`,
-    suggestedTitle: jobDescription.position,
-    skillsToReplace: [],
-    suggestedSkills: currentCV.skills.slice(0, 5),
-    experienceHighlights: [
-      'Tailor your experience to match job requirements',
-      'Use action verbs and quantify achievements',
-      'Highlight relevant accomplishments',
-    ],
-    projectRecommendations: [
-      'Showcase projects demonstrating required skills',
-      'Include measurable outcomes and impact',
-      'Align projects with company goals',
-    ],
-    atsKeywords: [
-      jobDescription.position,
-      jobDescription.company,
-      ...currentCV.skills.slice(0, 3)
-    ],
-  };
-}
+  async translateCV(cvData: any, targetLanguage: 'es' | 'en'): Promise<any> {
+    try {
+      const sourceLanguage = targetLanguage === 'es' ? 'English' : 'Spanish';
+      const targetLang = targetLanguage === 'es' ? 'Spanish' : 'English';
+
+      // Solo enviar los campos que necesitan traducción para reducir el tamaño del payload
+      const dataToTranslate = {
+        about: cvData.about,
+        title: cvData.title,
+        experience: cvData.experience?.map((exp: any) => ({
+          id: exp.id,
+          description: exp.description
+        })),
+        projects: cvData.projects?.map((proj: any) => ({
+          id: proj.id,
+          description: proj.description
+        })),
+        education: cvData.education?.map((edu: any) => ({
+          id: edu.id,
+          description: edu.description
+        }))
+      };
+
+      const prompt = `Translate from ${sourceLanguage} to ${targetLang}. Only translate the text content, keep IDs unchanged. Return ONLY valid JSON:
+
+${JSON.stringify(dataToTranslate)}`;
+
+      const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+
+      if (!GROQ_API_KEY || GROQ_API_KEY.length < 10) {
+        throw new Error('Groq API key not configured');
+      }
+
+      const response = await fetch(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${GROQ_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'llama-3.1-8b-instant',
+            messages: [
+              {
+                role: 'system',
+                content: 'You are a professional translator. Respond only with valid JSON.'
+              },
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            temperature: 0.3,
+            max_tokens: 2000,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error de la IA: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const text = data.choices[0]?.message?.content || '';
+
+      const cleanText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+      
+      if (!jsonMatch) {
+        throw new Error('La IA no pudo traducir el CV correctamente');
+      }
+
+      const translated = JSON.parse(jsonMatch[0]);
+
+      // Reconstruir el CV completo con las traducciones
+      const result = { ...cvData };
+      
+      if (translated.about) result.about = translated.about;
+      if (translated.title) result.title = translated.title;
+      
+      if (translated.experience && Array.isArray(translated.experience)) {
+        result.experience = cvData.experience.map((exp: any) => {
+          const translatedExp = translated.experience.find((t: any) => t.id === exp.id);
+          return {
+            ...exp,
+            description: translatedExp?.description || exp.description
+          };
+        });
+      }
+
+      if (translated.projects && Array.isArray(translated.projects)) {
+        result.projects = cvData.projects.map((proj: any) => {
+          const translatedProj = translated.projects.find((t: any) => t.id === proj.id);
+          return {
+            ...proj,
+            description: translatedProj?.description || proj.description
+          };
+        });
+      }
+
+      if (translated.education && Array.isArray(translated.education)) {
+        result.education = cvData.education.map((edu: any) => {
+          const translatedEdu = translated.education.find((t: any) => t.id === edu.id);
+          return {
+            ...edu,
+            description: translatedEdu?.description || edu.description
+          };
+        });
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Error translating CV:', error);
+      throw new Error('Error al traducir el CV. Intenta nuevamente.');
+    }
+  }
+};
