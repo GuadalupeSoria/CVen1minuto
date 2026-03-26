@@ -104,10 +104,21 @@ export const AIService = {
         fullText += pageText + '\n';
       }
       
+      console.log('Extracted text length:', fullText.length);
+      console.log('Extracted text preview:', fullText.substring(0, 500));
+      
+      // Verificar si el PDF contiene texto legible
+      if (fullText.trim().length < 50) {
+        throw new Error('El PDF no contiene texto seleccionable. Probablemente sea una imagen. Los PDFs generados por esta aplicación son imágenes y no se pueden reimportar automáticamente. Por favor, descarga un PDF con texto seleccionable o ingresa los datos manualmente.');
+      }
+      
       return fullText;
     } catch (error) {
       console.error('Error extracting text from PDF:', error);
-      throw new Error('No se pudo extraer el texto del PDF. Verifica que sea un archivo PDF válido.');
+      if (error instanceof Error && error.message.includes('no contiene texto')) {
+        throw error;
+      }
+      throw new Error('No se pudo extraer el texto del PDF. Verifica que sea un archivo PDF válido con texto seleccionable (no una imagen).');
     }
   },
 

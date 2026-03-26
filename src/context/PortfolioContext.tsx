@@ -49,6 +49,25 @@ interface Theme {
 
 type CVTemplate = 'original' | 'modern' | 'classic'
 
+export type DiffSection = 'about' | 'title' | 'skills'
+
+export interface PendingOptimization {
+  // Valores nuevos sugeridos
+  optimizedAbout: string
+  suggestedTitle: string
+  suggestedSkills: string[]
+  skillsToReplace?: string[]
+  experienceHighlights: string[]
+  projectRecommendations: string[]
+  atsKeywords: string[]
+  // Valores originales (para revertir)
+  originalAbout: string
+  originalTitle: string
+  originalSkills: string[]
+  // Qué secciones siguen pendientes de aceptar/rechazar
+  pendingSections: DiffSection[]
+}
+
 interface PortfolioData {
   name: string
   title: string
@@ -86,6 +105,13 @@ interface PortfolioContextType {
   addSkill: (skill: string) => void
   removeSkill: (skill: string) => void
   importFromPDF: (file: File) => Promise<void>
+  // Sistema de diff / optimizaciones pendientes
+  pendingOptimization: PendingOptimization | null
+  setPendingOptimization: (opt: PendingOptimization | null) => void
+  acceptSection: (section: DiffSection) => void
+  rejectSection: (section: DiffSection) => void
+  acceptAllPending: () => void
+  rejectAllPending: () => void
 }
 
 export type { CVTemplate }
@@ -116,12 +142,45 @@ const PortfolioContext = createContext<PortfolioContextType | undefined>(undefin
 
 export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [portfolioData, setPortfolioData] = useState<PortfolioData>(() => {
-    const savedData = localStorage.getItem('portfolioData')
-    return savedData ? { ...defaultPortfolioData, ...JSON.parse(savedData) } : defaultPortfolioData
+    try {
+      const savedData = localStorage.getItem('portfolioData')
+      const base = savedData ? { ...defaultPortfolioData, ...JSON.parse(savedData) } : defaultPortfolioData
+      // Si la foto fue guardada en clave separada (fallback por quota), restituirla
+      if (!base.photo) {
+        const savedPhoto = localStorage.getItem('portfolioPhoto')
+        if (savedPhoto) base.photo = savedPhoto
+      }
+      return base
+    } catch {
+      return defaultPortfolioData
+    }
   })
+  const [pendingOptimization, setPendingOptimization] = useState<PendingOptimization | null>(null)
 
   useEffect(() => {
-    localStorage.setItem('portfolioData', JSON.stringify(portfolioData))
+    try {
+      localStorage.setItem('portfolioData', JSON.stringify(portfolioData))
+      // Si antes había foto separada y ahora entra en el main, borrarla
+      if (portfolioData.photo) localStorage.removeItem('portfolioPhoto')
+    } catch (e) {
+      if ((e as DOMException).name === 'QuotaExceededError') {
+        // Guardar sin foto en el main key, foto en clave separada
+        try {
+          const { photo, ...rest } = portfolioData
+          localStorage.setItem('portfolioData', JSON.stringify({ ...rest, photo: '' }))
+          if (photo) {
+            try {
+              localStorage.setItem('portfolioPhoto', photo)
+            } catch {
+              // Si hasta la clave de foto falla, avisamos pero no crasheamos
+              console.warn('localStorage lleno: foto no guardada')
+            }
+          }
+        } catch {
+          console.warn('localStorage quota exceeded, datos no guardados')
+        }
+      }
+    }
   }, [portfolioData])
 
   const updatePortfolioData = (data: Partial<PortfolioData>) => {
@@ -253,8 +312,53 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }))
   }
 
-  const importFromPDF = async (file: File) => {
-    try {
+  // ── Diff / Optimizaciones pendientes ──────────────────────────────────────
+  const acceptSection = (section: DiffSection) => {
+    if (!pendingOptimization) return
+    setPortfolioData(prev => {
+      if (section === 'about') return { ...prev, about: pendingOptimization.optimizedAbout }
+      if (section === 'title') return { ...prev, title: pendingOptimization.suggestedTitle }
+      if (section === 'skills') {
+        const merged = [...prev.skills, ...pendingOptimization.suggestedSkills.filter(s => !prev.skills.includes(s))]
+        return { ...prev, skills: merged }
+      }
+      return prev
+    })
+    setPendingOptimization(prev => {
+      if (!prev) return null
+      const remaining = prev.pendingSections.filter(s => s !== section)
+      return remaining.length === 0 ? null : { ...prev, pendingSections: remaining }
+    })
+  }
+
+  const rejectSection = (section: DiffSection) => {
+    if (!pendingOptimization) return
+    setPendingOptimization(prev => {
+      if (!prev) return null
+      const remaining = prev.pendingSections.filter(s => s !== section)
+      return remaining.length === 0 ? null : { ...prev, pendingSections: remaining }
+    })
+  }
+
+  const acceptAllPending = () => {
+    if (!pendingOptimization) return
+    setPortfolioData(prev => {
+      const updated = { ...prev }
+      if (pendingOptimization.pendingSections.includes('about'))
+        updated.about = pendingOptimization.optimizedAbout
+      if (pendingOptimization.pendingSections.includes('title'))
+        updated.title = pendingOptimization.suggestedTitle
+      if (pendingOptimization.pendingSections.includes('skills')) {
+        updated.skills = [...prev.skills, ...pendingOptimization.suggestedSkills.filter(s => !prev.skills.includes(s))]
+      }
+      return updated
+    })
+    setPendingOptimization(null)
+  }
+
+  const rejectAllPending = () => setPendingOptimization(null)
+
+  const importFromPDF = async (file: File) => {    try {
       const language = portfolioData.language === 'en' ? 'en' : 'es';
       const parsedData = await AIService.importCVFromPDF(file, language);
       
@@ -335,7 +439,13 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       removeLanguage,
       addSkill,
       removeSkill,
-      importFromPDF
+      importFromPDF,
+      pendingOptimization,
+      setPendingOptimization,
+      acceptSection,
+      rejectSection,
+      acceptAllPending,
+      rejectAllPending,
     }}>
       {children}
     </PortfolioContext.Provider>

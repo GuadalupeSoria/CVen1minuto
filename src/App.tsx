@@ -1,79 +1,76 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { PortfolioProvider } from './context/PortfolioContext'
 import Editor from './components/Editor'
 import Preview from './components/Preview'
-import { Edit3, Eye } from 'lucide-react'
+import { PenLine, Eye, CheckCircle } from 'lucide-react'
+import subscriptionService from './services/subscriptionService'
 
 function App() {
   const [mobileTab, setMobileTab] = useState<'editor' | 'preview'>('editor')
+  const [showStripeSuccess, setShowStripeSuccess] = useState(false)
 
   useEffect(() => {
-    // Inicializar anuncios de AdSense
-    try {
-      // @ts-expect-error - adsbygoogle is injected by Google AdSense script
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (e) {
-      console.error('Error loading AdSense:', e);
+    // Verificar retorno desde Stripe Payment Link (?stripe_paid=1)
+    const activated = subscriptionService.handleStripeReturn()
+    if (activated) {
+      setShowStripeSuccess(true)
+      setTimeout(() => setShowStripeSuccess(false), 5000)
     }
-  }, []);
+  }, [])
 
   return (
     <PortfolioProvider>
-      <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="h-screen flex flex-col bg-[#0F0F0F] overflow-hidden">
+
+        {/* Toast de éxito Stripe */}
+        {showStripeSuccess && (
+          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2.5 px-5 py-3 bg-emerald-900/90 border border-emerald-700 text-emerald-200 rounded-2xl shadow-2xl backdrop-blur-xl animate-scale-in">
+            <CheckCircle size={16} className="text-emerald-400 shrink-0" />
+            <span className="text-sm font-semibold">¡Premium activado! Acceso ilimitado.</span>
+          </div>
+        )}
+
         {/* Mobile Tab Navigation */}
-        <div className="md:hidden flex border-b border-gray-200 bg-white sticky top-0 z-20">
+        <div className="md:hidden flex border-b border-[#38383A] bg-[#1C1C1E]/90 backdrop-blur-xl sticky top-0 z-20">
           <button
             onClick={() => setMobileTab('editor')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-medium transition-all duration-200 ${
               mobileTab === 'editor'
-                ? 'bg-blue-500 text-white border-b-2 border-blue-600'
-                : 'bg-gray-50 text-gray-600'
+                ? 'text-white border-b-2 border-violet-500'
+                : 'text-white/40 hover:text-white/70'
             }`}
           >
-            <Edit3 size={18} />
+            <PenLine size={15} />
             Editor
           </button>
           <button
             onClick={() => setMobileTab('preview')}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-medium transition-all duration-200 ${
               mobileTab === 'preview'
-                ? 'bg-blue-500 text-white border-b-2 border-blue-600'
-                : 'bg-gray-50 text-gray-600'
+                ? 'text-white border-b-2 border-violet-500'
+                : 'text-white/40 hover:text-white/70'
             }`}
           >
-            <Eye size={18} />
-            Preview
+            <Eye size={15} />
+            Vista previa
           </button>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Left Panel - Editor with toggle */}
-          <div className={`w-full md:w-[380px] lg:w-[400px] xl:w-[420px] bg-white border-r border-gray-200 overflow-y-auto ${
-            mobileTab === 'editor' ? 'block' : 'hidden md:block'
+        <div className="flex-1 flex overflow-hidden min-h-0">
+
+          {/* Left Panel — Editor */}
+          <div className={`w-full md:w-[390px] lg:w-[420px] xl:w-[440px] bg-[#1C1C1E] border-r border-[#38383A] flex flex-col overflow-hidden ${
+            mobileTab === 'editor' ? 'flex' : 'hidden md:flex'
           }`}>
             <Editor />
           </div>
 
-          {/* Center Panel - Preview */}
-          <div className={`flex-1 overflow-y-auto ${
+          {/* Center Panel — Preview */}
+          <div className={`flex-1 overflow-y-auto bg-[#0F0F0F] ${
             mobileTab === 'preview' ? 'block' : 'hidden md:block'
           }`}>
             <Preview />
-          </div>
-
-          {/* Right Panel - Vertical AdSense Banner */}
-          <div className="hidden xl:block w-[100px] bg-white border-l border-gray-200 p-2 overflow-hidden">
-            <div className="sticky top-4">
-              {/* AdSense Vertical Banner */}
-              <div className="text-xs text-gray-400 text-center mb-2">Publicidad</div>
-              <ins className="adsbygoogle"
-                   style={{ display: 'block' }}
-                   data-ad-client="ca-pub-2152317919633317"
-                   data-ad-slot="4314723833"
-                   data-ad-format="auto"
-                   data-full-width-responsive="true"></ins>
-            </div>
           </div>
         </div>
       </div>
@@ -82,3 +79,4 @@ function App() {
 }
 
 export default App
+

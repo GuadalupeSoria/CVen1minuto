@@ -1,4 +1,5 @@
 // Servicio para gestionar suscripciones y límites de uso
+import { redirectToStripe, STRIPE_SUCCESS_PARAM, STRIPE_SUBSCRIPTION_MONTHS } from '../config/stripe'
 
 const STORAGE_KEY = 'cv_downloads';
 const TRANSLATIONS_KEY = 'cv_translations';
@@ -31,16 +32,37 @@ class SubscriptionService {
     }
   }
 
-  // Activar premium (simulado - en producción sería con pago real)
-  activatePremium(months: number = 1): void {
-    const expiresAt = new Date();
-    expiresAt.setMonth(expiresAt.getMonth() + months);
-    
+  // Activar premium (llamar tras verificar pago de Stripe)
+  activatePremium(months: number = STRIPE_SUBSCRIPTION_MONTHS): void {
+    const expiresAt = new Date()
+    expiresAt.setMonth(expiresAt.getMonth() + months)
+
     localStorage.setItem(PREMIUM_KEY, JSON.stringify({
       isPremium: true,
       expiresAt: expiresAt.toISOString(),
-      activatedAt: new Date().toISOString()
-    }));
+      activatedAt: new Date().toISOString(),
+      source: 'stripe',
+    }))
+  }
+
+  // Redirigir al usuario al checkout de Stripe (Payment Link)
+  // Devuelve false si el Payment Link no está configurado
+  redirectToCheckout(): boolean {
+    return redirectToStripe()
+  }
+
+  // Verificar si la URL tiene el param de éxito de Stripe y activar premium
+  // Retorna true si se activó, false si no había nada que procesar
+  handleStripeReturn(): boolean {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get(STRIPE_SUCCESS_PARAM) === '1') {
+      this.activatePremium(STRIPE_SUBSCRIPTION_MONTHS)
+      // Limpiar la URL para no re-activar en recargas
+      const clean = window.location.pathname
+      window.history.replaceState({}, '', clean)
+      return true
+    }
+    return false
   }
 
   // Obtener información de descargas

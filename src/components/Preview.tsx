@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { usePortfolio } from '../context/PortfolioContext'
-import { Download, LayoutTemplate, Languages } from 'lucide-react'
+import { Download, LayoutTemplate, Languages, Check, X, Sparkles } from 'lucide-react'
 import html2pdf from 'html2pdf.js'
 import { AdModal } from './AdModal'
 import { OriginalTemplate } from './templates/OriginalTemplate'
@@ -57,7 +57,16 @@ const previewTranslations: Record<string, PreviewTranslations> = {
 }
 
 const Preview: React.FC = () => {
-  const { portfolioData, setTemplate, updatePortfolioData } = usePortfolio()
+  const {
+    portfolioData,
+    setTemplate,
+    updatePortfolioData,
+    pendingOptimization,
+    acceptSection,
+    rejectSection,
+    acceptAllPending,
+    rejectAllPending,
+  } = usePortfolio()
   const lang = (portfolioData.language as string) || 'es'
   const t = previewTranslations[lang] || previewTranslations.es
   const [showAdModal, setShowAdModal] = useState(false)
@@ -68,17 +77,32 @@ const Preview: React.FC = () => {
   const [targetTranslationLang, setTargetTranslationLang] = useState<'es' | 'en'>('en')
   const currentTemplate: CVTemplate = portfolioData.template || 'original'
 
+  // Merge portfolioData with pending AI changes for live preview
+  const previewData = useMemo(() => {
+    if (!pendingOptimization) return portfolioData
+    const sections = pendingOptimization.pendingSections
+    return {
+      ...portfolioData,
+      about: sections.includes('about') ? pendingOptimization.optimizedAbout : portfolioData.about,
+      title: sections.includes('title') ? pendingOptimization.suggestedTitle : portfolioData.title,
+      skills: sections.includes('skills')
+        ? [
+            ...portfolioData.skills,
+            ...(pendingOptimization.suggestedSkills ?? []).filter(
+              s => !portfolioData.skills.includes(s),
+            ),
+          ]
+        : portfolioData.skills,
+    }
+  }, [portfolioData, pendingOptimization])
+
   const handleSubscribe = () => {
     setShowAdModal(false);
-    // TODO: Implementar integración con Stripe/PayPal
-    // Por ahora, simulamos activación (para testing)
-    if (window.confirm(lang === 'es' 
-      ? '¿Activar suscripción Premium? (Simulado - $5/mes)' 
-      : 'Activate Premium subscription? (Simulated - $5/month)')) {
-      subscriptionService.activatePremium(1); // 1 mes
-      alert(lang === 'es' 
-        ? '¡Premium activado! Ahora tienes acceso ilimitado.' 
-        : 'Premium activated! You now have unlimited access.');
+    const ok = subscriptionService.redirectToCheckout();
+    if (!ok) {
+      alert(lang === 'es'
+        ? 'Stripe no configurado. Agrega VITE_STRIPE_PAYMENT_LINK al .env'
+        : 'Stripe not configured. Add VITE_STRIPE_PAYMENT_LINK to .env');
     }
   };
 
@@ -225,41 +249,36 @@ const Preview: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-8 overflow-y-auto">
+    <div className="flex-1 bg-[#0F0F0F] p-4 sm:p-8 overflow-y-auto">
       {/* Language Selector Modal */}
       {showLanguageSelector && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
-            <h2 className="text-2xl font-bold mb-2 text-center">
-              {lang === 'es' ? '¿A qué idioma traducir?' : 'Which language to translate to?'}
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-50 p-4">
+          <div className="bg-[#1C1C1E] border border-[#3A3A3C] rounded-3xl max-w-sm w-full p-6 shadow-2xl animate-scale-in">
+            <h2 className="text-base font-semibold text-white mb-1 text-center">
+              {lang === 'es' ? 'Traducir CV' : 'Translate CV'}
             </h2>
-            <p className="text-gray-600 text-center mb-6">
-              {lang === 'es' 
-                ? 'Selecciona el idioma destino para tu CV' 
-                : 'Select the target language for your CV'}
+            <p className="text-white/40 text-xs text-center mb-5">
+              {lang === 'es' ? 'Selecciona el idioma destino' : 'Select the target language'}
             </p>
-            
-            <div className="space-y-3">
+            <div className="space-y-2">
               <button
                 onClick={() => handleLanguageSelected('es')}
-                className="w-full py-4 px-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-bold text-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg flex items-center justify-center gap-3"
+                className="w-full py-3 px-5 bg-[#2C2C2E] hover:bg-[#3A3A3C] border border-[#3A3A3C] text-white rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-3"
               >
-                <span className="text-2xl">🇪🇸</span>
+                <span className="text-base">ES</span>
                 <span>Español</span>
               </button>
-              
               <button
                 onClick={() => handleLanguageSelected('en')}
-                className="w-full py-4 px-6 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-bold text-lg hover:from-green-600 hover:to-green-700 transition-all shadow-lg flex items-center justify-center gap-3"
+                className="w-full py-3 px-5 bg-[#2C2C2E] hover:bg-[#3A3A3C] border border-[#3A3A3C] text-white rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-3"
               >
-                <span className="text-2xl">🇬🇧</span>
+                <span className="text-base">EN</span>
                 <span>English</span>
               </button>
             </div>
-
             <button
               onClick={() => setShowLanguageSelector(false)}
-              className="w-full mt-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              className="w-full mt-3 py-2 text-white/30 hover:text-white/60 text-sm transition-colors"
             >
               {lang === 'es' ? 'Cancelar' : 'Cancel'}
             </button>
@@ -289,50 +308,143 @@ const Preview: React.FC = () => {
       />
       
       <div className="max-w-[210mm] mx-auto">
-        <div className="flex justify-between items-center gap-4 mb-6">
+        <div className="flex justify-between items-center gap-3 mb-6 flex-wrap">
           {/* Template Selector */}
           <div className="flex items-center gap-2">
-            <LayoutTemplate className="text-gray-600" size={20} />
+            <LayoutTemplate size={14} className="text-white/40" />
             <select
               value={currentTemplate}
               onChange={(e) => setTemplate?.(e.target.value as CVTemplate)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white cursor-pointer"
+              className="bg-[#2C2C2E] border border-[#3A3A3C] text-white text-xs px-3 py-2 rounded-xl focus:border-violet-500 focus:outline-none cursor-pointer transition-colors hover:bg-[#3A3A3C]"
             >
-              <option value="original">{lang === 'es' ? 'Plantilla Original' : 'Original Template'}</option>
-              <option value="modern">{lang === 'es' ? 'Plantilla Moderna' : 'Modern Template'}</option>
-              <option value="classic">{lang === 'es' ? 'Plantilla Clásica' : 'Classic Template'}</option>
+              <option value="original" className="bg-[#1C1C1E]">{lang === 'es' ? 'Original' : 'Original'}</option>
+              <option value="modern" className="bg-[#1C1C1E]">{lang === 'es' ? 'Moderna' : 'Modern'}</option>
+              <option value="classic" className="bg-[#1C1C1E]">{lang === 'es' ? 'Clasica' : 'Classic'}</option>
             </select>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               onClick={handleTranslateClick}
               disabled={isTranslating}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg shadow-blue-500/50 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#2C2C2E] hover:bg-[#3A3A3C] border border-[#3A3A3C] text-white/70 rounded-xl text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <Languages size={20} />
-              {isTranslating ? (t.translating || 'Traduciendo...') : (t.translateCV || 'Traducir CV')}
+              {isTranslating
+                ? <><div className="w-3 h-3 border border-white/20 border-t-white/60 rounded-full animate-spin" />{t.translating || 'Traduciendo...'}</>
+                : <><Languages size={13} />{t.translateCV || 'Traducir CV'}</>
+              }
             </button>
 
             <button
               onClick={handleExportPDFClick}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-lg shadow-green-500/50 font-medium"
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#1C1C1E] hover:bg-[#3C3C43] text-white rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-[0.98]"
             >
-              <Download size={20} />
+              <Download size={13} />
               {t.exportPdf}
             </button>
           </div>
         </div>
 
-        {/* CV Preview */}
-        <div className="preview-content shadow-2xl rounded-lg overflow-hidden">
+        {/* Diff banner – visible when AI changes are pending */}
+        {pendingOptimization && pendingOptimization.pendingSections.length > 0 && (
+          <div className="mb-4 bg-[#2C2C2E] border border-[#3A3A3C] rounded-2xl overflow-hidden">
+            {/* Banner header */}
+            <div className="flex items-center justify-between px-4 py-3 bg-emerald-500/10 border-b border-emerald-500/20">
+              <div className="flex items-center gap-2">
+                <Sparkles size={13} className="text-emerald-400" />
+                <span className="text-xs font-semibold text-emerald-300">
+                  {lang === 'es'
+                    ? `${pendingOptimization.pendingSections.length} cambios de IA pendientes en el preview`
+                    : `${pendingOptimization.pendingSections.length} AI changes pending in preview`}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={acceptAllPending}
+                  className="flex items-center gap-1 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-semibold transition-colors"
+                >
+                  <Check size={10} /> {lang === 'es' ? 'Aceptar todos' : 'Accept all'}
+                </button>
+                <button
+                  onClick={rejectAllPending}
+                  className="flex items-center gap-1 px-3 py-1 bg-[#3A3A3C] hover:bg-red-500/20 border border-red-500/30 text-red-400 rounded-lg text-[11px] font-semibold transition-colors"
+                >
+                  <X size={10} /> {lang === 'es' ? 'Rechazar todos' : 'Reject all'}
+                </button>
+              </div>
+            </div>
+
+            {/* Per-section diff rows */}
+            <div className="divide-y divide-[#3A3A3C]/60">
+              {pendingOptimization.pendingSections.includes('about') && (
+                <div className="flex items-start gap-3 px-4 py-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1">
+                      {lang === 'es' ? 'Sobre mí' : 'About me'}
+                    </p>
+                    <p className="text-[11px] text-white/30 line-through leading-relaxed">
+                      {pendingOptimization.originalAbout.slice(0, 80)}{pendingOptimization.originalAbout.length > 80 ? '…' : ''}
+                    </p>
+                    <p className="text-[11px] text-emerald-400 leading-relaxed mt-0.5 bg-emerald-500/10 px-1.5 py-1 rounded">
+                      {pendingOptimization.optimizedAbout.slice(0, 80)}{pendingOptimization.optimizedAbout.length > 80 ? '…' : ''}
+                    </p>
+                  </div>
+                  <div className="flex gap-1 shrink-0 mt-1">
+                    <button onClick={() => acceptSection('about')} className="p-1.5 bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-400 rounded-lg transition-colors" title={lang === 'es' ? 'Aceptar' : 'Accept'}><Check size={11} /></button>
+                    <button onClick={() => rejectSection('about')} className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors" title={lang === 'es' ? 'Rechazar' : 'Reject'}><X size={11} /></button>
+                  </div>
+                </div>
+              )}
+
+              {pendingOptimization.pendingSections.includes('title') && (
+                <div className="flex items-start gap-3 px-4 py-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1">
+                      {lang === 'es' ? 'Título profesional' : 'Professional title'}
+                    </p>
+                    <p className="text-[11px] text-white/30 line-through">{pendingOptimization.originalTitle}</p>
+                    <p className="text-[11px] font-semibold text-emerald-400 mt-0.5">{pendingOptimization.suggestedTitle}</p>
+                  </div>
+                  <div className="flex gap-1 shrink-0 mt-1">
+                    <button onClick={() => acceptSection('title')} className="p-1.5 bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-400 rounded-lg transition-colors" title={lang === 'es' ? 'Aceptar' : 'Accept'}><Check size={11} /></button>
+                    <button onClick={() => rejectSection('title')} className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors" title={lang === 'es' ? 'Rechazar' : 'Reject'}><X size={11} /></button>
+                  </div>
+                </div>
+              )}
+
+              {pendingOptimization.pendingSections.includes('skills') && (
+                <div className="flex items-start gap-3 px-4 py-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5">
+                      {lang === 'es' ? 'Habilidades a agregar' : 'Skills to add'}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(pendingOptimization.suggestedSkills ?? []).map((skill, i) => (
+                        <span key={i} className="px-2 py-0.5 bg-emerald-500/12 border border-emerald-500/25 text-emerald-400 rounded-full text-[10px] font-medium">+ {skill}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex gap-1 shrink-0 mt-1">
+                    <button onClick={() => acceptSection('skills')} className="p-1.5 bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-400 rounded-lg transition-colors" title={lang === 'es' ? 'Aceptar' : 'Accept'}><Check size={11} /></button>
+                    <button onClick={() => rejectSection('skills')} className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors" title={lang === 'es' ? 'Rechazar' : 'Reject'}><X size={11} /></button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* CV Preview — renders previewData (includes pending AI changes) */}
+        <div className={`preview-content shadow-2xl rounded-lg overflow-hidden ring-1 ring-white/5 ${
+          pendingOptimization ? 'ring-emerald-500/30 ring-2' : ''
+        }`}>
           {currentTemplate === 'original' ? (
-            <OriginalTemplate data={portfolioData} t={t} />
+            <OriginalTemplate data={previewData} t={t} />
           ) : currentTemplate === 'modern' ? (
-            <ModernTemplate data={portfolioData} t={t} />
+            <ModernTemplate data={previewData} t={t} />
           ) : (
-            <ClassicTemplate data={portfolioData} t={t} />
+            <ClassicTemplate data={previewData} t={t} />
           )}
         </div>
       </div>

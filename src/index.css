@@ -1,122 +1,155 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* iOS Dark palette – jerarquía de capas */
+  --bg-app:    #0F0F0F;   /* overall: casi negro, no puro */
+  --bg-panel:  #1C1C1E;   /* panel lateral / headers */
+  --bg-card:   #2C2C2E;   /* tarjetas / secciones */
+  --bg-s2:     #3A3A3C;   /* inputs / hover / tercera capa */
+  --bg-s3:     #48484A;   /* bordes claros / cuarta capa */
+  --border:    rgba(84,84,88,0.65);
+  --border-mid:rgba(84,84,88,0.45);
+  --text-1:    #FFFFFF;
+  --text-2:    rgba(235,235,245,0.6);
+  --text-3:    rgba(235,235,245,0.3);
+  --text-4:    rgba(235,235,245,0.18);
+  --accent:    #7c3aed;
+  --accent-hover:#6d28d9;
+  /* Diff colors (emerald sobre oscuro) */
+  --diff-add:  rgba(16,185,129,0.12);
+  --diff-add-border: #059669;
+  --diff-del:  rgba(239,68,68,0.12);
+  --diff-del-border: #dc2626;
+}
+
+* { box-sizing: border-box; }
+
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg-app);
+  color: var(--text-1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
+/* Scrollbar dark */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+* { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.12) transparent; }
+
+::selection { background: rgba(124,58,237,0.35); color: #fff; }
+
+/* Dark glass */
+.glass {
+  background: rgba(28,28,30,0.75);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid rgba(84,84,88,0.5);
+}
+.glass-strong {
+  background: rgba(28,28,30,0.90);
+  backdrop-filter: blur(40px) saturate(1.8);
+  -webkit-backdrop-filter: blur(40px) saturate(1.8);
+  border: 1px solid rgba(84,84,88,0.55);
 }
 
+/* Dark input style */
+.input-dark {
+  background: #1C1C1E;
+  border: 1px solid #3A3A3C;
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-size: 0.875rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+  padding: 10px 14px;
+}
+.input-dark:focus {
+  border-color: #7c3aed;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.18);
+}
+.input-dark::placeholder { color: rgba(235,235,245,0.3); }
+
+/* Color picker */
 .color-picker {
   -webkit-appearance: none;
   appearance: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 9999px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
   padding: 0;
-  border: 2px solid rgba(0,0,0,0.06);
+  border: 2px solid rgba(0,0,0,0.12);
+  cursor: pointer;
+  background: none;
+}
+.color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+.color-picker::-webkit-color-swatch { border-radius: 50%; border: none; }
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes diffFlash {
+  0%,100% { background-color: var(--diff-add); }
+  50%      { background-color: #bbf7d0; }
 }
 
-.color-picker::-webkit-color-swatch {
-  border-radius: 9999px;
-}
+.animate-fade-up   { animation: fadeUp   0.25s ease both; }
+.animate-scale-in  { animation: scaleIn  0.22s ease both; }
+.animate-fade-in   { animation: fadeIn   0.2s ease both; }
+.animate-slide-right { animation: slideRight 0.2s ease both; }
+.animate-spin-slow { animation: spin-slow 3s linear infinite; }
+.animate-diff-flash { animation: diffFlash 1.5s ease infinite; }
 
-.color-picker::-moz-color-swatch {
-  border-radius: 9999px;
-}
-
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  height: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: transparent;
-  border-radius: 9999px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-  transition: background-color 160ms ease, opacity 160ms ease;
-  opacity: 0;
-}
-
-.custom-scrollbar:hover::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.14);
-  opacity: 1;
-}
-
-.custom-scrollbar:hover {
-  scrollbar-color: rgba(255,255,255,0.14) transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:vertical,
-.custom-scrollbar::-webkit-scrollbar-thumb:horizontal {
-  min-height: 12px;
-}
-
-.preview-content svg {
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.preview-content .skill-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  vertical-align: middle;
-  padding-top: 2px;
-  padding-bottom: 2px;
-}
-
-/* A4 Page simulation - 210mm x 297mm at 96 DPI */
-.a4-page {
-  width: 210mm;
-  min-height: 270mm;
-  max-width: 100%;
-  margin: 0 auto 20px auto;
-  background: white;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  position: relative;
-  padding: 5mm;
-  box-sizing: border-box;
-}
-
-.page-indicator {
-  position: absolute;
-  bottom: 2mm;
-  right: 5mm;
-  font-size: 10px;
-  color: #999;
-  background: white;
+/* Diff styles */
+.diff-add {
+  background: var(--diff-add);
+  border-left: 3px solid var(--diff-add-border);
+  border-radius: 0 8px 8px 0;
   padding: 2px 6px;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.diff-del {
+  background: var(--diff-del);
+  border-left: 3px solid var(--diff-del-border);
+  border-radius: 0 8px 8px 0;
+  padding: 2px 6px;
+  text-decoration: line-through;
+  opacity: 0.7;
 }
 
-@media screen and (max-width: 640px) {
-  .a4-page {
-    width: 100%;
-    min-height: auto;
-    margin-bottom: 10px;
-    box-shadow: none;
-  }
-  
-  .a4-page::after {
-    display: none;
-  }
-  
-  .page-indicator {
-    display: none;
-  }
+/* A4 page (white stays for CV) */
+.a4-page {
+  background: #fff;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+  border-radius: 4px;
+}
+
+/* iOS dark card */
+.ios-card {
+  background: #2C2C2E;
+  border: 1px solid rgba(84,84,88,0.55);
+  border-radius: 18px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);
 }
