@@ -105,6 +105,7 @@ interface PortfolioContextType {
   addSkill: (skill: string) => void
   removeSkill: (skill: string) => void
   importFromPDF: (file: File) => Promise<void>
+  importFromImage: (file: File) => Promise<void>
   // Sistema de diff / optimizaciones pendientes
   pendingOptimization: PendingOptimization | null
   setPendingOptimization: (opt: PendingOptimization | null) => void
@@ -358,66 +359,58 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const rejectAllPending = () => setPendingOptimization(null)
 
-  const importFromPDF = async (file: File) => {    try {
-      const language = portfolioData.language === 'en' ? 'en' : 'es';
-      const parsedData = await AIService.importCVFromPDF(file, language);
-      
-      // Update portfolio data with parsed information
-      const updatedData: Partial<PortfolioData> = {};
-      
-      if (parsedData.name) updatedData.name = parsedData.name;
-      if (parsedData.title) updatedData.title = parsedData.title;
-      if (parsedData.about) updatedData.about = parsedData.about;
-      if (parsedData.skills && parsedData.skills.length > 0) updatedData.skills = parsedData.skills;
-      
-      // Update contact information
-      if (parsedData.email || parsedData.phone || parsedData.linkedin || parsedData.address || parsedData.website) {
-        updatedData.contact = {
-          ...portfolioData.contact,
-          ...(parsedData.email && { email: parsedData.email }),
-          ...(parsedData.phone && { phone: parsedData.phone }),
-          ...(parsedData.linkedin && { linkedin: parsedData.linkedin }),
-          ...(parsedData.address && { address: parsedData.address }),
-          ...(parsedData.website && { website: parsedData.website }),
-        };
+  const applyParsedCV = (parsedData: ParsedCVData) => {
+    const updatedData: Partial<PortfolioData> = {}
+    if (parsedData.name) updatedData.name = parsedData.name
+    if (parsedData.title) updatedData.title = parsedData.title
+    if (parsedData.about) updatedData.about = parsedData.about
+    if (parsedData.skills && parsedData.skills.length > 0) updatedData.skills = parsedData.skills
+    if (parsedData.email || parsedData.phone || parsedData.linkedin || parsedData.address || parsedData.website) {
+      updatedData.contact = {
+        ...portfolioData.contact,
+        ...(parsedData.email && { email: parsedData.email }),
+        ...(parsedData.phone && { phone: parsedData.phone }),
+        ...(parsedData.linkedin && { linkedin: parsedData.linkedin }),
+        ...(parsedData.address && { address: parsedData.address }),
+        ...(parsedData.website && { website: parsedData.website }),
       }
-      
-      // Clear existing data arrays and add new ones
-      if (parsedData.experience && parsedData.experience.length > 0) {
-        updatedData.experience = parsedData.experience.map(exp => ({
-          ...exp,
-          id: Date.now().toString() + Math.random()
-        }));
-      }
-      
-      if (parsedData.education && parsedData.education.length > 0) {
-        updatedData.education = parsedData.education.map(edu => ({
-          ...edu,
-          id: Date.now().toString() + Math.random(),
-          duration: edu.duration || ''
-        }));
-      }
-      
-      if (parsedData.projects && parsedData.projects.length > 0) {
-        updatedData.projects = parsedData.projects.map(proj => ({
-          ...proj,
-          id: Date.now().toString() + Math.random()
-        }));
-      }
-      
-      if (parsedData.languages && parsedData.languages.length > 0) {
-        updatedData.languages = parsedData.languages.map(lang => ({
-          ...lang,
-          id: Date.now().toString() + Math.random()
-        }));
-      }
-      
-      updatePortfolioData(updatedData);
-    } catch (error) {
-      console.error('Error importing PDF:', error);
-      throw error;
     }
-  };
+    if (parsedData.experience && parsedData.experience.length > 0) {
+      updatedData.experience = parsedData.experience.map(exp => ({ ...exp, id: Date.now().toString() + Math.random() }))
+    }
+    if (parsedData.education && parsedData.education.length > 0) {
+      updatedData.education = parsedData.education.map(edu => ({ ...edu, id: Date.now().toString() + Math.random(), duration: edu.duration || '' }))
+    }
+    if (parsedData.projects && parsedData.projects.length > 0) {
+      updatedData.projects = parsedData.projects.map(proj => ({ ...proj, id: Date.now().toString() + Math.random() }))
+    }
+    if (parsedData.languages && parsedData.languages.length > 0) {
+      updatedData.languages = parsedData.languages.map(lang => ({ ...lang, id: Date.now().toString() + Math.random() }))
+    }
+    updatePortfolioData(updatedData)
+  }
+
+  const importFromImage = async (file: File) => {
+    try {
+      const language = portfolioData.language === 'en' ? 'en' : 'es'
+      const parsedData = await AIService.importCVFromImage(file, language)
+      applyParsedCV(parsedData)
+    } catch (error) {
+      console.error('Error importing from image:', error)
+      throw error
+    }
+  }
+
+  const importFromPDF = async (file: File) => {
+    try {
+      const language = portfolioData.language === 'en' ? 'en' : 'es'
+      const parsedData = await AIService.importCVFromPDF(file, language)
+      applyParsedCV(parsedData)
+    } catch (error) {
+      console.error('Error importing PDF:', error)
+      throw error
+    }
+  }
 
   return (
     <PortfolioContext.Provider value={{
@@ -440,6 +433,7 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       addSkill,
       removeSkill,
       importFromPDF,
+      importFromImage,
       pendingOptimization,
       setPendingOptimization,
       acceptSection,

@@ -20,60 +20,103 @@ interface PortfolioData {
 interface ModernTemplateProps {
   data: PortfolioData
   t: any
+  highlightSections?: string[]
 }
 
-export const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, t }) => {
+const contactIconStyle: React.CSSProperties = {
+  display: 'inline-block',
+  width: '12px',
+  height: '12px',
+  flexShrink: 0,
+  verticalAlign: 'middle',
+}
+
+const contactItemStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '5px',
+  marginRight: '12px',
+  marginBottom: '4px',
+  verticalAlign: 'middle',
+}
+
+const contactTextStyle: React.CSSProperties = {
+  fontSize: '10px',
+  lineHeight: '12px',
+  color: '#374151',
+  verticalAlign: 'middle',
+}
+
+const skillBadgeStyle = (color: string): React.CSSProperties => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '3px 10px',
+  borderRadius: '9999px',
+  fontSize: '11px',
+  fontWeight: 500,
+  backgroundColor: `${color}20`,
+  color: color,
+  marginRight: '6px',
+  marginBottom: '6px',
+})
+
+const highlightStyle: React.CSSProperties = {
+  outline: '2px solid rgba(16, 185, 129, 0.45)',
+  outlineOffset: '2px',
+  borderRadius: '4px',
+}
+
+export const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, t, highlightSections = [] }) => {
+  const color = data.theme.primaryColor
   return (
-    <div className="bg-white" style={{ width: '210mm', minHeight: '297mm', padding: '15mm', boxSizing: 'border-box' }}>
+    <div className="bg-white" style={{ width: '210mm', padding: '15mm', boxSizing: 'border-box', fontFamily: 'Arial, sans-serif' }}>
       {/* Header */}
-      <div className="flex items-start gap-6 mb-6">
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '24px', marginBottom: '20px' }}>
         {data.showPhoto && data.photo && (
-          <div className="flex-shrink-0">
+          <div style={{ flexShrink: 0 }}>
             <img
               src={data.photo}
               alt={data.name}
-              className="w-24 h-24 rounded-full object-cover border-4"
-              style={{ borderColor: data.theme.primaryColor }}
+              style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: `3px solid ${color}` }}
             />
           </div>
         )}
 
-        <div className="flex-1 min-w-0">
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-            <h1 className="text-3xl font-bold break-words leading-tight" style={{ margin: 0 }}>{data.name}</h1>
-            <h2 className="text-xl text-gray-600 break-words leading-tight" style={{ margin: 0, marginTop: '4px', marginBottom: '16px' }}>{data.title}</h2>
-          </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#111827', margin: 0, lineHeight: 1.2 }}>{data.name}</h1>
+          <h2 style={{ fontSize: '16px', color: '#6B7280', margin: '4px 0 12px', fontWeight: 500 }}>{data.title}</h2>
 
-          <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-gray-700">
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
             {data.contact?.email && (
-              <div className="flex items-center gap-1.5 min-w-0" style={{ alignItems: 'center' }}>
-                <Mail className="w-4 h-4 flex-shrink-0" style={{ display: 'block' }} />
-                <span className="break-all" style={{ lineHeight: '16px' }}>{data.contact.email}</span>
-              </div>
+              <span style={contactItemStyle}>
+                <Mail size={12} style={contactIconStyle} color="#6B7280" />
+                <span style={contactTextStyle}>{data.contact.email}</span>
+              </span>
             )}
             {data.contact?.phone && (
-              <div className="flex items-center gap-1.5 flex-shrink-0" style={{ alignItems: 'center' }}>
-                <Phone className="w-4 h-4 flex-shrink-0" style={{ display: 'block' }} />
-                <span className="whitespace-nowrap" style={{ lineHeight: '16px' }}>{data.contact.phone}</span>
-              </div>
+              <span style={contactItemStyle}>
+                <Phone size={12} style={contactIconStyle} color="#6B7280" />
+                <span style={contactTextStyle}>{data.contact.phone}</span>
+              </span>
             )}
             {data.contact?.address && (
-              <div className="flex items-center gap-1.5 min-w-0" style={{ alignItems: 'center' }}>
-                <MapPin className="w-4 h-4 flex-shrink-0" style={{ display: 'block' }} />
-                <span className="break-words" style={{ lineHeight: '16px' }}>{data.contact.address}</span>
-              </div>
+              <span style={contactItemStyle}>
+                <MapPin size={12} style={contactIconStyle} color="#6B7280" />
+                <span style={contactTextStyle}>{data.contact.address}</span>
+              </span>
             )}
             {data.contact?.website && (
-              <div className="flex items-center gap-1.5 min-w-0" style={{ alignItems: 'center' }}>
-                <Globe className="w-4 h-4 flex-shrink-0" style={{ display: 'block' }} />
-                <span className="break-all" style={{ lineHeight: '16px' }}>{data.contact.website}</span>
-              </div>
+              <span style={contactItemStyle}>
+                <Globe size={12} style={contactIconStyle} color="#6B7280" />
+                <span style={contactTextStyle}>{data.contact.website}</span>
+              </span>
             )}
             {data.contact?.linkedin && (
-              <div className="flex items-center gap-1.5 min-w-0" style={{ alignItems: 'center' }}>
-                <Globe className="w-4 h-4 flex-shrink-0" style={{ display: 'block' }} />
-                <span className="break-all" style={{ lineHeight: '16px' }}>{data.contact.linkedin}</span>
-              </div>
+              <span style={contactItemStyle}>
+                <Globe size={12} style={contactIconStyle} color="#6B7280" />
+                <span style={contactTextStyle}>{data.contact.linkedin}</span>
+              </span>
             )}
           </div>
         </div>
@@ -81,37 +124,31 @@ export const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, t }) => {
 
       {/* About */}
       {data.about && (
-        <div className="mb-6" style={{ pageBreakInside: 'avoid' }}>
-          <h3
-            className="text-lg font-bold mb-2 pb-1 border-b-2"
-            style={{ borderColor: data.theme.primaryColor }}
-          >
+        <div style={{ marginBottom: '18px', pageBreakInside: 'avoid', ...(highlightSections.includes('about') ? highlightStyle : {}) }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '6px', paddingBottom: '4px', borderBottom: `2px solid ${color}`, color: '#111827' }}>
             {t.aboutTitle}
           </h3>
-          <p className="text-sm text-gray-700 whitespace-pre-wrap">{data.about}</p>
+          <p style={{ fontSize: '12px', color: '#374151', lineHeight: 1.6, whiteSpace: 'pre-wrap', margin: 0 }}>{data.about}</p>
         </div>
       )}
 
       {/* Experience */}
       {data.experience && data.experience.length > 0 && (
-        <div className="mb-6">
-          <h3
-            className="text-lg font-bold mb-2 pb-1 border-b-2"
-            style={{ borderColor: data.theme.primaryColor }}
-          >
+        <div style={{ marginBottom: '18px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '6px', paddingBottom: '4px', borderBottom: `2px solid ${color}`, color: '#111827' }}>
             {t.experienceTitle}
           </h3>
           {data.experience.map((exp) => (
-            <div key={exp.id} className="mb-3" style={{ pageBreakInside: 'avoid' }}>
-              <div className="flex justify-between items-start">
+            <div key={exp.id} style={{ marginBottom: '10px', pageBreakInside: 'avoid' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                  <h4 className="font-semibold text-sm">{exp.position}</h4>
-                  <p className="text-sm text-gray-600">{exp.company}</p>
+                  <p style={{ fontWeight: 600, fontSize: '12px', color: '#111827', margin: 0 }}>{exp.position}</p>
+                  <p style={{ fontSize: '12px', color: '#6B7280', margin: '1px 0 0' }}>{exp.company}</p>
                 </div>
-                <span className="text-xs text-gray-500">{exp.duration}</span>
+                <span style={{ fontSize: '11px', color: '#9CA3AF', whiteSpace: 'nowrap' }}>{exp.duration}</span>
               </div>
               {exp.description && (
-                <p className="text-xs text-gray-700 mt-1 whitespace-pre-wrap">{exp.description}</p>
+                <p style={{ fontSize: '11px', color: '#374151', marginTop: '4px', whiteSpace: 'pre-wrap' }}>{exp.description}</p>
               )}
             </div>
           ))}
@@ -120,27 +157,18 @@ export const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, t }) => {
 
       {/* Projects */}
       {data.projects && data.projects.length > 0 && (
-        <div className="mb-6">
-          <h3
-            className="text-lg font-bold mb-2 pb-1 border-b-2"
-            style={{ borderColor: data.theme.primaryColor }}
-          >
+        <div style={{ marginBottom: '18px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '6px', paddingBottom: '4px', borderBottom: `2px solid ${color}`, color: '#111827' }}>
             {t.projectsTitle}
           </h3>
           {data.projects.map((project) => (
-            <div key={project.id} className="mb-3" style={{ pageBreakInside: 'avoid' }}>
-              <h4 className="font-semibold text-sm">{project.name}</h4>
-              <p className="text-xs text-gray-700 whitespace-pre-wrap">{project.description}</p>
+            <div key={project.id} style={{ marginBottom: '10px', pageBreakInside: 'avoid' }}>
+              <p style={{ fontWeight: 600, fontSize: '12px', color: '#111827', margin: '0 0 3px' }}>{project.name}</p>
+              <p style={{ fontSize: '11px', color: '#374151', whiteSpace: 'pre-wrap', margin: 0 }}>{project.description}</p>
               {project.skills && project.skills.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
+                <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '6px' }}>
                   {project.skills.map((skill: string, idx: number) => (
-                    <span
-                      key={idx}
-                      className="text-xs px-2 py-0.5 rounded"
-                      style={{ backgroundColor: `${data.theme.primaryColor}20`, color: data.theme.primaryColor }}
-                    >
-                      {skill}
-                    </span>
+                    <span key={idx} style={skillBadgeStyle(color)}>{skill}</span>
                   ))}
                 </div>
               )}
@@ -151,20 +179,15 @@ export const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, t }) => {
 
       {/* Education */}
       {data.education && data.education.length > 0 && (
-        <div className="mb-6">
-          <h3
-            className="text-lg font-bold mb-2 pb-1 border-b-2"
-            style={{ borderColor: data.theme.primaryColor }}
-          >
+        <div style={{ marginBottom: '18px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '6px', paddingBottom: '4px', borderBottom: `2px solid ${color}`, color: '#111827' }}>
             {t.educationTitle}
           </h3>
           {data.education.map((edu) => (
-            <div key={edu.id} className="mb-2" style={{ pageBreakInside: 'avoid' }}>
-              <h4 className="font-semibold text-sm">{edu.degree}</h4>
-              <p className="text-sm text-gray-600">{edu.institution}</p>
-              {edu.description && (
-                <p className="text-xs text-gray-700 mt-1">{edu.description}</p>
-              )}
+            <div key={edu.id} style={{ marginBottom: '8px', pageBreakInside: 'avoid' }}>
+              <p style={{ fontWeight: 600, fontSize: '12px', color: '#111827', margin: 0 }}>{edu.degree}</p>
+              <p style={{ fontSize: '12px', color: '#6B7280', margin: '1px 0 0' }}>{edu.institution}</p>
+              {edu.description && <p style={{ fontSize: '11px', color: '#374151', marginTop: '3px' }}>{edu.description}</p>}
             </div>
           ))}
         </div>
@@ -172,22 +195,13 @@ export const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, t }) => {
 
       {/* Skills */}
       {data.skills && data.skills.length > 0 && (
-        <div className="mb-6" style={{ pageBreakInside: 'avoid' }}>
-          <h3
-            className="text-lg font-bold mb-2 pb-1 border-b-2"
-            style={{ borderColor: data.theme.primaryColor }}
-          >
+        <div style={{ marginBottom: '18px', pageBreakInside: 'avoid', ...(highlightSections.includes('skills') ? highlightStyle : {}) }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '8px', paddingBottom: '4px', borderBottom: `2px solid ${color}`, color: '#111827' }}>
             {t.skillsTitle}
           </h3>
-          <div className="flex flex-wrap gap-2">
+          <div style={{ display: 'flex', flexWrap: 'wrap' }}>
             {data.skills.map((skill, index) => (
-              <span
-                key={index}
-                className="text-sm px-3 py-1 rounded-full"
-                style={{ backgroundColor: `${data.theme.primaryColor}20`, color: data.theme.primaryColor }}
-              >
-                {skill}
-              </span>
+              <span key={index} style={skillBadgeStyle(color)}>{skill}</span>
             ))}
           </div>
         </div>
@@ -195,18 +209,15 @@ export const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, t }) => {
 
       {/* Languages */}
       {data.languages && data.languages.length > 0 && (
-        <div className="mb-6" style={{ pageBreakInside: 'avoid' }}>
-          <h3
-            className="text-lg font-bold mb-2 pb-1 border-b-2"
-            style={{ borderColor: data.theme.primaryColor }}
-          >
-            Idiomas
+        <div style={{ marginBottom: '18px', pageBreakInside: 'avoid' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '8px', paddingBottom: '4px', borderBottom: `2px solid ${color}`, color: '#111827' }}>
+            {t.languagesTitle || 'Idiomas'}
           </h3>
-          <div className="flex flex-wrap gap-3">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
             {data.languages.map((lang) => (
-              <div key={lang.id} className="text-sm">
-                <span className="font-semibold">{lang.name}</span>
-                {lang.level && <span className="text-gray-600"> - {lang.level}</span>}
+              <div key={lang.id} style={{ fontSize: '12px', color: '#374151' }}>
+                <span style={{ fontWeight: 600 }}>{lang.name}</span>
+                {lang.level && <span style={{ color: '#6B7280' }}> - {lang.level}</span>}
               </div>
             ))}
           </div>

@@ -85,41 +85,41 @@ function createFallbackResponse(
 }
 
 export const AIService = {
-  async extractTextFromPDF(file: File): Promise<string> {
-    try {
-      const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.530/build/pdf.worker.min.mjs`;
+  async extractTextFromPDF(file: File): Promise<string | null> {
+    const pdfjsLib = await import('pdfjs-dist');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.530/build/pdf.worker.min.mjs`;
 
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      
-      let fullText = '';
-      
-      for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        const pageText = textContent.items
-          .map((item: any) => item.str)
-          .join(' ');
-        fullText += pageText + '\n';
-      }
-      
-      console.log('Extracted text length:', fullText.length);
-      console.log('Extracted text preview:', fullText.substring(0, 500));
-      
-      // Verificar si el PDF contiene texto legible
-      if (fullText.trim().length < 50) {
-        throw new Error('El PDF no contiene texto seleccionable. Probablemente sea una imagen. Los PDFs generados por esta aplicación son imágenes y no se pueden reimportar automáticamente. Por favor, descarga un PDF con texto seleccionable o ingresa los datos manualmente.');
-      }
-      
-      return fullText;
-    } catch (error) {
-      console.error('Error extracting text from PDF:', error);
-      if (error instanceof Error && error.message.includes('no contiene texto')) {
-        throw error;
-      }
-      throw new Error('No se pudo extraer el texto del PDF. Verifica que sea un archivo PDF válido con texto seleccionable (no una imagen).');
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+    let fullText = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      fullText += textContent.items.map((item: any) => item.str).join(' ') + '\n';
     }
+
+    // Return null if no selectable text (image-based PDF)
+    return fullText.trim().length >= 50 ? fullText : null;
+  },
+
+  async renderPDFPageToBase64(file: File, pageNumber = 1): Promise<string> {
+    const pdfjsLib = await import('pdfjs-dist');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@5.4.530/build/pdf.worker.min.mjs`;
+
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const page = await pdf.getPage(pageNumber);
+
+    const viewport = page.getViewport({ scale: 2.0 });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    const ctx = canvas.getContext('2d')!;
+
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    // Strip "data:image/png;base64," prefix
+    return canvas.toDataURL('image/png').split(',')[1];
   },
 
   async parseCVWithAI(pdfText: string, language: 'es' | 'en' = 'es'): Promise<ParsedCVData> {
@@ -211,8 +211,141 @@ Extract as much relevant information as possible. If a field is not found, omit 
 
   async importCVFromPDF(file: File, language: 'es' | 'en' = 'es'): Promise<ParsedCVData> {
     const pdfText = await this.extractTextFromPDF(file);
-    const parsedData = await this.parseCVWithAI(pdfText, language);
-    return parsedData;
+
+    if (pdfText) {
+      // PDF has selectable text — use text extraction path
+      return this.parseCVWithAI(pdfText, language);
+    }
+
+    // PDF is image-based (e.g. exported from this app) — render page and use vision
+    console.log('No selectable text found, falling back to vision model...');
+    const base64 = await this.renderPDFPageToBase64(file, 1);
+
+    const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+    if (!GROQ_API_KEY || GROQ_API_KEY.length < 10) {
+      throw new Error('Groq API key no configurado');
+    }
+
+    const responseLanguage = language === 'en' ? 'English' : 'Spanish';
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${GROQ_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'image_url', image_url: { url: `data:image/png;base64,${base64}` } },
+              {
+                type: 'text',
+                text: `Extract all CV/Resume information from this image. Respond in ${responseLanguage}. Return ONLY valid JSON with this exact structure (omit fields not found):
+{"name":"","title":"","about":"","email":"","phone":"","linkedin":"","address":"","website":"","skills":[],"experience":[{"company":"","position":"","duration":"","description":""}],"education":[{"institution":"","degree":"","duration":""}],"projects":[{"name":"","description":"","skills":[]}],"languages":[{"name":"","level":""}]}`,
+              },
+            ],
+          },
+        ],
+        temperature: 0.2,
+        max_tokens: 2000,
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`Error de la IA al procesar el PDF: ${response.status} ${err}`);
+    }
+
+    const data = await response.json();
+    const text = data.choices[0]?.message?.content || '';
+    const clean = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const match = clean.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('La IA no pudo extraer el CV del PDF');
+    return JSON.parse(match[0]) as ParsedCVData;
+  },
+
+  async importCVFromImage(file: File, language: 'es' | 'en' = 'es'): Promise<ParsedCVData> {
+    const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+    if (!GROQ_API_KEY || GROQ_API_KEY.length < 10) {
+      throw new Error('Groq API key not configured');
+    }
+
+    // Convert image to base64
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        // Strip the data URL prefix to get pure base64
+        resolve(result.split(',')[1]);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const mimeType = file.type || 'image/jpeg';
+    const responseLanguage = language === 'en' ? 'English' : 'Spanish';
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${GROQ_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'image_url',
+                image_url: { url: `data:${mimeType};base64,${base64}` },
+              },
+              {
+                type: 'text',
+                text: `Extract all CV/Resume information from this image. Respond in ${responseLanguage}. Return ONLY valid JSON with this exact structure (omit fields not found):
+{
+  "name": "Full name",
+  "title": "Professional title",
+  "about": "Professional summary (2-3 sentences)",
+  "email": "email@example.com",
+  "phone": "+1234567890",
+  "linkedin": "linkedin url",
+  "address": "City, Country",
+  "website": "website url",
+  "skills": ["skill1", "skill2"],
+  "experience": [{"company": "Company", "position": "Job title", "duration": "2020 - 2023", "description": "description"}],
+  "education": [{"institution": "University", "degree": "Degree", "duration": "2015 - 2019"}],
+  "projects": [{"name": "Project", "description": "description", "skills": ["tech1"]}],
+  "languages": [{"name": "Language", "level": "Level"}]
+}`,
+              },
+            ],
+          },
+        ],
+        temperature: 0.2,
+        max_tokens: 2000,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Groq vision API error:', response.status, errorText);
+      throw new Error(`Error al procesar la imagen con IA: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const text = data.choices[0]?.message?.content || '';
+    const cleanText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+
+    if (!jsonMatch) {
+      throw new Error('La IA no pudo extraer el CV de la imagen. Asegúrate de que la imagen sea clara y legible.');
+    }
+
+    return JSON.parse(jsonMatch[0]) as ParsedCVData;
   },
 
   async optimizeCV(

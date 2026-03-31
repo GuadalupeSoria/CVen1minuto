@@ -7,7 +7,15 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "agent:aesthetic": "ts-node agents/cli.ts aesthetic",
+    "agent:seo": "ts-node agents/cli.ts seo",
+    "agent:content": "ts-node agents/cli.ts content",
+    "agent:publish": "ts-node agents/cli.ts publish",
+    "agent:analytics": "ts-node agents/cli.ts analytics",
+    "agent:all": "ts-node agents/cli.ts all",
+    "agents:schedule": "ts-node agents/scheduler.ts",
+    "agents:list": "ts-node agents/scheduler.ts --list"
   },
   "dependencies": {
     "html2pdf.js": "^0.10.2",

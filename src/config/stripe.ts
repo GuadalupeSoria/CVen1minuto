@@ -26,10 +26,19 @@ export const STRIPE_SUBSCRIPTION_MONTHS = 1
  */
 export function redirectToStripe(): boolean {
   if (!STRIPE_PAYMENT_LINK) {
-    console.error(
-      '[Stripe] Falta VITE_STRIPE_PAYMENT_LINK en .env — ' +
-      'crea un Payment Link en https://dashboard.stripe.com/payment-links'
-    )
+    if (import.meta.env.DEV) {
+      console.warn(
+        '%c[Stripe] Payment Link no configurado\n%c' +
+        'Pasos para activar suscripciones:\n' +
+        '1. Copia .env.example a .env\n' +
+        '2. Ve a https://dashboard.stripe.com/payment-links\n' +
+        '3. Crea un link de $4.99/mes con success_url: ?stripe_paid=1\n' +
+        '4. Pega la URL en VITE_STRIPE_PAYMENT_LINK\n' +
+        '5. Reinicia el servidor de desarrollo (npm run dev)',
+        'color: #f59e0b; font-weight: bold',
+        'color: #a1a1aa'
+      )
+    }
     return false
   }
   window.location.href = STRIPE_PAYMENT_LINK

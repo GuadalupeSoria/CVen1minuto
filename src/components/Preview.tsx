@@ -75,6 +75,7 @@ const Preview: React.FC = () => {
   const [isTranslating, setIsTranslating] = useState(false)
   const [showLanguageSelector, setShowLanguageSelector] = useState(false)
   const [targetTranslationLang, setTargetTranslationLang] = useState<'es' | 'en'>('en')
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
   const currentTemplate: CVTemplate = portfolioData.template || 'original'
 
   // Merge portfolioData with pending AI changes for live preview
@@ -193,6 +194,7 @@ const Preview: React.FC = () => {
   };
 
   const generatePDF = () => {
+    setIsGeneratingPDF(true)
     const element = document.querySelector('.preview-content')
     if (element) {
       const opt = {
@@ -244,6 +246,9 @@ const Preview: React.FC = () => {
         .catch((error: Error) => {
           console.error('Error generating PDF:', error);
           alert(lang === 'es' ? 'Error al generar el PDF' : 'Error generating PDF');
+        })
+        .finally(() => {
+          setIsGeneratingPDF(false);
         });
     }
   }
@@ -308,37 +313,45 @@ const Preview: React.FC = () => {
       />
       
       <div className="max-w-[210mm] mx-auto">
-        <div className="flex justify-between items-center gap-3 mb-6 flex-wrap">
+        <div className="flex justify-between items-center gap-3 mb-6 flex-wrap animate-slide-down">
           {/* Template Selector */}
-          <div className="flex items-center gap-2">
-            <LayoutTemplate size={14} className="text-white/40" />
+          <div className="flex items-center gap-2" data-tour="template-selector">
+            <LayoutTemplate size={14} className="text-white/30" />
             <select
               value={currentTemplate}
               onChange={(e) => setTemplate?.(e.target.value as CVTemplate)}
-              className="bg-[#2C2C2E] border border-[#3A3A3C] text-white text-xs px-3 py-2 rounded-xl focus:border-violet-500 focus:outline-none cursor-pointer transition-colors hover:bg-[#3A3A3C]"
+              className="bg-[#2C2C2E] border border-[#3A3A3C] text-white text-xs px-3 py-2 rounded-xl
+                focus:border-violet-500 focus:outline-none cursor-pointer transition-all
+                hover:bg-[#3A3A3C] hover:border-white/20"
             >
               <option value="original" className="bg-[#1C1C1E]">{lang === 'es' ? 'Original' : 'Original'}</option>
-              <option value="modern" className="bg-[#1C1C1E]">{lang === 'es' ? 'Moderna' : 'Modern'}</option>
-              <option value="classic" className="bg-[#1C1C1E]">{lang === 'es' ? 'Clasica' : 'Classic'}</option>
+              <option value="modern"   className="bg-[#1C1C1E]">{lang === 'es' ? 'Moderna'  : 'Modern'}</option>
+              <option value="classic"  className="bg-[#1C1C1E]">{lang === 'es' ? 'Clásica'  : 'Classic'}</option>
             </select>
           </div>
 
           {/* Action Buttons */}
           <div className="flex gap-2">
             <button
+              data-tour="translate-btn"
               onClick={handleTranslateClick}
               disabled={isTranslating}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[#2C2C2E] hover:bg-[#3A3A3C] border border-[#3A3A3C] text-white/70 rounded-xl text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#2C2C2E] hover:bg-[#3A3A3C]
+                border border-[#3A3A3C] text-white/70 rounded-xl text-xs font-medium
+                transition-all duration-200 press-scale disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {isTranslating
-                ? <><div className="w-3 h-3 border border-white/20 border-t-white/60 rounded-full animate-spin" />{t.translating || 'Traduciendo...'}</>
+                ? <><div className="w-3 h-3 border border-white/20 border-t-violet-400 rounded-full animate-spin" />{t.translating || 'Traduciendo...'}</>
                 : <><Languages size={13} />{t.translateCV || 'Traducir CV'}</>
               }
             </button>
 
             <button
+              data-tour="export-btn"
               onClick={handleExportPDFClick}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[#1C1C1E] hover:bg-[#3C3C43] text-white rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-[0.98]"
+              className="flex items-center gap-1.5 px-4 py-2 bg-violet-600 hover:bg-violet-500
+                text-white rounded-xl text-xs font-semibold transition-all duration-200
+                press-scale shadow-glow-sm"
             >
               <Download size={13} />
               {t.exportPdf}
@@ -440,11 +453,11 @@ const Preview: React.FC = () => {
           pendingOptimization ? 'ring-emerald-500/30 ring-2' : ''
         }`}>
           {currentTemplate === 'original' ? (
-            <OriginalTemplate data={previewData} t={t} />
+            <OriginalTemplate data={previewData} t={t} highlightSections={isGeneratingPDF ? [] : (pendingOptimization?.pendingSections ?? [])} />
           ) : currentTemplate === 'modern' ? (
-            <ModernTemplate data={previewData} t={t} />
+            <ModernTemplate data={previewData} t={t} highlightSections={isGeneratingPDF ? [] : (pendingOptimization?.pendingSections ?? [])} />
           ) : (
-            <ClassicTemplate data={previewData} t={t} />
+            <ClassicTemplate data={previewData} t={t} highlightSections={isGeneratingPDF ? [] : (pendingOptimization?.pendingSections ?? [])} />
           )}
         </div>
       </div>

@@ -208,7 +208,7 @@ const Editor: React.FC = () => {
     addExperience, updateExperience, removeExperience,
     addEducation, updateEducation, removeEducation,
     addLanguage, updateLanguage, removeLanguage,
-    addSkill, removeSkill, setLanguage, importFromPDF
+    addSkill, removeSkill, setLanguage, importFromPDF, importFromImage
   } = usePortfolio()
 
   const lang = (portfolioData.language as string) || 'es'
@@ -323,16 +323,16 @@ const Editor: React.FC = () => {
           </select>
         </div>
 
-        <button onClick={() => setShowPDFImporter(true)} className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#2C2C2E] border border-[#3A3A3C] hover:bg-[#3A3A3C] text-white/70 text-sm font-medium transition-all group">
+        <button data-tour="import-btn" onClick={() => setShowPDFImporter(true)} className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#2C2C2E] border border-[#3A3A3C] hover:bg-[#3A3A3C] text-white/70 text-sm font-medium transition-all group">
           <FileUp size={14} className="text-violet-400 group-hover:text-violet-300 transition-colors" />
-          {lang === 'es' ? 'Importar CV desde PDF' : 'Import CV from PDF'}
+          {lang === 'es' ? 'Importar CV (PDF o imagen)' : 'Import CV (PDF or image)'}
         </button>
 
         <div className="flex gap-1.5 p-1 bg-[#0F0F0F] rounded-xl border border-[#38383A]">
           <button onClick={() => setViewMode('editor')} className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${viewMode === 'editor' ? 'bg-[#2C2C2E] text-white shadow-sm' : 'text-white/40 hover:text-white/70'}`}>
             <PenLine size={13} />Editor
           </button>
-          <button onClick={() => setViewMode('optimizer')} className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${viewMode === 'optimizer' ? 'bg-violet-600 text-white shadow-sm' : 'text-white/40 hover:text-white/70'}`}>
+          <button data-tour="ai-optimizer" onClick={() => setViewMode('optimizer')} className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${viewMode === 'optimizer' ? 'bg-violet-600 text-white shadow-sm' : 'text-white/40 hover:text-white/70'}`}>
             <Sparkles size={13} />IA Optimizer
           </button>
         </div>
@@ -395,14 +395,48 @@ const Editor: React.FC = () => {
                   <div className="space-y-3">
                     <div><Label>{t.personal_nameLabel}</Label><DarkInput value={portfolioData.name} onChange={(e) => updatePortfolioData({ name: e.target.value })} placeholder="Tu Nombre Completo" /></div>
                     <div><Label>{t.personal_titleLabel}</Label><DarkInput value={portfolioData.title} onChange={(e) => updatePortfolioData({ title: e.target.value })} placeholder="Desarrollador Full Stack" /></div>
-                    <div><Label>{t.personal_aboutLabel}</Label><DarkTextarea value={portfolioData.about} onChange={(e) => updatePortfolioData({ about: e.target.value })} rows={4} placeholder={lang === 'es' ? 'Escribe sobre ti...' : 'Write about yourself...'} /></div>
+                    <div><Label>{t.personal_aboutLabel}</Label><DarkTextarea value={portfolioData.about} onChange={(e) => updatePortfolioData({ about: e.target.value })} rows={8} className="min-h-[180px]" placeholder={lang === 'es' ? 'Escribe sobre ti...' : 'Write about yourself...'} /></div>
                   </div>
                 </SectionCard>
 
                 <SectionCard>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2"><Palette size={14} className="text-white/40" /><Label>{t.personal_colorLabel}</Label></div>
-                    <input type="color" value={portfolioData.theme.primaryColor} onChange={(e) => updatePortfolioData({ theme: { ...portfolioData.theme, primaryColor: e.target.value } })} className="color-picker" aria-label={t.personal_colorLabel} />
+                  <div className="flex items-center gap-2 mb-3">
+                    <Palette size={14} className="text-white/40" />
+                    <Label>{t.personal_colorLabel}</Label>
+                  </div>
+                  <div className="flex flex-wrap gap-2 items-center">
+                    {['#3B82F6','#7C3AED','#10B981','#F59E0B','#EF4444','#EC4899','#0EA5E9','#6366F1','#14B8A6','#111827'].map(preset => (
+                      <button
+                        key={preset}
+                        onClick={() => updatePortfolioData({ theme: { ...portfolioData.theme, primaryColor: preset } })}
+                        title={preset}
+                        style={{ backgroundColor: preset }}
+                        className={`w-7 h-7 rounded-full border-2 transition-all hover:scale-110 active:scale-95 ${
+                          portfolioData.theme.primaryColor === preset
+                            ? 'border-white scale-110 shadow-lg'
+                            : 'border-transparent'
+                        }`}
+                      />
+                    ))}
+                    <label
+                      className="w-7 h-7 rounded-full border-2 border-dashed border-white/30 hover:border-white/60 flex items-center justify-center cursor-pointer transition-all hover:scale-110 active:scale-95"
+                      title={lang === 'es' ? 'Color personalizado' : 'Custom color'}
+                      style={{ position: 'relative', overflow: 'hidden' }}
+                    >
+                      <Palette size={12} className="text-white/50" />
+                      <input
+                        type="color"
+                        value={portfolioData.theme.primaryColor}
+                        onChange={(e) => updatePortfolioData({ theme: { ...portfolioData.theme, primaryColor: e.target.value } })}
+                        style={{ position: 'absolute', opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
+                        aria-label={t.personal_colorLabel}
+                      />
+                    </label>
+                    <div
+                      className="w-7 h-7 rounded-full border-2 border-white/20 shadow-sm"
+                      style={{ backgroundColor: portfolioData.theme.primaryColor }}
+                      title={portfolioData.theme.primaryColor}
+                    />
                   </div>
                 </SectionCard>
               </div>
@@ -613,7 +647,13 @@ const Editor: React.FC = () => {
         )}
       </div>
 
-      <PDFImporter isOpen={showPDFImporter} onClose={() => setShowPDFImporter(false)} onImport={(file) => importFromPDF(file)} language={lang} />
+      <PDFImporter
+        isOpen={showPDFImporter}
+        onClose={() => setShowPDFImporter(false)}
+        onImport={(file) => importFromPDF(file)}
+        onImportImage={(file) => importFromImage(file)}
+        language={lang}
+      />
     </div>
   )
 }

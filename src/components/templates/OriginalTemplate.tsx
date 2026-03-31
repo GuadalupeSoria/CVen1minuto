@@ -20,9 +20,33 @@ interface PortfolioData {
 interface OriginalTemplateProps {
   data: PortfolioData
   t: any
+  highlightSections?: string[]
 }
 
-export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t }) => {
+const contactItemStyle: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '5px',
+  marginRight: '10px',
+  marginBottom: '4px',
+  verticalAlign: 'middle',
+}
+
+const contactIconStyle: React.CSSProperties = {
+  display: 'inline-block',
+  width: '12px',
+  height: '12px',
+  verticalAlign: 'middle',
+  flexShrink: 0,
+}
+
+const hlStyle: React.CSSProperties = {
+  outline: '2px solid rgba(16, 185, 129, 0.45)',
+  outlineOffset: '2px',
+  borderRadius: '4px',
+}
+
+export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t, highlightSections = [] }) => {
   const projectsCount = data.projects?.filter(p => 
     (p.name && p.name.trim()) || (p.description && p.description.trim()) || (p.skills && p.skills.length > 0)
   ).length || 0;
@@ -35,7 +59,7 @@ export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t }) =
   const shouldMoveSkillsOnly = experiencesCount >= 4;
 
   return (
-    <div className="a4-page bg-white" style={{ width: '210mm', minHeight: '297mm', padding: '15mm', boxSizing: 'border-box', color: data.theme.primaryColor }}>
+    <div className="a4-page bg-white" style={{ width: '210mm', padding: '15mm', boxSizing: 'border-box', color: data.theme.primaryColor, fontFamily: 'Arial, sans-serif' }}>
       <div className="flex items-center gap-6 mb-12">
         <div className="flex items-center gap-4">
           {data.showPhoto ? (
@@ -54,33 +78,30 @@ export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t }) =
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1">{data.name}</h1>
             <h2 className="text-base sm:text-xl lg:text-2xl text-gray-600 mb-2">{data.title}</h2>
 
-            <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-xs lg:text-sm text-gray-700">
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', color: '#374151' }}>
               {data.contact?.email && (
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <Mail className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                  <span className="break-all">{data.contact.email}</span>
-                </div>
+                <span style={contactItemStyle}>
+                  <Mail size={12} style={contactIconStyle} color="#6B7280" />
+                  <span style={{ fontSize: '10px', lineHeight: '14px', color: '#374151', wordBreak: 'break-all' }}>{data.contact.email}</span>
+                </span>
               )}
-
               {data.contact?.phone && (
-                <div className="flex items-center gap-1.5 flex-shrink-0">
-                  <Phone className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                  <span className="whitespace-nowrap">{data.contact.phone}</span>
-                </div>
+                <span style={contactItemStyle}>
+                  <Phone size={12} style={contactIconStyle} color="#6B7280" />
+                  <span style={{ fontSize: '10px', lineHeight: '14px', color: '#374151', whiteSpace: 'nowrap' }}>{data.contact.phone}</span>
+                </span>
               )}
-
               {data.contact?.address && (
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                  <span className="break-words">{data.contact.address}</span>
-                </div>
+                <span style={contactItemStyle}>
+                  <MapPin size={12} style={contactIconStyle} color="#6B7280" />
+                  <span style={{ fontSize: '10px', lineHeight: '14px', color: '#374151', wordBreak: 'break-word' }}>{data.contact.address}</span>
+                </span>
               )}
-
               {data.contact?.website && (
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <Globe className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                  <span className="break-all">{data.contact.website}</span>
-                </div>
+                <span style={contactItemStyle}>
+                  <Globe size={12} style={contactIconStyle} color="#6B7280" />
+                  <span style={{ fontSize: '10px', lineHeight: '14px', color: '#374151', wordBreak: 'break-all' }}>{data.contact.website}</span>
+                </span>
               )}
             </div>
           </div>
@@ -89,7 +110,7 @@ export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t }) =
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-12">
         <div>
-          <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid' }}>
+          <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid', ...(highlightSections.includes('about') ? hlStyle : {}) }}>
             <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.aboutTitle}</h3>
             <p className="text-xs sm:text-sm lg:text-base text-gray-700 leading-relaxed whitespace-pre-wrap">{data.about}</p>
           </section>
@@ -131,7 +152,7 @@ export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t }) =
 
           {/* Skills in left column when shouldMoveEducationAndSkills or shouldMoveSkillsOnly */}
           {(shouldMoveEducationAndSkills || shouldMoveSkillsOnly) && data.skills && data.skills.length > 0 && (
-            <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid' }}>
+            <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid', ...(highlightSections.includes('skills') ? hlStyle : {}) }}>
               <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.skillsTitle}</h3>
               <div className="w-full flex flex-wrap gap-2">
                 {data.skills.map((skill, index) => (
@@ -141,7 +162,9 @@ export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t }) =
                     style={{
                       backgroundColor: `${data.theme.primaryColor}15`,
                       color: data.theme.primaryColor,
-                      lineHeight: 1
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
                     {skill}
@@ -203,7 +226,7 @@ export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t }) =
 
           {/* Skills in right column when NOT moved to left */}
           {!shouldMoveEducationAndSkills && !shouldMoveSkillsOnly && data.skills && data.skills.length > 0 && (
-            <section style={{ pageBreakInside: 'avoid' }}>
+            <section style={{ pageBreakInside: 'avoid', ...(highlightSections.includes('skills') ? hlStyle : {}) }}>
               <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.skillsTitle}</h3>
               <div className="w-full flex flex-wrap gap-2">
                 {data.skills.map((skill, index) => (
@@ -213,7 +236,9 @@ export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t }) =
                     style={{
                       backgroundColor: `${data.theme.primaryColor}15`,
                       color: data.theme.primaryColor,
-                      lineHeight: 1
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
                     {skill}
