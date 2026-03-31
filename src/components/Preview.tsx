@@ -196,61 +196,58 @@ const Preview: React.FC = () => {
   const generatePDF = () => {
     setIsGeneratingPDF(true)
     const element = document.querySelector('.preview-content')
-    if (element) {
+    if (!element) { setIsGeneratingPDF(false); return }
+
+    // Wait one frame so isGeneratingPDF=true removes highlight outlines before capture
+    requestAnimationFrame(() => {
+      // Measure the actual rendered width of the element in px
+      const elWidth = (element as HTMLElement).getBoundingClientRect().width
+
       const opt = {
-        margin: [0, 0, 0, 0],
+        margin: 0,
         filename: `cv-${portfolioData.name.toLowerCase().replace(/\s+/g, '-')}.pdf`,
-        image: { 
-          type: 'jpeg', 
-          quality: 1.0
-        },
+        image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
-          scale: 3,
+          scale: 2,
           useCORS: true,
           letterRendering: true,
           logging: false,
           scrollY: 0,
           scrollX: 0,
           backgroundColor: '#ffffff',
-          windowWidth: 210 * 3.78, // 210mm a px con mejor resolución
-          windowHeight: 297 * 3.78, // 297mm a px
+          // Match windowWidth to actual element width so responsive classes
+          // behave identically between preview and PDF capture
+          windowWidth: elWidth,
           onclone: (clonedDoc: Document) => {
-            const clonedElement = clonedDoc.querySelector('.preview-content') as HTMLElement;
-            if (clonedElement) {
-              // Asegurar que el texto sea seleccionable
-              clonedElement.style.width = '210mm';
-              clonedElement.style.minHeight = '297mm';
-              clonedElement.style.backgroundColor = '#ffffff';
+            const el = clonedDoc.querySelector('.preview-content') as HTMLElement
+            if (el) {
+              el.style.backgroundColor = '#ffffff'
+              // Remove any height constraints so content isn't clipped
+              el.style.maxHeight = 'none'
+              el.style.overflow = 'visible'
             }
-          }
+          },
         },
-        jsPDF: { 
-          unit: 'mm', 
-          format: 'a4', 
+        jsPDF: {
+          unit: 'mm',
+          format: 'a4',
           orientation: 'portrait',
-          compress: false
+          compress: true,
         },
-        pagebreak: {
-          mode: ['css', 'legacy'],
-          avoid: ['img', '.avoid-break']
-        }
+        // No pagebreak config — let html2pdf decide naturally based on content height
       }
 
       html2pdf()
         .set(opt)
         .from(element)
         .save()
-        .then(() => {
-          subscriptionService.recordDownload();
-        })
+        .then(() => { subscriptionService.recordDownload() })
         .catch((error: Error) => {
-          console.error('Error generating PDF:', error);
-          alert(lang === 'es' ? 'Error al generar el PDF' : 'Error generating PDF');
+          console.error('Error generating PDF:', error)
+          alert(lang === 'es' ? 'Error al generar el PDF' : 'Error generating PDF')
         })
-        .finally(() => {
-          setIsGeneratingPDF(false);
-        });
-    }
+        .finally(() => { setIsGeneratingPDF(false) })
+    })
   }
 
   return (

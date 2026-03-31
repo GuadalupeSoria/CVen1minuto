@@ -23,245 +23,371 @@ interface OriginalTemplateProps {
   highlightSections?: string[]
 }
 
-const contactItemStyle: React.CSSProperties = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: '5px',
-  marginRight: '10px',
-  marginBottom: '4px',
-  verticalAlign: 'middle',
+// All measurements in px assuming 794px wide (210mm at 96dpi)
+const S = {
+  page: {
+    width: '210mm',
+    padding: '15mm',
+    boxSizing: 'border-box' as const,
+    fontFamily: 'Arial, Helvetica, sans-serif',
+    backgroundColor: '#ffffff',
+  } as React.CSSProperties,
+
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    marginBottom: '20px',
+    paddingBottom: '14px',
+    borderBottom: '1px solid #E5E7EB',
+  } as React.CSSProperties,
+
+  name: {
+    fontSize: '24px',
+    fontWeight: 700,
+    color: '#111827',
+    margin: '0 0 3px',
+    lineHeight: 1.2,
+  } as React.CSSProperties,
+
+  titleText: {
+    fontSize: '14px',
+    color: '#6B7280',
+    margin: '0 0 10px',
+    fontWeight: 500,
+  } as React.CSSProperties,
+
+  contactRow: {
+    display: 'flex',
+    flexWrap: 'wrap' as const,
+    gap: '0',
+  } as React.CSSProperties,
+
+  contactItem: {
+    display: 'flex',
+    flexDirection: 'row' as const,
+    alignItems: 'center',
+    gap: '4px',
+    marginRight: '12px',
+    marginBottom: '4px',
+  } as React.CSSProperties,
+
+  contactText: {
+    fontSize: '10px',
+    color: '#6B7280',
+    lineHeight: '12px',
+  } as React.CSSProperties,
+
+  columns: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '24px',
+  } as React.CSSProperties,
+
+  sectionTitle: (color: string): React.CSSProperties => ({
+    fontSize: '13px',
+    fontWeight: 700,
+    color: color,
+    margin: '0 0 8px',
+    paddingBottom: '4px',
+    borderBottom: `2px solid ${color}`,
+  }),
+
+  sectionWrap: (extra?: React.CSSProperties): React.CSSProperties => ({
+    marginBottom: '14px',
+    pageBreakInside: 'avoid' as const,
+    ...extra,
+  }),
+
+  expItem: (color: string): React.CSSProperties => ({
+    borderLeft: `2px solid ${color}`,
+    paddingLeft: '10px',
+    marginBottom: '10px',
+    pageBreakInside: 'avoid' as const,
+  }),
+
+  expPosition: {
+    fontSize: '12px',
+    fontWeight: 700,
+    color: '#111827',
+    margin: '0 0 2px',
+  } as React.CSSProperties,
+
+  expCompany: {
+    fontSize: '11px',
+    color: '#6B7280',
+    margin: '0 0 2px',
+  } as React.CSSProperties,
+
+  expDate: {
+    fontSize: '10px',
+    color: '#9CA3AF',
+    margin: '0 0 4px',
+  } as React.CSSProperties,
+
+  expDesc: {
+    fontSize: '11px',
+    color: '#374151',
+    margin: '0',
+    lineHeight: 1.5,
+    whiteSpace: 'pre-wrap' as const,
+  } as React.CSSProperties,
+
+  bodyText: {
+    fontSize: '11px',
+    color: '#374151',
+    lineHeight: 1.6,
+    margin: '0',
+    whiteSpace: 'pre-wrap' as const,
+  } as React.CSSProperties,
+
+  card: {
+    backgroundColor: '#F9FAFB',
+    border: '1px solid #E5E7EB',
+    borderRadius: '6px',
+    padding: '10px',
+    marginBottom: '8px',
+    pageBreakInside: 'avoid' as const,
+  } as React.CSSProperties,
+
+  cardTitle: {
+    fontSize: '12px',
+    fontWeight: 700,
+    color: '#111827',
+    margin: '0 0 3px',
+  } as React.CSSProperties,
+
+  cardSub: {
+    fontSize: '11px',
+    color: '#6B7280',
+    margin: '0 0 2px',
+  } as React.CSSProperties,
+
+  cardDate: {
+    fontSize: '10px',
+    color: '#9CA3AF',
+    margin: '0 0 5px',
+  } as React.CSSProperties,
+
+  skillsWrap: {
+    display: 'flex',
+    flexWrap: 'wrap' as const,
+    gap: '5px',
+    marginTop: '6px',
+  } as React.CSSProperties,
+
+  skillBadge: (color: string): React.CSSProperties => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '3px 8px',
+    borderRadius: '9999px',
+    fontSize: '10px',
+    fontWeight: 500,
+    backgroundColor: `${color}18`,
+    color: color,
+  }),
+
+  hlStyle: {
+    outline: '2px solid rgba(16,185,129,0.45)',
+    outlineOffset: '2px',
+    borderRadius: '4px',
+  } as React.CSSProperties,
 }
 
-const contactIconStyle: React.CSSProperties = {
-  display: 'inline-block',
-  width: '12px',
-  height: '12px',
-  verticalAlign: 'middle',
+const iconSvgStyle: React.CSSProperties = {
+  display: 'block',
+  width: '11px',
+  height: '11px',
   flexShrink: 0,
 }
 
-const hlStyle: React.CSSProperties = {
-  outline: '2px solid rgba(16, 185, 129, 0.45)',
-  outlineOffset: '2px',
-  borderRadius: '4px',
+function formatDateRange(item: any): string {
+  const start = [item.startMonth, item.startYear].filter(Boolean).join(' ')
+  const end = [item.endMonth, item.endYear].filter(Boolean).join(' ')
+  if (start || end) return `${start}${start && end ? ' - ' : ''}${end}`
+  if (item.duration) return item.duration
+  return ''
 }
 
 export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t, highlightSections = [] }) => {
-  const projectsCount = data.projects?.filter(p => 
-    (p.name && p.name.trim()) || (p.description && p.description.trim()) || (p.skills && p.skills.length > 0)
-  ).length || 0;
-  const experiencesCount = data.experience?.length || 0;
-  
-  // Logic:
-  // - >=2 projects and <3 experiences: move Education and Skills to left
-  // - >=4 experiences: move only Skills to left
-  const shouldMoveEducationAndSkills = projectsCount >= 2 && experiencesCount < 3;
-  const shouldMoveSkillsOnly = experiencesCount >= 4;
+  const color = data.theme.primaryColor
+
+  const validProjects = data.projects?.filter(
+    p => (p.name && p.name.trim()) || (p.description && p.description.trim()) || (p.skills && p.skills.length > 0)
+  ) || []
+
+  const projectsCount = validProjects.length
+  const experiencesCount = data.experience?.length || 0
+
+  const shouldMoveEdAndSkills = projectsCount >= 2 && experiencesCount < 3
+  const shouldMoveSkillsOnly = experiencesCount >= 4
 
   return (
-    <div className="a4-page bg-white" style={{ width: '210mm', padding: '15mm', boxSizing: 'border-box', color: data.theme.primaryColor, fontFamily: 'Arial, sans-serif' }}>
-      <div className="flex items-center gap-6 mb-12">
-        <div className="flex items-center gap-4">
-          {data.showPhoto ? (
-            data.photo ? (
-              <img
-                src={data.photo}
-                alt={data.name}
-                className="w-20 h-20 sm:w-32 sm:h-32 rounded-full object-cover shadow-lg"
-              />
-            ) : (
-              <div className="w-20 h-20 sm:w-32 sm:h-32 rounded-full bg-gray-200 flex items-center justify-center">{t.noPhoto}</div>
-            )
-          ) : null}
-
-          <div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-1">{data.name}</h1>
-            <h2 className="text-base sm:text-xl lg:text-2xl text-gray-600 mb-2">{data.title}</h2>
-
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', color: '#374151' }}>
-              {data.contact?.email && (
-                <span style={contactItemStyle}>
-                  <Mail size={12} style={contactIconStyle} color="#6B7280" />
-                  <span style={{ fontSize: '10px', lineHeight: '14px', color: '#374151', wordBreak: 'break-all' }}>{data.contact.email}</span>
-                </span>
-              )}
-              {data.contact?.phone && (
-                <span style={contactItemStyle}>
-                  <Phone size={12} style={contactIconStyle} color="#6B7280" />
-                  <span style={{ fontSize: '10px', lineHeight: '14px', color: '#374151', whiteSpace: 'nowrap' }}>{data.contact.phone}</span>
-                </span>
-              )}
-              {data.contact?.address && (
-                <span style={contactItemStyle}>
-                  <MapPin size={12} style={contactIconStyle} color="#6B7280" />
-                  <span style={{ fontSize: '10px', lineHeight: '14px', color: '#374151', wordBreak: 'break-word' }}>{data.contact.address}</span>
-                </span>
-              )}
-              {data.contact?.website && (
-                <span style={contactItemStyle}>
-                  <Globe size={12} style={contactIconStyle} color="#6B7280" />
-                  <span style={{ fontSize: '10px', lineHeight: '14px', color: '#374151', wordBreak: 'break-all' }}>{data.contact.website}</span>
-                </span>
-              )}
-            </div>
+    <div style={S.page}>
+      {/* ── Header ── */}
+      <div style={S.header}>
+        {data.showPhoto && data.photo && (
+          <img
+            src={data.photo}
+            alt={data.name}
+            style={{ width: '72px', height: '72px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+          />
+        )}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h1 style={S.name}>{data.name}</h1>
+          <h2 style={{ ...S.titleText, color }}>{data.title}</h2>
+          <div style={S.contactRow}>
+            {data.contact?.email && (
+              <span style={S.contactItem}>
+                <Mail size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
+                <span style={S.contactText}>{data.contact.email}</span>
+              </span>
+            )}
+            {data.contact?.phone && (
+              <span style={S.contactItem}>
+                <Phone size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
+                <span style={S.contactText}>{data.contact.phone}</span>
+              </span>
+            )}
+            {data.contact?.address && (
+              <span style={S.contactItem}>
+                <MapPin size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
+                <span style={S.contactText}>{data.contact.address}</span>
+              </span>
+            )}
+            {data.contact?.website && (
+              <span style={S.contactItem}>
+                <Globe size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
+                <span style={S.contactText}>{data.contact.website}</span>
+              </span>
+            )}
+            {data.contact?.linkedin && (
+              <span style={S.contactItem}>
+                <Globe size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
+                <span style={S.contactText}>{data.contact.linkedin}</span>
+              </span>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-12">
+      {/* ── Two columns ── */}
+      <div style={S.columns}>
+        {/* LEFT */}
         <div>
-          <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid', ...(highlightSections.includes('about') ? hlStyle : {}) }}>
-            <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.aboutTitle}</h3>
-            <p className="text-xs sm:text-sm lg:text-base text-gray-700 leading-relaxed whitespace-pre-wrap">{data.about}</p>
-          </section>
+          {/* About */}
+          {data.about && (
+            <div style={S.sectionWrap(highlightSections.includes('about') ? S.hlStyle : {})}>
+              <h3 style={S.sectionTitle(color)}>{t.aboutTitle}</h3>
+              <p style={S.bodyText}>{data.about}</p>
+            </div>
+          )}
 
-          <section className="mb-6 lg:mb-8">
-            <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.experienceTitle}</h3>
-            <div className="space-y-3 lg:space-y-4">
+          {/* Experience */}
+          {data.experience && data.experience.length > 0 && (
+            <div style={S.sectionWrap()}>
+              <h3 style={S.sectionTitle(color)}>{t.experienceTitle}</h3>
               {data.experience.map((exp) => (
-                <div key={exp.id} className="border-l-2 pl-3 lg:pl-4" style={{ borderColor: data.theme.primaryColor, pageBreakInside: 'avoid' }}>
-                  <h4 className="font-semibold text-xs sm:text-sm lg:text-base">{exp.position}</h4>
-                  <p className="text-gray-600 text-xs lg:text-sm">{exp.company}</p>
-                  <p className="text-xs text-gray-500">{[exp.startMonth, exp.startYear].filter(Boolean).join(' ')} {exp.startMonth || exp.startYear ? '-' : ''} {[exp.endMonth, exp.endYear].filter(Boolean).join(' ') } {exp.duration ? exp.duration : ''}</p>
-                  {exp.description && <p className="text-xs lg:text-sm text-gray-700 mt-2 whitespace-pre-wrap">{exp.description}</p>}
+                <div key={exp.id} style={S.expItem(color)}>
+                  <p style={S.expPosition}>{exp.position}</p>
+                  <p style={S.expCompany}>{exp.company}</p>
+                  {formatDateRange(exp) && <p style={S.expDate}>{formatDateRange(exp)}</p>}
+                  {exp.description && <p style={S.expDesc}>{exp.description}</p>}
                 </div>
               ))}
             </div>
-          </section>
-
-          {/* Education in left column when shouldMoveEducationAndSkills */}
-          {shouldMoveEducationAndSkills && (
-            <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid' }}>
-              <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.educationTitle}</h3>
-              <div className="space-y-3 lg:space-y-4">
-                {data.education && data.education.length > 0 ? (
-                  data.education.map((ed) => (
-                    <div key={ed.id} className="bg-gray-50 p-3 rounded-lg" style={{ pageBreakInside: 'avoid' }}>
-                      <h4 className="font-semibold text-xs sm:text-base">{ed.institution}</h4>
-                      <p className="text-xs sm:text-sm text-gray-500">{ed.degree}</p>
-                      <p className="text-xs sm:text-sm text-gray-500">{[ed.startMonth, ed.startYear].filter(Boolean).join(' ')} {ed.startMonth || ed.startYear ? '-' : ''} {[ed.endMonth, ed.endYear].filter(Boolean).join(' ')}</p>
-                      {ed.description && <p className="text-xs sm:text-sm text-gray-700 mt-2">{ed.description}</p>}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500">{t.noEducation}</p>
-                )}
-              </div>
-            </section>
           )}
 
-          {/* Skills in left column when shouldMoveEducationAndSkills or shouldMoveSkillsOnly */}
-          {(shouldMoveEducationAndSkills || shouldMoveSkillsOnly) && data.skills && data.skills.length > 0 && (
-            <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid', ...(highlightSections.includes('skills') ? hlStyle : {}) }}>
-              <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.skillsTitle}</h3>
-              <div className="w-full flex flex-wrap gap-2">
-                {data.skills.map((skill, index) => (
-                  <span
-                    key={index}
-                    className="skill-badge inline-flex items-center px-2 py-0.5 lg:py-1 rounded-full text-xs max-w-full break-words"
-                    style={{
-                      backgroundColor: `${data.theme.primaryColor}15`,
-                      color: data.theme.primaryColor,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    {skill}
-                  </span>
+          {/* Education (left when shouldMoveEdAndSkills) */}
+          {shouldMoveEdAndSkills && data.education && data.education.length > 0 && (
+            <div style={S.sectionWrap()}>
+              <h3 style={S.sectionTitle(color)}>{t.educationTitle}</h3>
+              {data.education.map((ed) => (
+                <div key={ed.id} style={S.card}>
+                  <p style={S.cardTitle}>{ed.institution}</p>
+                  <p style={S.cardSub}>{ed.degree}</p>
+                  {formatDateRange(ed) && <p style={S.cardDate}>{formatDateRange(ed)}</p>}
+                  {ed.description && <p style={{ ...S.bodyText, fontSize: '10px' }}>{ed.description}</p>}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Skills (left when shouldMoveEdAndSkills or shouldMoveSkillsOnly) */}
+          {(shouldMoveEdAndSkills || shouldMoveSkillsOnly) && data.skills && data.skills.length > 0 && (
+            <div style={S.sectionWrap(highlightSections.includes('skills') ? S.hlStyle : {})}>
+              <h3 style={S.sectionTitle(color)}>{t.skillsTitle}</h3>
+              <div style={S.skillsWrap}>
+                {data.skills.map((skill, i) => (
+                  <span key={i} style={S.skillBadge(color)}>{skill}</span>
                 ))}
               </div>
-            </section>
+            </div>
           )}
         </div>
 
+        {/* RIGHT */}
         <div>
-          {/* Projects ALWAYS in right column */}
-          {data.projects && data.projects.some(p => (p.name && p.name.trim()) || (p.description && p.description.trim()) || (p.skills && p.skills.length > 0)) && (
-            <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid' }}>
-              <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.projectsTitle}</h3>
-              <div className="space-y-3 lg:space-y-4">
-                {data.projects.map((project) => (
-                  (project.name || project.description || (project.skills && project.skills.length)) ? (
-                    <div key={project.id} className="bg-gray-50 p-3 lg:p-4 rounded-lg" style={{ pageBreakInside: 'avoid' }}>
-                      <h4 className="font-semibold mb-2 text-xs sm:text-sm lg:text-base">{project.name}</h4>
-                      <p className="text-xs lg:text-sm text-gray-500 mb-2">{[project.startMonth, project.startYear].filter(Boolean).join(' ')} {project.startMonth || project.startYear ? '-' : ''} {[project.endMonth, project.endYear].filter(Boolean).join(' ')}</p>
-                      <p className="text-gray-600 text-xs lg:text-sm whitespace-pre-wrap">{project.description}</p>
-                      {project.skills && project.skills.length > 0 && (
-                        <div className="w-full flex flex-wrap gap-2 mt-3 justify-start">
-                          {project.skills.map((s: string, i: number) => (
-                            <span key={i} className="skill-badge inline-flex items-center px-2 py-0.5 lg:py-1 rounded-full text-xs bg-gray-100 max-w-full break-words" style={{ color: data.theme.primaryColor }}>
-                              {s}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+          {/* Projects */}
+          {validProjects.length > 0 && (
+            <div style={S.sectionWrap()}>
+              <h3 style={S.sectionTitle(color)}>{t.projectsTitle}</h3>
+              {validProjects.map((project) => (
+                <div key={project.id} style={S.card}>
+                  <p style={S.cardTitle}>{project.name}</p>
+                  {formatDateRange(project) && <p style={S.cardDate}>{formatDateRange(project)}</p>}
+                  {project.description && <p style={S.bodyText}>{project.description}</p>}
+                  {project.skills && project.skills.length > 0 && (
+                    <div style={S.skillsWrap}>
+                      {project.skills.map((s: string, i: number) => (
+                        <span key={i} style={{ ...S.skillBadge(color), backgroundColor: '#F3F4F6', color }}>{s}</span>
+                      ))}
                     </div>
-                  ) : null
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Education (right when NOT moved to left) */}
+          {!shouldMoveEdAndSkills && data.education && data.education.length > 0 && (
+            <div style={S.sectionWrap()}>
+              <h3 style={S.sectionTitle(color)}>{t.educationTitle}</h3>
+              {data.education.map((ed) => (
+                <div key={ed.id} style={S.card}>
+                  <p style={S.cardTitle}>{ed.institution}</p>
+                  <p style={S.cardSub}>{ed.degree}</p>
+                  {formatDateRange(ed) && <p style={S.cardDate}>{formatDateRange(ed)}</p>}
+                  {ed.description && <p style={{ ...S.bodyText, fontSize: '10px' }}>{ed.description}</p>}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Skills (right when NOT moved to left) */}
+          {!shouldMoveEdAndSkills && !shouldMoveSkillsOnly && data.skills && data.skills.length > 0 && (
+            <div style={S.sectionWrap(highlightSections.includes('skills') ? S.hlStyle : {})}>
+              <h3 style={S.sectionTitle(color)}>{t.skillsTitle}</h3>
+              <div style={S.skillsWrap}>
+                {data.skills.map((skill, i) => (
+                  <span key={i} style={S.skillBadge(color)}>{skill}</span>
                 ))}
               </div>
-            </section>
+            </div>
           )}
 
-          {/* Education in right column when NOT moved to left */}
-          {!shouldMoveEducationAndSkills && (
-            <section className="mb-6 lg:mb-8" style={{ pageBreakInside: 'avoid' }}>
-              <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.educationTitle}</h3>
-              <div className="space-y-3 lg:space-y-4">
-                {data.education && data.education.length > 0 ? (
-                  data.education.map((ed) => (
-                    <div key={ed.id} className="bg-gray-50 p-3 rounded-lg" style={{ pageBreakInside: 'avoid' }}>
-                      <h4 className="font-semibold text-xs sm:text-base">{ed.institution}</h4>
-                      <p className="text-xs sm:text-sm text-gray-500">{ed.degree}</p>
-                      <p className="text-xs sm:text-sm text-gray-500">{[ed.startMonth, ed.startYear].filter(Boolean).join(' ')} {ed.startMonth || ed.startYear ? '-' : ''} {[ed.endMonth, ed.endYear].filter(Boolean).join(' ')}</p>
-                      {ed.description && <p className="text-xs sm:text-sm text-gray-700 mt-2">{ed.description}</p>}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500">{t.noEducation}</p>
-                )}
-              </div>
-            </section>
-          )}
-
-          {/* Skills in right column when NOT moved to left */}
-          {!shouldMoveEducationAndSkills && !shouldMoveSkillsOnly && data.skills && data.skills.length > 0 && (
-            <section style={{ pageBreakInside: 'avoid', ...(highlightSections.includes('skills') ? hlStyle : {}) }}>
-              <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>{t.skillsTitle}</h3>
-              <div className="w-full flex flex-wrap gap-2">
-                {data.skills.map((skill, index) => (
-                  <span
-                    key={index}
-                    className="skill-badge inline-flex items-center px-2 py-0.5 lg:py-1 rounded-full text-xs max-w-full break-words"
-                    style={{
-                      backgroundColor: `${data.theme.primaryColor}15`,
-                      color: data.theme.primaryColor,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </section>
-          )}
-
+          {/* Languages */}
           {data.languages && data.languages.length > 0 && (
-            <section className="mt-4" style={{ pageBreakInside: 'avoid' }}>
-              <h3 className="text-sm sm:text-lg lg:text-xl font-semibold mb-3 lg:mb-4" style={{ pageBreakAfter: 'avoid' }}>Idiomas</h3>
-              <div className="flex flex-col gap-2">
-                {data.languages.map((l) => (
-                  <div key={l.id} className="flex items-center justify-between">
-                    <div className="text-sm">
-                      <strong>{l.name}</strong>
-                      {l.level && <span className="ml-2 text-gray-600">{l.level}</span>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
+            <div style={S.sectionWrap()}>
+              <h3 style={S.sectionTitle(color)}>{t.languagesTitle || 'Idiomas'}</h3>
+              {data.languages.map((l) => (
+                <div key={l.id} style={{ marginBottom: '5px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 600, color: '#111827' }}>{l.name}</span>
+                  {l.level && <span style={{ fontSize: '11px', color: '#6B7280', marginLeft: '6px' }}>{l.level}</span>}
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>
