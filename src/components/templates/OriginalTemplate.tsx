@@ -70,12 +70,23 @@ const S = {
     gap: '4px',
     marginRight: '12px',
     marginBottom: '4px',
+    minHeight: '12px',
+  } as React.CSSProperties,
+
+  contactIconBox: {
+    width: '11px',
+    height: '11px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   } as React.CSSProperties,
 
   contactText: {
+    display: 'block',
     fontSize: '10px',
     color: '#6B7280',
-    lineHeight: '12px',
+    lineHeight: 1.1,
   } as React.CSSProperties,
 
   columns: {
@@ -182,13 +193,15 @@ const S = {
   } as React.CSSProperties,
 
   skillBadge: (color: string): React.CSSProperties => ({
-    display: 'inline-flex',
+    display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '3px 8px',
+    minHeight: '18px',
+    padding: '0 8px',
     borderRadius: '9999px',
     fontSize: '10px',
     fontWeight: 500,
+    lineHeight: 1,
     backgroundColor: `${color}18`,
     color: color,
   }),
@@ -205,6 +218,7 @@ const iconSvgStyle: React.CSSProperties = {
   width: '11px',
   height: '11px',
   flexShrink: 0,
+  verticalAlign: 'middle',
 }
 
 function formatDateRange(item: any): string {
@@ -245,31 +259,41 @@ export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t, hig
           <div style={S.contactRow}>
             {data.contact?.email && (
               <span style={S.contactItem}>
-                <Mail size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
+                <span style={S.contactIconBox}>
+                  <Mail size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
+                </span>
                 <span style={S.contactText}>{data.contact.email}</span>
               </span>
             )}
             {data.contact?.phone && (
               <span style={S.contactItem}>
-                <Phone size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
+                <span style={S.contactIconBox}>
+                  <Phone size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
+                </span>
                 <span style={S.contactText}>{data.contact.phone}</span>
               </span>
             )}
             {data.contact?.address && (
               <span style={S.contactItem}>
-                <MapPin size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
+                <span style={S.contactIconBox}>
+                  <MapPin size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
+                </span>
                 <span style={S.contactText}>{data.contact.address}</span>
               </span>
             )}
             {data.contact?.website && (
               <span style={S.contactItem}>
-                <Globe size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
+                <span style={S.contactIconBox}>
+                  <Globe size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
+                </span>
                 <span style={S.contactText}>{data.contact.website}</span>
               </span>
             )}
             {data.contact?.linkedin && (
               <span style={S.contactItem}>
-                <Globe size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
+                <span style={S.contactIconBox}>
+                  <Globe size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
+                </span>
                 <span style={S.contactText}>{data.contact.linkedin}</span>
               </span>
             )}

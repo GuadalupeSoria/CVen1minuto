@@ -178,6 +178,11 @@ const Preview: React.FC = () => {
     setIsTranslating(true);
     try {
       const translationLang = targetLang || targetTranslationLang;
+      // 1) Cambiar primero el idioma de interfaz para títulos/labels del CV
+      if ((portfolioData.language || 'es') !== translationLang) {
+        updatePortfolioData({ language: translationLang });
+      }
+
       console.log('Translating to:', translationLang);
       console.log('Current data:', portfolioData);
       
@@ -187,6 +192,7 @@ const Preview: React.FC = () => {
       if (translated) {
         // Forzar actualización completa
         updatePortfolioData({
+          language: translationLang,
           about: translated.about,
           title: translated.title,
           experience: translated.experience,
@@ -197,7 +203,7 @@ const Preview: React.FC = () => {
         
         // Mostrar confirmación
         setTimeout(() => {
-          alert(lang === 'es' 
+          alert(translationLang === 'es' 
             ? 'CV traducido correctamente' 
             : 'CV translated successfully');
         }, 100);
