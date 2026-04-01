@@ -118,20 +118,65 @@ interface PortfolioContextType {
 export type { CVTemplate }
 
 const defaultPortfolioData: PortfolioData = {
-  name: 'Tu Nombre',
-  title: 'Desarrollador Web',
-  about: 'Escribe una breve descripción sobre ti...',
+  name: 'Tu Nombre Apellido',
+  title: 'Desarrollador Full Stack',
+  about: 'Profesional orientado a resultados con experiencia en desarrollo web, colaboración con equipos multidisciplinarios y mejora continua de productos digitales. Me enfoco en construir interfaces claras, accesibles y de alto rendimiento, cuidando la calidad del código y la experiencia de usuario de punta a punta. Disfruto traducir objetivos de negocio en soluciones técnicas escalables, documentadas y mantenibles, aportando proactividad, comunicación efectiva y capacidad de adaptación en entornos dinámicos.',
   photo: '',
   showPhoto: true,
   template: 'original',
-  projects: [{ id: '1', name: 'Proyecto 1', description: 'Descripción del proyecto 1', skills: ['JavaScript', 'React'] }],
-  experience: [{ id: '1', company: 'Empresa', position: 'Cargo', duration: '2020 - Presente' }],
-  education: [],
-  skills: ['JavaScript', 'React', 'TypeScript'],
+  projects: [
+    {
+      id: '1',
+      name: 'Plataforma de Gestión Comercial',
+      description: 'Desarrollo de una aplicación web para seguimiento de clientes, pipeline de ventas y generación de reportes. Se optimizó la carga inicial y se mejoró la trazabilidad de operaciones para el equipo comercial.',
+      startMonth: 'Mar',
+      startYear: '2024',
+      endMonth: 'Dic',
+      endYear: '2024',
+      skills: ['React', 'TypeScript', 'Node.js', 'PostgreSQL']
+    }
+  ],
+  experience: [
+    {
+      id: '1',
+      company: 'TechNova Solutions',
+      position: 'Desarrollador Frontend',
+      startMonth: 'Ene',
+      startYear: '2023',
+      endMonth: 'Actualidad',
+      endYear: '',
+      duration: 'Ene 2023 - Actualidad',
+      description: 'Implementación de nuevas funcionalidades en productos SaaS, refactorización de componentes críticos y mejora de métricas Core Web Vitals. Coordinación con diseño y backend para entregar releases quincenales con foco en estabilidad.'
+    },
+    {
+      id: '2',
+      company: 'Digital Factory Lab',
+      position: 'Desarrollador Web Jr',
+      startMonth: 'Jun',
+      startYear: '2021',
+      endMonth: 'Dic',
+      endYear: '2022',
+      duration: 'Jun 2021 - Dic 2022',
+      description: 'Mantenimiento evolutivo de sitios corporativos y e-commerce, integración de APIs de terceros y resolución de incidencias productivas. Participación en pruebas funcionales y automatización de tareas de despliegue.'
+    }
+  ],
+  education: [
+    {
+      id: '1',
+      institution: 'Universidad Tecnológica Nacional',
+      degree: 'Tecnicatura Universitaria en Programación',
+      startMonth: 'Mar',
+      startYear: '2019',
+      endMonth: 'Dic',
+      endYear: '2021',
+      description: 'Formación en estructuras de datos, bases de datos, desarrollo de software y buenas prácticas de ingeniería.'
+    }
+  ],
+  skills: ['JavaScript', 'TypeScript', 'React', 'Node.js', 'HTML', 'CSS', 'Git'],
   contact: {
     email: 'tu@email.com',
     phone: '+1234567890',
-    linkedin: 'https://linkedin.com/in/tu-perfil'
+    linkedin: ''
   },
   languages: [],
   theme: {

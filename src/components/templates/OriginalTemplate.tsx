@@ -150,6 +150,11 @@ const S = {
     pageBreakInside: 'avoid' as const,
   } as React.CSSProperties,
 
+  plainItem: {
+    marginBottom: '10px',
+    pageBreakInside: 'avoid' as const,
+  } as React.CSSProperties,
+
   cardTitle: {
     fontSize: '12px',
     fontWeight: 700,
@@ -304,7 +309,7 @@ export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t, hig
             <div style={S.sectionWrap()}>
               <h3 style={S.sectionTitle(color)}>{t.educationTitle}</h3>
               {data.education.map((ed) => (
-                <div key={ed.id} style={S.card}>
+                <div key={ed.id} style={S.plainItem}>
                   <p style={S.cardTitle}>{ed.institution}</p>
                   <p style={S.cardSub}>{ed.degree}</p>
                   {formatDateRange(ed) && <p style={S.cardDate}>{formatDateRange(ed)}</p>}
@@ -334,7 +339,7 @@ export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t, hig
             <div style={S.sectionWrap()}>
               <h3 style={S.sectionTitle(color)}>{t.projectsTitle}</h3>
               {validProjects.map((project) => (
-                <div key={project.id} style={S.card}>
+                <div key={project.id} style={S.plainItem}>
                   <p style={S.cardTitle}>{project.name}</p>
                   {formatDateRange(project) && <p style={S.cardDate}>{formatDateRange(project)}</p>}
                   {project.description && <p style={S.bodyText}>{project.description}</p>}
@@ -355,7 +360,7 @@ export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t, hig
             <div style={S.sectionWrap()}>
               <h3 style={S.sectionTitle(color)}>{t.educationTitle}</h3>
               {data.education.map((ed) => (
-                <div key={ed.id} style={S.card}>
+                <div key={ed.id} style={S.plainItem}>
                   <p style={S.cardTitle}>{ed.institution}</p>
                   <p style={S.cardSub}>{ed.degree}</p>
                   {formatDateRange(ed) && <p style={S.cardDate}>{formatDateRange(ed)}</p>}
