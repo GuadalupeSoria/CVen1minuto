@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { usePortfolio } from '../context/PortfolioContext'
 import { Download, LayoutTemplate, Languages, Check, X, Sparkles } from 'lucide-react'
 import html2pdf from 'html2pdf.js'
@@ -77,6 +77,23 @@ const Preview: React.FC = () => {
   const [targetTranslationLang, setTargetTranslationLang] = useState<'es' | 'en'>('en')
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
   const currentTemplate: CVTemplate = portfolioData.template || 'original'
+
+  // Mobile scaling: shrink the 210mm template to fit narrow screens
+  const outerRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(1)
+
+  useEffect(() => {
+    const TEMPLATE_W = 794 // 210mm at 96dpi
+    const update = () => {
+      if (!outerRef.current) return
+      const avail = outerRef.current.clientWidth
+      setScale(avail > 0 ? Math.min(1, avail / TEMPLATE_W) : 1)
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    if (outerRef.current) ro.observe(outerRef.current)
+    return () => ro.disconnect()
+  }, [])
 
   // Merge portfolioData with pending AI changes for live preview
   const previewData = useMemo(() => {
@@ -445,17 +462,29 @@ const Preview: React.FC = () => {
           </div>
         )}
 
-        {/* CV Preview — renders previewData (includes pending AI changes) */}
-        <div className={`preview-content shadow-2xl rounded-lg overflow-hidden ring-1 ring-white/5 ${
-          pendingOptimization ? 'ring-emerald-500/30 ring-2' : ''
-        }`}>
-          {currentTemplate === 'original' ? (
-            <OriginalTemplate data={previewData} t={t} highlightSections={isGeneratingPDF ? [] : (pendingOptimization?.pendingSections ?? [])} />
-          ) : currentTemplate === 'modern' ? (
-            <ModernTemplate data={previewData} t={t} highlightSections={isGeneratingPDF ? [] : (pendingOptimization?.pendingSections ?? [])} />
-          ) : (
-            <ClassicTemplate data={previewData} t={t} highlightSections={isGeneratingPDF ? [] : (pendingOptimization?.pendingSections ?? [])} />
-          )}
+        {/* CV Preview — scales to fit on narrow/mobile screens */}
+        <div ref={outerRef} style={{ width: '100%', overflow: 'hidden' }}>
+          <div
+            className={`preview-content shadow-2xl rounded-lg overflow-hidden ring-1 ring-white/5 ${
+              pendingOptimization ? 'ring-emerald-500/30 ring-2' : ''
+            }`}
+            style={scale < 1 ? {
+              transform: `scale(${scale})`,
+              transformOrigin: 'top left',
+              // compensate layout: scaled div still occupies full width in flow,
+              // so shrink the perceived width and let the outer clip it
+              width: `${(1 / scale) * 100}%`,
+              marginBottom: `calc((${scale} - 1) * 100%)`, // pull up bottom gap
+            } : undefined}
+          >
+            {currentTemplate === 'original' ? (
+              <OriginalTemplate data={previewData} t={t} highlightSections={isGeneratingPDF ? [] : (pendingOptimization?.pendingSections ?? [])} />
+            ) : currentTemplate === 'modern' ? (
+              <ModernTemplate data={previewData} t={t} highlightSections={isGeneratingPDF ? [] : (pendingOptimization?.pendingSections ?? [])} />
+            ) : (
+              <ClassicTemplate data={previewData} t={t} highlightSections={isGeneratingPDF ? [] : (pendingOptimization?.pendingSections ?? [])} />
+            )}
+          </div>
         </div>
       </div>
     </div>

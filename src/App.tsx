@@ -47,7 +47,14 @@ function AppInner() {
           </div>
         )}
 
-        {showTour && <OnboardingTour language={lang} onDone={completeTour} />}
+        {showTour && (
+          <OnboardingTour
+            language={lang}
+            onDone={completeTour}
+            mobileTab={mobileTab}
+            onTabSwitch={setMobileTab}
+          />
+        )}
 
         {/* Mobile Tab Navigation */}
         <div className="md:hidden flex border-b border-[#38383A] bg-[#1C1C1E]/90 backdrop-blur-xl sticky top-0 z-20">
