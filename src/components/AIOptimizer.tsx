@@ -4,6 +4,7 @@ import { usePortfolio } from '../context/PortfolioContext';
 import { AIService } from '../services/AIService';
 import subscriptionService from '../services/subscriptionService';
 import { AdModal } from './AdModal';
+import { useAuth } from '../context/AuthContext';
 import type { PendingOptimization, DiffSection } from '../context/PortfolioContext';
 
 interface OptimizationResult {
@@ -127,6 +128,8 @@ const AIOptimizer: React.FC = () => {
     rejectAllPending,
   } = usePortfolio();
 
+  const { isPremium: supabasePremium } = useAuth()
+  const isPremiumUser = supabasePremium || subscriptionService.isPremium()
   const lang = ((portfolioData as unknown as { language?: string }).language as 'es' | 'en') ?? 'es';
   const t = LABELS[lang];
 
@@ -149,11 +152,13 @@ const AIOptimizer: React.FC = () => {
       alert('Agrega VITE_GROQ_API_KEY en el archivo .env');
       return;
     }
-    const status = subscriptionService.canOptimize();
-    if (!status.allowed) {
-      setShowLimitReached(true);
-      setShowAdModal(true);
-      return;
+    if (!isPremiumUser) {
+      const status = subscriptionService.canOptimize();
+      if (!status.allowed) {
+        setShowLimitReached(true);
+        setShowAdModal(true);
+        return;
+      }
     }
     try {
       setIsOptimizing(true);
@@ -209,7 +214,7 @@ const AIOptimizer: React.FC = () => {
 
   const handleApplyAll = () => {
     if (!localResult) return;
-    if (!subscriptionService.isPremium()) {
+    if (!isPremiumUser) {
       setShowLimitReached(false);
       setShowAdModal(true);
       return;

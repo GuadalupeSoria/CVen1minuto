@@ -455,9 +455,11 @@ All text fields must be in ${responseLanguage}:
       const dataToTranslate = {
         about: cvData.about,
         title: cvData.title,
+        skills: cvData.skills,
         experience: cvData.experience?.map((exp: any) => ({
           id: exp.id,
-          description: exp.description
+          description: exp.description,
+          skills: exp.skills
         })),
         projects: cvData.projects?.map((proj: any) => ({
           id: proj.id,
@@ -469,7 +471,9 @@ All text fields must be in ${responseLanguage}:
         }))
       };
 
-      const prompt = `Translate from ${sourceLanguage} to ${targetLang}. Only translate the text content, keep IDs unchanged. Return ONLY valid JSON:
+      const prompt = `Translate from ${sourceLanguage} to ${targetLang}. Only translate text content, keep IDs unchanged. Return ONLY valid JSON.
+
+IMPORTANT for skills arrays: Only translate descriptive/soft skills (e.g. "Trabajo en equipo" → "Teamwork", "Resolución de problemas" → "Problem solving"). Do NOT translate technology names, programming languages, frameworks, tools, or proper nouns (e.g. React, TypeScript, Node.js, PostgreSQL, Git, Docker, AWS keep them exactly as-is).
 
 ${JSON.stringify(dataToTranslate)}`;
 
@@ -526,13 +530,15 @@ ${JSON.stringify(dataToTranslate)}`;
       
       if (translated.about) result.about = translated.about;
       if (translated.title) result.title = translated.title;
-      
+      if (translated.skills && Array.isArray(translated.skills)) result.skills = translated.skills;
+
       if (translated.experience && Array.isArray(translated.experience)) {
         result.experience = cvData.experience.map((exp: any) => {
           const translatedExp = translated.experience.find((t: any) => t.id === exp.id);
           return {
             ...exp,
-            description: translatedExp?.description || exp.description
+            description: translatedExp?.description || exp.description,
+            skills: translatedExp?.skills || exp.skills
           };
         });
       }

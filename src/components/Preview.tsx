@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { usePortfolio } from '../context/PortfolioContext'
-import { Download, LayoutTemplate, Languages, Check, X, Sparkles } from 'lucide-react'
+import { Download, LayoutTemplate, Languages, Check, X, Sparkles, Save, BookMarked, Loader2 } from 'lucide-react'
 import html2pdf from 'html2pdf.js'
 import { AdModal } from './AdModal'
 import { OriginalTemplate } from './templates/OriginalTemplate'
@@ -9,6 +9,9 @@ import { ClassicTemplate } from './templates/ClassicTemplate'
 import type { CVTemplate } from '../context/PortfolioContext'
 import subscriptionService from '../services/subscriptionService'
 import { AIService } from '../services/AIService'
+import { useAuth } from '../context/AuthContext'
+import { useDrafts } from '../hooks/useDrafts'
+import DraftsPanel from './DraftsPanel'
 
 type PreviewTranslations = {
   exportPdf: string
@@ -67,8 +70,29 @@ const Preview: React.FC = () => {
     acceptAllPending,
     rejectAllPending,
   } = usePortfolio()
+  const { user, isPremium: supabasePremium } = useAuth()
   const lang = (portfolioData.language as string) || 'es'
   const t = previewTranslations[lang] || previewTranslations.es
+
+  // Premium si está logueado con premium en Supabase, o tiene la suscripción local activa
+  const isPremiumUser = supabasePremium || subscriptionService.isPremium()
+
+  // Drafts
+  const { saveDraft, loading: savingDraft } = useDrafts(user?.id)
+  const [showDrafts, setShowDrafts] = useState(false)
+  const [showSaveInput, setShowSaveInput] = useState(false)
+  const [saveName, setSaveName] = useState('')
+  const [saveOk, setSaveOk] = useState(false)
+
+  const handleSaveDraft = async () => {
+    if (!saveName.trim() || !user) return
+    await saveDraft(saveName.trim(), portfolioData, lang)
+    setSaveOk(true)
+    setSaveName('')
+    setShowSaveInput(false)
+    setTimeout(() => setSaveOk(false), 2500)
+  }
+
   const [showAdModal, setShowAdModal] = useState(false)
   const [modalAction, setModalAction] = useState<'download' | 'translate'>('download')
   const [showLimitReached, setShowLimitReached] = useState(false)
@@ -125,37 +149,28 @@ const Preview: React.FC = () => {
   };
 
   const handleExportPDFClick = () => {
+    if (isPremiumUser) { generatePDF(); return; }
     const downloadStatus = subscriptionService.canDownload();
-    
     if (!downloadStatus.allowed) {
       setShowLimitReached(true);
       setModalAction('download');
       setShowAdModal(true);
       return;
     }
-    
-    const isPremium = subscriptionService.isPremium();
-    
-    if (isPremium) {
-      generatePDF();
-    } else {
-      setShowLimitReached(false);
-      setModalAction('download');
-      setShowAdModal(true);
-    }
+    setShowLimitReached(false);
+    setModalAction('download');
+    setShowAdModal(true);
   };
 
   const handleTranslateClick = async () => {
+    if (isPremiumUser) { setShowLanguageSelector(true); return; }
     const translateStatus = subscriptionService.canTranslate();
-    
     if (!translateStatus.allowed) {
       setShowLimitReached(true);
       setModalAction('translate');
       setShowAdModal(true);
       return;
     }
-    
-    // Mostrar selector de idioma primero
     setShowLanguageSelector(true);
   };
 
@@ -163,9 +178,7 @@ const Preview: React.FC = () => {
     setTargetTranslationLang(selectedLang);
     setShowLanguageSelector(false);
     
-    const isPremium = subscriptionService.isPremium();
-    
-    if (isPremium) {
+    if (isPremiumUser) {
       handleTranslateCV(selectedLang);
     } else {
       setShowLimitReached(false);
@@ -333,24 +346,77 @@ const Preview: React.FC = () => {
       />
       
       <div className="max-w-[210mm] mx-auto">
-        <div className="flex justify-between items-center gap-3 mb-6 flex-wrap animate-slide-down">
-          {/* Template Selector */}
-          <div className="flex items-center gap-2" data-tour="template-selector">
-            <LayoutTemplate size={14} className="text-white/30" />
-            <select
-              value={currentTemplate}
-              onChange={(e) => setTemplate?.(e.target.value as CVTemplate)}
-              className="bg-[#2C2C2E] border border-[#3A3A3C] text-white text-xs px-3 py-2 rounded-xl
-                focus:border-violet-500 focus:outline-none cursor-pointer transition-all
-                hover:bg-[#3A3A3C] hover:border-white/20"
-            >
-              <option value="original" className="bg-[#1C1C1E]">{lang === 'es' ? 'Original' : 'Original'}</option>
-              <option value="modern"   className="bg-[#1C1C1E]">{lang === 'es' ? 'Moderna'  : 'Modern'}</option>
-              <option value="classic"  className="bg-[#1C1C1E]">{lang === 'es' ? 'Clásica'  : 'Classic'}</option>
-            </select>
+        <div className="flex justify-between items-center gap-2 mb-6 flex-wrap animate-slide-down">
+          {/* Left: Template + Save + Mis CVs */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2" data-tour="template-selector">
+              <LayoutTemplate size={14} className="text-white/30 shrink-0" />
+              <select
+                value={currentTemplate}
+                onChange={(e) => setTemplate?.(e.target.value as CVTemplate)}
+                className="bg-[#2C2C2E] border border-[#3A3A3C] text-white text-xs px-3 py-2 rounded-xl
+                  focus:border-violet-500 focus:outline-none cursor-pointer transition-all
+                  hover:bg-[#3A3A3C] hover:border-white/20"
+              >
+                <option value="original" className="bg-[#1C1C1E]">{lang === 'es' ? 'Original' : 'Original'}</option>
+                <option value="modern"   className="bg-[#1C1C1E]">{lang === 'es' ? 'Moderna'  : 'Modern'}</option>
+                <option value="classic"  className="bg-[#1C1C1E]">{lang === 'es' ? 'Clásica'  : 'Classic'}</option>
+              </select>
+            </div>
+
+            {/* Save + Mis CVs — solo visibles con sesión */}
+            {user && (
+              <>
+                {/* Save inline */}
+                <div className="flex items-center gap-1.5">
+                  {showSaveInput ? (
+                    <>
+                      <input
+                        autoFocus
+                        value={saveName}
+                        onChange={(e) => setSaveName(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleSaveDraft(); if (e.key === 'Escape') { setShowSaveInput(false); setSaveName('') } }}
+                        placeholder={lang === 'es' ? 'Nombre del CV...' : 'CV name...'}
+                        className="px-2.5 py-1.5 bg-[#1C1C1E] border border-violet-500/60 rounded-lg text-white text-xs placeholder:text-white/25 focus:outline-none w-36"
+                      />
+                      <button
+                        onClick={handleSaveDraft}
+                        disabled={savingDraft || !saveName.trim()}
+                        className="p-1.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white rounded-lg transition-all"
+                      >
+                        {savingDraft ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                      </button>
+                      <button onClick={() => { setShowSaveInput(false); setSaveName('') }} className="p-1.5 bg-[#2C2C2E] hover:bg-[#3A3A3C] text-white/40 rounded-lg transition-all">
+                        <X size={12} />
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => setShowSaveInput(true)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium transition-all border ${
+                        saveOk
+                          ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400'
+                          : 'bg-[#2C2C2E] border-[#3A3A3C] hover:bg-[#3A3A3C] text-white/60'
+                      }`}
+                    >
+                      {saveOk ? <><Check size={12} />{lang === 'es' ? 'Guardado' : 'Saved'}</> : <><Save size={12} />{lang === 'es' ? 'Guardar' : 'Save'}</>}
+                    </button>
+                  )}
+                </div>
+
+                {/* Mis CVs */}
+                <button
+                  onClick={() => setShowDrafts(true)}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#2C2C2E] border border-[#3A3A3C] hover:bg-[#3A3A3C] text-white/60 rounded-xl text-xs font-medium transition-all"
+                >
+                  <BookMarked size={12} />
+                  {lang === 'es' ? 'Mis CVs' : 'My CVs'}
+                </button>
+              </>
+            )}
           </div>
 
-          {/* Action Buttons */}
+          {/* Right: Action Buttons */}
           <div className="flex gap-2">
             <button
               data-tour="translate-btn"
@@ -493,6 +559,17 @@ const Preview: React.FC = () => {
           </div>
         </div>
       </div>
+      {user && (
+        <DraftsPanel
+          isOpen={showDrafts}
+          onClose={() => setShowDrafts(false)}
+          userId={user.id}
+          currentCVData={portfolioData}
+          currentLanguage={lang}
+          onLoad={(cvData) => updatePortfolioData(cvData as Parameters<typeof updatePortfolioData>[0])}
+          language={lang}
+        />
+      )}
     </div>
   )
 }

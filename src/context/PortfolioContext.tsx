@@ -22,6 +22,7 @@ interface Experience {
   endMonth?: string
   endYear?: string
   description?: string
+  skills?: string[]
 }
 
 interface Education {

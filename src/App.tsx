@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from 'react'
 import { PortfolioProvider, usePortfolio } from './context/PortfolioContext'
+import { AuthProvider } from './context/AuthContext'
 import Editor from './components/Editor'
 import Preview from './components/Preview'
 import Footer from './components/Footer'
@@ -129,9 +130,11 @@ function App() {
   if (page === 'terms') return <Terms />
 
   return (
-    <PortfolioProvider>
-      <AppInner />
-    </PortfolioProvider>
+    <AuthProvider>
+      <PortfolioProvider>
+        <AppInner />
+      </PortfolioProvider>
+    </AuthProvider>
   )
 }
 

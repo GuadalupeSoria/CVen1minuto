@@ -67,6 +67,15 @@ const highlightStyle: React.CSSProperties = {
   borderRadius: '4px',
 }
 
+const formatDuration = (item: any): string => {
+  const start = [item.startMonth, item.startYear].filter(Boolean).join(' ')
+  const end = item.endMonth
+    ? [item.endMonth, item.endYear].filter(Boolean).join(' ')
+    : ''
+  if (start || end) return start && end ? `${start} - ${end}` : start || end
+  return item.duration || ''
+}
+
 export const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, t, highlightSections = [] }) => {
   const color = data.theme.primaryColor
   return (
@@ -145,10 +154,17 @@ export const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, t, highlig
                   <p style={{ fontWeight: 600, fontSize: '12px', color: '#111827', margin: 0 }}>{exp.position}</p>
                   <p style={{ fontSize: '12px', color: '#6B7280', margin: '1px 0 0' }}>{exp.company}</p>
                 </div>
-                <span style={{ fontSize: '11px', color: '#9CA3AF', whiteSpace: 'nowrap' }}>{exp.duration}</span>
+                <span style={{ fontSize: '11px', color: '#9CA3AF', whiteSpace: 'nowrap' }}>{formatDuration(exp)}</span>
               </div>
               {exp.description && (
                 <p style={{ fontSize: '11px', color: '#374151', marginTop: '4px', whiteSpace: 'pre-wrap' }}>{exp.description}</p>
+              )}
+              {exp.skills && exp.skills.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '6px' }}>
+                  {exp.skills.map((skill: string, idx: number) => (
+                    <span key={idx} style={skillBadgeStyle(color)}>{skill}</span>
+                  ))}
+                </div>
               )}
             </div>
           ))}

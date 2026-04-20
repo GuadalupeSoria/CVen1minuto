@@ -1,12 +1,15 @@
 ﻿import React, { useState, useRef } from 'react'
 import { usePortfolio } from '../context/PortfolioContext'
+import { useAuth } from '../context/AuthContext'
 import {
   Plus, X, Upload, Phone, MapPin, Mail, Globe,
   PenLine, Sparkles, ChevronLeft, ChevronRight, FileUp, User, Briefcase,
-  GraduationCap, Code2, Languages, FolderGit2, AtSign, Palette
+  GraduationCap, Code2, Languages, FolderGit2, AtSign, Palette,
+  LogIn, LogOut, Crown
 } from 'lucide-react'
 import AIOptimizer from './AIOptimizer'
 import PDFImporter from './PDFImporter'
+import { LoginModal } from './LoginModal'
 
 type TranslationsShape = {
   editorTitle: string
@@ -211,21 +214,28 @@ const Editor: React.FC = () => {
     addSkill, removeSkill, setLanguage, importFromPDF, importFromImage
   } = usePortfolio()
 
+  const { user, isPremium, signOut } = useAuth()
+
   const lang = (portfolioData.language as string) || 'es'
   const t = translations[lang] || translations.es
 
+  const [showLoginModal, setShowLoginModal] = useState(false)
   const [viewMode, setViewMode] = useState<'editor' | 'optimizer'>('editor')
   const [activeTab, setActiveTab] = useState('personal')
   const [newProject, setNewProject] = useState({ name: '', description: '', startMonth: '', startYear: '', endMonth: '', endYear: '', skills: [] as string[] })
   const [newProjectSkill, setNewProjectSkill] = useState('')
   const [projectSkillInputs, setProjectSkillInputs] = useState<Record<string, string>>({})
-  const [newExperience, setNewExperience] = useState({ company: '', position: '', duration: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' })
+  const [experienceSkillInputs, setExperienceSkillInputs] = useState<Record<string, string>>({})
+  const [newExperience, setNewExperience] = useState({ company: '', position: '', duration: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '', skills: [] as string[] })
+  const [newExpSkill, setNewExpSkill] = useState('')
   const [newSkill, setNewSkill] = useState('')
   const [newEducation, setNewEducation] = useState({ institution: '', degree: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' })
   const fileInputRef = useRef<HTMLInputElement>(null)
   const tabsScrollRef = useRef<HTMLDivElement>(null)
   const [newLangName, setNewLangName] = useState('')
   const [newLangLevel, setNewLangLevel] = useState('')
+  const [newLangCustom, setNewLangCustom] = useState(false)
+  const [customLevelIds, setCustomLevelIds] = useState<Set<string>>(new Set())
   const [showLeftArrow, setShowLeftArrow] = useState(false)
   const [showRightArrow, setShowRightArrow] = useState(false)
   const [showPDFImporter, setShowPDFImporter] = useState(false)
@@ -257,7 +267,8 @@ const Editor: React.FC = () => {
   const handleAddExperience = () => {
     if (newExperience.company || newExperience.position) {
       addExperience(newExperience)
-      setNewExperience({ company: '', position: '', duration: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '' })
+      setNewExperience({ company: '', position: '', duration: '', startMonth: '', startYear: '', endMonth: '', endYear: '', description: '', skills: [] })
+      setNewExpSkill('')
     }
   }
   const handleAddSkill = () => { if (newSkill.trim()) { addSkill(newSkill.trim()); setNewSkill('') } }
@@ -272,6 +283,18 @@ const Editor: React.FC = () => {
     const proj = portfolioData.projects.find(p => p.id === id)
     updateProject(id, { skills: [...(proj?.skills || []), val] })
     setProjectSkillInputs(prev => ({ ...prev, [id]: '' }))
+  }
+  const handleAddSkillToExperience = (id: string) => {
+    const val = experienceSkillInputs[id]
+    if (!val) return
+    const exp = portfolioData.experience.find(e => e.id === id)
+    updateExperience(id, { skills: [...(exp?.skills || []), val] })
+    setExperienceSkillInputs(prev => ({ ...prev, [id]: '' }))
+  }
+  const handleAddExpSkill = () => {
+    if (!newExpSkill.trim()) return
+    setNewExperience(prev => ({ ...prev, skills: [...(prev.skills || []), newExpSkill.trim()] }))
+    setNewExpSkill('')
   }
   const handleAddEducation = () => {
     if (newEducation.institution || newEducation.degree) {
@@ -303,8 +326,9 @@ const Editor: React.FC = () => {
   const enter = (cb: () => void) => (e: React.KeyboardEvent) => { if (e.key === 'Enter') { e.preventDefault(); cb() } }
 
   const optLevels = lang === 'es'
-    ? ['Nativo', 'Avanzado', 'Intermedio', 'Basico']
-    : ['Native', 'Advanced', 'Intermediate', 'Basic']
+    ? ['Nativo', 'C2 - Dominio', 'C1 - Avanzado', 'B2 - Intermedio alto', 'B1 - Intermedio', 'A2 - Pre-intermedio', 'A1 - Basico']
+    : ['Native', 'C2 - Mastery', 'C1 - Advanced', 'B2 - Upper-Intermediate', 'B1 - Intermediate', 'A2 - Pre-Intermediate', 'A1 - Basic']
+  const isCustomLevel = (level: string | undefined) => !!level && !optLevels.includes(level)
 
   return (
     <div className="flex flex-col h-full bg-[#1C1C1E] overflow-hidden">
@@ -317,10 +341,37 @@ const Editor: React.FC = () => {
             <img src="/assets/logonew.png" alt="Logo" className="w-9 h-9 rounded-xl" />
             <span className="text-sm font-semibold text-white tracking-tight">CV en 1 minuto</span>
           </div>
-          <select value={lang} onChange={(e) => setLanguage?.(e.target.value)} className={`${sel} !w-auto px-3 py-2 text-xs`} aria-label="Idioma">
-            <option value="es" className="bg-[#1C1C1E]">ES</option>
-            <option value="en" className="bg-[#1C1C1E]">EN</option>
-          </select>
+          <div className="flex items-center gap-2">
+            {user ? (
+              <div className="flex items-center gap-1.5">
+                {isPremium && (
+                  <span className="flex items-center gap-1 px-2 py-1 bg-yellow-500/15 border border-yellow-500/30 rounded-lg text-[10px] font-semibold text-yellow-400">
+                    <Crown size={10} />Premium
+                  </span>
+                )}
+                <button
+                  onClick={() => signOut()}
+                  title={user.email ?? ''}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#2C2C2E] border border-[#3A3A3C] hover:border-red-500/40 hover:text-red-400 rounded-xl text-white/50 text-xs transition-all"
+                >
+                  <LogOut size={12} />
+                  <span className="max-w-[80px] truncate hidden sm:inline">{user.email}</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-violet-600/20 border border-violet-500/30 hover:bg-violet-600/30 rounded-xl text-violet-400 text-xs font-medium transition-all"
+              >
+                <LogIn size={12} />
+                {lang === 'es' ? 'Entrar' : 'Sign in'}
+              </button>
+            )}
+            <select value={lang} onChange={(e) => setLanguage?.(e.target.value)} className={`${sel} !w-auto px-3 py-2 text-xs`} aria-label="Idioma">
+              <option value="es" className="bg-[#1C1C1E]">ES</option>
+              <option value="en" className="bg-[#1C1C1E]">EN</option>
+            </select>
+          </div>
         </div>
 
         <button data-tour="import-btn" onClick={() => setShowPDFImporter(true)} className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#2C2C2E] border border-[#3A3A3C] hover:bg-[#3A3A3C] text-white/70 text-sm font-medium transition-all group">
@@ -541,6 +592,19 @@ const Editor: React.FC = () => {
                         <DarkInput value={exp.endYear || ''} onChange={(e) => updateExperience(exp.id, { endYear: e.target.value })} placeholder={t.exp_yearEndPlaceholder} />
                       </div>
                       <DarkTextarea value={exp.description || ''} onChange={(e) => updateExperience(exp.id, { description: e.target.value })} placeholder={t.exp_descriptionPlaceholder} rows={2} />
+                      <div>
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                          {(exp.skills || []).map((s, i) => (
+                            <span key={i} className="tag-item flex items-center gap-1 px-2.5 py-1 bg-[#3A3A3C] border border-[#48484A] rounded-full text-white/80 text-xs">
+                              {s}<button onClick={() => updateExperience(exp.id, { skills: (exp.skills || []).filter(x => x !== s) })} className="text-white/30 hover:text-red-400 transition-colors ml-0.5"><X size={10} /></button>
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex gap-1.5">
+                          <DarkInput placeholder={t.project_addSkillPlaceholder} value={experienceSkillInputs[exp.id] || ''} onChange={(e) => setExperienceSkillInputs(prev => ({ ...prev, [exp.id]: e.target.value }))} onKeyDown={enter(() => handleAddSkillToExperience(exp.id))} className="flex-1" />
+                          <button onClick={() => handleAddSkillToExperience(exp.id)} className="px-3 py-2.5 bg-[#3A3A3C] hover:bg-[#48484A] border border-[#48484A] rounded-xl text-white/70 transition-all"><Plus size={14} /></button>
+                        </div>
+                      </div>
                     </div>
                   </SectionCard>
                 ))}
@@ -555,6 +619,19 @@ const Editor: React.FC = () => {
                     <DarkInput value={newExperience.endYear} onChange={(e) => setNewExperience({ ...newExperience, endYear: e.target.value })} placeholder={t.exp_yearEndPlaceholder} />
                   </div>
                   <DarkTextarea value={newExperience.description} onChange={(e) => setNewExperience({ ...newExperience, description: e.target.value })} placeholder={t.exp_descriptionPlaceholder} rows={2} />
+                  <div>
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {(newExperience.skills || []).map((s, i) => (
+                        <span key={i} className="flex items-center gap-1 px-2.5 py-1 bg-[#3A3A3C] border border-[#48484A] rounded-full text-white/80 text-xs">
+                          {s}<button onClick={() => setNewExperience(prev => ({ ...prev, skills: prev.skills.filter(x => x !== s) }))} className="text-white/30 hover:text-red-400 transition-colors"><X size={10} /></button>
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex gap-1.5">
+                      <DarkInput placeholder={t.project_addSkillPlaceholder} value={newExpSkill} onChange={(e) => setNewExpSkill(e.target.value)} onKeyDown={enter(handleAddExpSkill)} className="flex-1" />
+                      <button onClick={handleAddExpSkill} className="px-3 py-2.5 bg-[#3A3A3C] border border-[#48484A] rounded-xl text-white/70 hover:bg-[#48484A] transition-all"><Plus size={14} /></button>
+                    </div>
+                  </div>
                   <button onClick={handleAddExperience} className="w-full py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"><Plus size={14} />{t.addExperience}</button>
                 </div>
               </div>
@@ -619,26 +696,69 @@ const Editor: React.FC = () => {
             {/* Languages */}
             {activeTab === 'languages' && (
               <div className="space-y-3 animate-fade-up">
-                {(portfolioData.languages || []).map((li) => (
-                  <SectionCard key={li.id}>
-                    <button onClick={() => removeLanguage(li.id)} className="absolute top-3 right-3 p-1.5 text-zinc-600 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"><X size={13} /></button>
-                    <div className="space-y-2.5 pr-6">
-                      <DarkInput value={li.name} onChange={(e) => updateLanguage(li.id, { name: e.target.value })} placeholder={t.language_namePlaceholder} />
-                      <select value={li.level || ''} onChange={(e) => updateLanguage(li.id, { level: e.target.value })} className={sel}>
-                        <option value="" className="bg-[#1C1C1E]">{lang === 'es' ? 'Seleccionar nivel...' : 'Select level...'}</option>
-                        {optLevels.map(l => <option key={l} value={l} className="bg-[#1C1C1E]">{l}</option>)}
-                      </select>
-                    </div>
-                  </SectionCard>
-                ))}
+                {(portfolioData.languages || []).map((li) => {
+                  const inCustomMode = customLevelIds.has(li.id) || isCustomLevel(li.level)
+                  return (
+                    <SectionCard key={li.id}>
+                      <button onClick={() => { removeLanguage(li.id); setCustomLevelIds(prev => { const s = new Set(prev); s.delete(li.id); return s }) }} className="absolute top-3 right-3 p-1.5 text-zinc-600 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"><X size={13} /></button>
+                      <div className="space-y-2.5 pr-6">
+                        <DarkInput value={li.name} onChange={(e) => updateLanguage(li.id, { name: e.target.value })} placeholder={t.language_namePlaceholder} />
+                        <select
+                          value={inCustomMode ? '__custom__' : (li.level || '')}
+                          onChange={(e) => {
+                            if (e.target.value === '__custom__') {
+                              setCustomLevelIds(prev => new Set([...prev, li.id]))
+                            } else {
+                              setCustomLevelIds(prev => { const s = new Set(prev); s.delete(li.id); return s })
+                              updateLanguage(li.id, { level: e.target.value })
+                            }
+                          }}
+                          className={sel}
+                        >
+                          <option value="" className="bg-[#1C1C1E]">{lang === 'es' ? 'Seleccionar nivel...' : 'Select level...'}</option>
+                          {optLevels.map(l => <option key={l} value={l} className="bg-[#1C1C1E]">{l}</option>)}
+                          <option value="__custom__" className="bg-[#1C1C1E]">{lang === 'es' ? 'Personalizado...' : 'Custom...'}</option>
+                        </select>
+                        {inCustomMode && (
+                          <DarkInput
+                            value={li.level || ''}
+                            onChange={(e) => updateLanguage(li.id, { level: e.target.value })}
+                            placeholder={lang === 'es' ? 'Escribe el nivel...' : 'Type level...'}
+                            autoFocus
+                          />
+                        )}
+                      </div>
+                    </SectionCard>
+                  )
+                })}
                 <div className="bg-[#161616] border border-dashed border-[#3A3A3C] rounded-2xl p-4 space-y-2.5">
                   <p className="text-xs text-white/40 font-medium">{lang === 'es' ? 'Nuevo idioma' : 'New language'}</p>
                   <DarkInput value={newLangName} onChange={(e) => setNewLangName(e.target.value)} placeholder={t.language_namePlaceholder} />
-                  <select value={newLangLevel} onChange={(e) => setNewLangLevel(e.target.value)} className={sel}>
+                  <select
+                    value={newLangCustom ? '__custom__' : newLangLevel}
+                    onChange={(e) => {
+                      if (e.target.value === '__custom__') { setNewLangCustom(true); setNewLangLevel('') }
+                      else { setNewLangCustom(false); setNewLangLevel(e.target.value) }
+                    }}
+                    className={sel}
+                  >
                     <option value="" className="bg-[#1C1C1E]">{lang === 'es' ? 'Seleccionar nivel...' : 'Select level...'}</option>
                     {optLevels.map(l => <option key={l} value={l} className="bg-[#1C1C1E]">{l}</option>)}
+                    <option value="__custom__" className="bg-[#1C1C1E]">{lang === 'es' ? 'Personalizado...' : 'Custom...'}</option>
                   </select>
-                  <button onClick={() => { if (!newLangName) return; addLanguage({ name: newLangName, level: newLangLevel }); setNewLangName(''); setNewLangLevel('') }} className="w-full py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"><Plus size={14} />{t.addLanguage}</button>
+                  {newLangCustom && (
+                    <DarkInput
+                      value={newLangLevel}
+                      onChange={(e) => setNewLangLevel(e.target.value)}
+                      placeholder={lang === 'es' ? 'Escribe el nivel...' : 'Type level...'}
+                      autoFocus
+                    />
+                  )}
+                  <button onClick={() => {
+                    if (!newLangName) return
+                    addLanguage({ name: newLangName, level: newLangLevel })
+                    setNewLangName(''); setNewLangLevel(''); setNewLangCustom(false)
+                  }} className="w-full py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"><Plus size={14} />{t.addLanguage}</button>
                 </div>
               </div>
             )}
@@ -654,6 +774,13 @@ const Editor: React.FC = () => {
         onImportImage={(file) => importFromImage(file)}
         language={lang}
       />
+
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        language={lang}
+      />
+
     </div>
   )
 }

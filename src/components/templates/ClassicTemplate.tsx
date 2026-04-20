@@ -29,6 +29,15 @@ const highlightStyle: React.CSSProperties = {
   borderRadius: '4px',
 }
 
+const formatDuration = (item: any): string => {
+  const start = [item.startMonth, item.startYear].filter(Boolean).join(' ')
+  const end = item.endMonth
+    ? [item.endMonth, item.endYear].filter(Boolean).join(' ')
+    : ''
+  if (start || end) return start && end ? `${start} - ${end}` : start || end
+  return item.duration || ''
+}
+
 export const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, t, highlightSections = [] }) => {
   const color = data.theme.primaryColor
 
@@ -174,11 +183,31 @@ export const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, t, highl
               <div key={exp.id} style={{ marginBottom: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2px' }}>
                   <p style={{ fontWeight: 600, fontSize: '12px', color: '#111827', margin: 0 }}>{exp.position}</p>
-                  <span style={{ fontSize: '11px', color: '#9CA3AF', whiteSpace: 'nowrap', marginLeft: '8px' }}>{exp.duration}</span>
+                  <span style={{ fontSize: '11px', color: '#9CA3AF', whiteSpace: 'nowrap', marginLeft: '8px' }}>{formatDuration(exp)}</span>
                 </div>
                 <p style={{ fontSize: '12px', color: '#6B7280', margin: '0 0 4px' }}>{exp.company}</p>
                 {exp.description && (
                   <p style={{ fontSize: '11px', color: '#374151', whiteSpace: 'pre-wrap', margin: 0 }}>{exp.description}</p>
+                )}
+                {exp.skills && exp.skills.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '5px' }}>
+                    {exp.skills.map((skill: string, idx: number) => (
+                      <span
+                        key={idx}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          fontSize: '10px',
+                          backgroundColor: `${color}15`,
+                          color: color,
+                        }}
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
                 )}
               </div>
             ))}

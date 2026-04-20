@@ -18,6 +18,7 @@
     "agents:list": "ts-node agents/scheduler.ts --list"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.104.0",
     "html2pdf.js": "^0.10.2",
     "lucide-react": "^0.344.0",
     "pdfjs-dist": "^5.4.530",
