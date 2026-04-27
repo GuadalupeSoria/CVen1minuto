@@ -33,7 +33,7 @@ export default function Terms() {
           <section>
             <h2 className="text-lg font-semibold text-white mb-3">1. Aceptación de los términos</h2>
             <p>
-              Al acceder y usar <strong className="text-white">CV en 1 Minuto</strong> (cven1minuto.com),
+              Al acceder y usar <strong className="text-white">TuCV</strong> (tucv.es),
               aceptas estos Términos de Uso en su totalidad. Si no estás de acuerdo con algún término,
               te pedimos que no uses el servicio.
             </p>
@@ -42,7 +42,7 @@ export default function Terms() {
           <section>
             <h2 className="text-lg font-semibold text-white mb-3">2. Descripción del servicio</h2>
             <p>
-              CV en 1 Minuto es una plataforma web que permite a los usuarios crear, editar, optimizar
+              TuCV es una plataforma web que permite a los usuarios crear, editar, optimizar
               con inteligencia artificial y exportar currículums vitae profesionales. El servicio se
               ofrece bajo un modelo freemium:
             </p>
@@ -91,7 +91,7 @@ export default function Terms() {
             </p>
             <p>
               Los elementos de la plataforma (diseño, código, plantillas, algoritmos de IA) son
-              propiedad de CV en 1 Minuto y están protegidos por las leyes de propiedad intelectual.
+              propiedad de TuCV y están protegidos por las leyes de propiedad intelectual.
               No está permitida su reproducción sin autorización expresa.
             </p>
           </section>
@@ -110,7 +110,7 @@ export default function Terms() {
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-white mb-1">Política de reembolso</h3>
-                  <p className="text-white/60 text-sm">Ofrecemos reembolso completo dentro de los 7 días posteriores al primer pago si no estás satisfecho. Para solicitar un reembolso, contáctanos en soporte@cven1minuto.com.</p>
+                  <p className="text-white/60 text-sm">Ofrecemos reembolso completo dentro de los 7 días posteriores al primer pago si no estás satisfecho. Para solicitar un reembolso, contáctanos en tucv.support@gmail.com.</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-white mb-1">Cancelación</h3>
@@ -132,7 +132,7 @@ export default function Terms() {
           <section>
             <h2 className="text-lg font-semibold text-white mb-3">7. Limitación de responsabilidad</h2>
             <p>
-              CV en 1 Minuto se proporciona "tal como está" sin garantías de ningún tipo. No somos
+              TuCV se proporciona "tal como está" sin garantías de ningún tipo. No somos
               responsables de: pérdida de datos, resultados de procesos de selección, decisiones
               tomadas basándose en el servicio, ni interrupciones del servicio.
             </p>
@@ -162,7 +162,7 @@ export default function Terms() {
             <h2 className="text-lg font-semibold text-white mb-3">10. Contacto</h2>
             <div className="bg-[#1C1C1E] border border-white/8 rounded-2xl p-5">
               <p className="text-white/60 text-sm">Para consultas sobre estos términos:</p>
-              <p className="mt-2 text-white font-medium">soporte@cven1minuto.com</p>
+              <p className="mt-2 text-white font-medium">tucv.support@gmail.com</p>
             </div>
           </section>
 
@@ -171,7 +171,7 @@ export default function Terms() {
 
       <footer className="border-t border-white/6 py-6">
         <div className="max-w-3xl mx-auto px-6 flex flex-wrap gap-4 items-center justify-between text-sm text-white/30">
-          <span>© {new Date().getFullYear()} CV en 1 Minuto</span>
+          <span>© {new Date().getFullYear()} TuCV</span>
           <div className="flex gap-4">
             <a href="#" className="hover:text-white transition-colors">Editor</a>
             <a href="#about" className="hover:text-white transition-colors">Acerca de</a>

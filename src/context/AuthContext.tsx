@@ -36,12 +36,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   useEffect(() => {
+    const supabaseConfigured = !!(
+      import.meta.env.VITE_SUPABASE_URL &&
+      import.meta.env.VITE_SUPABASE_ANON_KEY
+    )
+    if (!supabaseConfigured) { setLoading(false); return }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) fetchProfile(session.user.id)
       setLoading(false)
-    })
+    }).catch(() => setLoading(false))
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
@@ -54,17 +60,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [])
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return { error: error?.message ?? null }
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      return { error: error?.message ?? null }
+    } catch {
+      return { error: 'Auth service unavailable' }
+    }
   }
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ email, password })
-    return { error: error?.message ?? null }
+    try {
+      const { error } = await supabase.auth.signUp({ email, password })
+      return { error: error?.message ?? null }
+    } catch {
+      return { error: 'Auth service unavailable' }
+    }
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    try { await supabase.auth.signOut() } catch { /* noop */ }
   }
 
   // Premium: logged in and profile says is_premium and not expired

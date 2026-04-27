@@ -51,13 +51,12 @@ class SubscriptionService {
     return redirectToStripe()
   }
 
-  // Verificar si la URL tiene el param de éxito de Stripe y activar premium
-  // Retorna true si se activó, false si no había nada que procesar
+  // Verificar si la URL tiene el param de éxito de Stripe
+  // En producción el webhook actualiza Supabase directamente; aquí solo limpiamos la URL
   handleStripeReturn(): boolean {
     const params = new URLSearchParams(window.location.search)
     if (params.get(STRIPE_SUCCESS_PARAM) === '1') {
-      this.activatePremium(STRIPE_SUBSCRIPTION_MONTHS)
-      // Limpiar la URL para no re-activar en recargas
+      // Solo limpiamos la URL; no activamos premium desde el cliente (evita bypass)
       const clean = window.location.pathname
       window.history.replaceState({}, '', clean)
       return true

@@ -34,9 +34,9 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-lg font-semibold text-white mb-3">1. Quiénes somos</h2>
             <p>
-              <strong className="text-white">CV en 1 Minuto</strong> es un servicio web gratuito que permite a los usuarios
+              <strong className="text-white">TuCV</strong> es un servicio web gratuito que permite a los usuarios
               crear, editar y exportar currículums vitae profesionales con ayuda de inteligencia artificial.
-              Accesible en <a href="https://cven1minuto.com" className="text-violet-400 hover:text-violet-300">cven1minuto.com</a>.
+              Accesible en <a href="https://tucv.es" className="text-violet-400 hover:text-violet-300">tucv.es</a>.
             </p>
           </section>
 
@@ -178,7 +178,7 @@ export default function PrivacyPolicy() {
               <p className="text-white/60 text-sm">
                 Para cualquier consulta sobre privacidad o para ejercer tus derechos, contáctanos en:
               </p>
-              <p className="mt-2 text-white font-medium">privacidad@cven1minuto.com</p>
+              <p className="mt-2 text-white font-medium">tucv.support@gmail.com</p>
             </div>
           </section>
 
@@ -188,7 +188,7 @@ export default function PrivacyPolicy() {
       {/* Footer mini */}
       <footer className="border-t border-white/6 py-6">
         <div className="max-w-3xl mx-auto px-6 flex flex-wrap gap-4 items-center justify-between text-sm text-white/30">
-          <span>© {new Date().getFullYear()} CV en 1 Minuto</span>
+          <span>© {new Date().getFullYear()} TuCV</span>
           <div className="flex gap-4">
             <a href="#" className="hover:text-white transition-colors">Editor</a>
             <a href="#about" className="hover:text-white transition-colors">Acerca de</a>

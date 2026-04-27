@@ -189,7 +189,7 @@ export default function About() {
 
       <footer className="border-t border-white/6 py-6">
         <div className="max-w-3xl mx-auto px-6 flex flex-wrap gap-4 items-center justify-between text-sm text-white/30">
-          <span>© {new Date().getFullYear()} CV en 1 Minuto</span>
+          <span>© {new Date().getFullYear()} TuCV</span>
           <div className="flex gap-4">
             <a href="#" className="hover:text-white transition-colors">Editor</a>
             <a href="#privacy" className="hover:text-white transition-colors">Privacidad</a>

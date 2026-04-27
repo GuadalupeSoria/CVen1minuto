@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { usePortfolio } from '../context/PortfolioContext'
 import { Download, LayoutTemplate, Languages, Check, X, Sparkles, Save, BookMarked, Loader2 } from 'lucide-react'
-import html2pdf from 'html2pdf.js'
+import { toCanvas } from 'html-to-image'
+import jsPDF from 'jspdf'
 import { AdModal } from './AdModal'
 import { OriginalTemplate } from './templates/OriginalTemplate'
 import { ModernTemplate } from './templates/ModernTemplate'
@@ -196,11 +197,7 @@ const Preview: React.FC = () => {
         updatePortfolioData({ language: translationLang });
       }
 
-      console.log('Translating to:', translationLang);
-      console.log('Current data:', portfolioData);
-      
       const translated = await AIService.translateCV(portfolioData, translationLang);
-      console.log('Translation result:', translated);
       
       if (translated) {
         // Forzar actualización completa
@@ -229,61 +226,57 @@ const Preview: React.FC = () => {
     }
   };
 
-  const generatePDF = () => {
+  const generatePDF = async () => {
     setIsGeneratingPDF(true)
-    const element = document.querySelector('.preview-content')
+    const element = document.querySelector('.preview-content') as HTMLElement
     if (!element) { setIsGeneratingPDF(false); return }
 
-    // Wait one frame so isGeneratingPDF=true removes highlight outlines before capture
-    requestAnimationFrame(() => {
-      // Measure the actual rendered width of the element in px
-      const elWidth = (element as HTMLElement).getBoundingClientRect().width
+    // One frame so highlight outlines are removed before capture
+    await new Promise(r => requestAnimationFrame(r))
 
-      const opt = {
-        margin: 0,
-        filename: `cv-${portfolioData.name.toLowerCase().replace(/\s+/g, '-')}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          letterRendering: true,
-          logging: false,
-          scrollY: 0,
-          scrollX: 0,
-          backgroundColor: '#ffffff',
-          // Match windowWidth to actual element width so responsive classes
-          // behave identically between preview and PDF capture
-          windowWidth: elWidth,
-          onclone: (clonedDoc: Document) => {
-            const el = clonedDoc.querySelector('.preview-content') as HTMLElement
-            if (el) {
-              el.style.backgroundColor = '#ffffff'
-              // Remove any height constraints so content isn't clipped
-              el.style.maxHeight = 'none'
-              el.style.overflow = 'visible'
-            }
-          },
-        },
-        jsPDF: {
-          unit: 'mm',
-          format: 'a4',
-          orientation: 'portrait',
-          compress: true,
-        },
-        // No pagebreak config — let html2pdf decide naturally based on content height
+    try {
+      const PIXEL_RATIO = 2
+      const canvas = await toCanvas(element, {
+        pixelRatio: PIXEL_RATIO,
+        backgroundColor: '#ffffff',
+        style: { maxHeight: 'none', overflow: 'visible', transform: 'none' },
+      })
+
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true })
+      const pdfW = pdf.internal.pageSize.getWidth()   // 210 mm
+      const pdfH = pdf.internal.pageSize.getHeight()  // 297 mm
+
+      // Convert canvas pixels → mm  (96 dpi baseline)
+      const PX_PER_MM = 96 / 25.4
+      const img1xW = canvas.width / PIXEL_RATIO
+      const img1xH = canvas.height / PIXEL_RATIO
+      const pageHeightPx = pdfH * PX_PER_MM
+
+      let srcY = 0
+      while (srcY < img1xH) {
+        if (srcY > 0) pdf.addPage()
+
+        const slicePx = Math.min(pageHeightPx, img1xH - srcY)
+        const slice = document.createElement('canvas')
+        slice.width = canvas.width
+        slice.height = Math.ceil(slicePx * PIXEL_RATIO)
+        slice.getContext('2d')!.drawImage(
+          canvas,
+          0, Math.round(srcY * PIXEL_RATIO), canvas.width, slice.height,
+          0, 0, slice.width, slice.height,
+        )
+        pdf.addImage(slice.toDataURL('image/jpeg', 0.98), 'JPEG', 0, 0, pdfW, slicePx / PX_PER_MM)
+        srcY += pageHeightPx
       }
 
-      html2pdf()
-        .set(opt)
-        .from(element)
-        .save()
-        .then(() => { subscriptionService.recordDownload() })
-        .catch((error: Error) => {
-          console.error('Error generating PDF:', error)
-          alert(lang === 'es' ? 'Error al generar el PDF' : 'Error generating PDF')
-        })
-        .finally(() => { setIsGeneratingPDF(false) })
-    })
+      pdf.save(`cv-${portfolioData.name.toLowerCase().replace(/\s+/g, '-')}.pdf`)
+      subscriptionService.recordDownload()
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+      alert(lang === 'es' ? 'Error al generar el PDF' : 'Error generating PDF')
+    } finally {
+      setIsGeneratingPDF(false)
+    }
   }
 
   return (

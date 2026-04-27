@@ -103,6 +103,9 @@ interface PortfolioContextType {
   addLanguage: (language: { name: string; level?: string }) => void
   updateLanguage: (id: string, language: Partial<{ name: string; level?: string }>) => void
   removeLanguage: (id: string) => void
+  reorderProjects: (fromIndex: number, toIndex: number) => void
+  reorderExperiences: (fromIndex: number, toIndex: number) => void
+  reorderLanguages: (fromIndex: number, toIndex: number) => void
   addSkill: (skill: string) => void
   removeSkill: (skill: string) => void
   importFromPDF: (file: File) => Promise<void>
@@ -331,6 +334,33 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }))
   }
 
+  const reorderProjects = (fromIndex: number, toIndex: number) => {
+    setPortfolioData(prev => {
+      const arr = [...prev.projects]
+      const [item] = arr.splice(fromIndex, 1)
+      arr.splice(toIndex, 0, item)
+      return { ...prev, projects: arr }
+    })
+  }
+
+  const reorderExperiences = (fromIndex: number, toIndex: number) => {
+    setPortfolioData(prev => {
+      const arr = [...prev.experience]
+      const [item] = arr.splice(fromIndex, 1)
+      arr.splice(toIndex, 0, item)
+      return { ...prev, experience: arr }
+    })
+  }
+
+  const reorderLanguages = (fromIndex: number, toIndex: number) => {
+    setPortfolioData(prev => {
+      const arr = [...(prev.languages || [])]
+      const [item] = arr.splice(fromIndex, 1)
+      arr.splice(toIndex, 0, item)
+      return { ...prev, languages: arr }
+    })
+  }
+
   const updateEducation = (id: string, education: Partial<Education>) => {
     setPortfolioData(prevData => ({
       ...prevData,
@@ -476,6 +506,9 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       addLanguage,
       updateLanguage,
       removeLanguage,
+      reorderProjects,
+      reorderExperiences,
+      reorderLanguages,
       addSkill,
       removeSkill,
       importFromPDF,

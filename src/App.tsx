@@ -7,17 +7,23 @@ import Footer from './components/Footer'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import About from './pages/About'
 import Terms from './pages/Terms'
+import LandingPage from './pages/LandingPage'
 import OnboardingTour, { useOnboarding } from './components/OnboardingTour'
 import { PenLine, Eye, CheckCircle, HelpCircle } from 'lucide-react'
 import subscriptionService from './services/subscriptionService'
 
-type Page = 'app' | 'privacy' | 'about' | 'terms'
+type Page = 'landing' | 'app' | 'privacy' | 'about' | 'terms'
+
+const VISITED_KEY = 'cv1m_visited'
 
 function getPageFromHash(): Page {
   const hash = window.location.hash.replace('#', '')
   if (hash === 'privacy') return 'privacy'
   if (hash === 'about') return 'about'
   if (hash === 'terms') return 'terms'
+  if (hash === 'app') return 'app'
+  // Show landing page only on first visit; returning users go straight to app
+  if (!localStorage.getItem(VISITED_KEY)) return 'landing'
   return 'app'
 }
 
@@ -120,7 +126,15 @@ function App() {
   const [page, setPage] = useState<Page>(getPageFromHash())
 
   useEffect(() => {
-    const onHashChange = () => setPage(getPageFromHash())
+    const onHashChange = () => {
+      setPage(getPageFromHash())
+      // Re-initialize AdSense ads on navigation
+      try {
+        (window as Window & { adsbygoogle?: unknown[] }).adsbygoogle =
+          (window as Window & { adsbygoogle?: unknown[] }).adsbygoogle || []
+        ;((window as Window & { adsbygoogle?: unknown[] }).adsbygoogle as unknown[]).push({})
+      } catch { /* noop */ }
+    }
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
@@ -128,6 +142,18 @@ function App() {
   if (page === 'privacy') return <PrivacyPolicy />
   if (page === 'about') return <About />
   if (page === 'terms') return <Terms />
+
+  if (page === 'landing') {
+    return (
+      <LandingPage
+        onStart={() => {
+          localStorage.setItem(VISITED_KEY, '1')
+          window.location.hash = 'app'
+          setPage('app')
+        }}
+      />
+    )
+  }
 
   return (
     <AuthProvider>

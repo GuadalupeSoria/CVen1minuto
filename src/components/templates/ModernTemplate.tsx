@@ -23,38 +23,15 @@ interface ModernTemplateProps {
   highlightSections?: string[]
 }
 
-const contactIconStyle: React.CSSProperties = {
-  display: 'inline-block',
-  width: '12px',
-  height: '12px',
-  flexShrink: 0,
-  verticalAlign: 'middle',
-}
-
-const contactItemStyle: React.CSSProperties = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: '5px',
-  marginRight: '12px',
-  marginBottom: '4px',
-  verticalAlign: 'middle',
-}
-
-const contactTextStyle: React.CSSProperties = {
-  fontSize: '10px',
-  lineHeight: '12px',
-  color: '#374151',
-  verticalAlign: 'middle',
-}
 
 const skillBadgeStyle = (color: string): React.CSSProperties => ({
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '3px 10px',
+  display: 'inline-block',
+  padding: '0 10px',
+  lineHeight: '18px',
   borderRadius: '9999px',
   fontSize: '11px',
   fontWeight: 500,
+  whiteSpace: 'nowrap',
   backgroundColor: `${color}20`,
   color: color,
   marginRight: '6px',
@@ -96,37 +73,19 @@ export const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, t, highlig
           <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#111827', margin: 0, lineHeight: 1.2 }}>{data.name}</h1>
           <h2 style={{ fontSize: '16px', color: '#6B7280', margin: '4px 0 12px', fontWeight: 500 }}>{data.title}</h2>
 
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-            {data.contact?.email && (
-              <span style={contactItemStyle}>
-                <Mail size={12} style={contactIconStyle} color="#6B7280" />
-                <span style={contactTextStyle}>{data.contact.email}</span>
+          <div style={{ lineHeight: '1.8' }}>
+            {([
+              { icon: <Mail size={11} color="#6B7280" />, val: data.contact?.email },
+              { icon: <Phone size={11} color="#6B7280" />, val: data.contact?.phone },
+              { icon: <MapPin size={11} color="#6B7280" />, val: data.contact?.address },
+              { icon: <Globe size={11} color="#6B7280" />, val: data.contact?.website },
+              { icon: <Globe size={11} color="#6B7280" />, val: data.contact?.linkedin },
+            ] as const).filter(c => c.val).map((c, i) => (
+              <span key={i} style={{ display: 'inline-block', marginRight: '12px', marginBottom: '2px', whiteSpace: 'nowrap', lineHeight: '15px', verticalAlign: 'middle' }}>
+                <span style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '3px', lineHeight: '1' }}>{c.icon}</span>
+                <span style={{ display: 'inline-block', verticalAlign: 'middle', fontSize: '10px', color: '#374151', lineHeight: '15px' }}>{c.val}</span>
               </span>
-            )}
-            {data.contact?.phone && (
-              <span style={contactItemStyle}>
-                <Phone size={12} style={contactIconStyle} color="#6B7280" />
-                <span style={contactTextStyle}>{data.contact.phone}</span>
-              </span>
-            )}
-            {data.contact?.address && (
-              <span style={contactItemStyle}>
-                <MapPin size={12} style={contactIconStyle} color="#6B7280" />
-                <span style={contactTextStyle}>{data.contact.address}</span>
-              </span>
-            )}
-            {data.contact?.website && (
-              <span style={contactItemStyle}>
-                <Globe size={12} style={contactIconStyle} color="#6B7280" />
-                <span style={contactTextStyle}>{data.contact.website}</span>
-              </span>
-            )}
-            {data.contact?.linkedin && (
-              <span style={contactItemStyle}>
-                <Globe size={12} style={contactIconStyle} color="#6B7280" />
-                <span style={contactTextStyle}>{data.contact.linkedin}</span>
-              </span>
-            )}
+            ))}
           </div>
         </div>
       </div>
@@ -160,7 +119,7 @@ export const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, t, highlig
                 <p style={{ fontSize: '11px', color: '#374151', marginTop: '4px', whiteSpace: 'pre-wrap' }}>{exp.description}</p>
               )}
               {exp.skills && exp.skills.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '6px' }}>
+                <div style={{ marginTop: '6px', lineHeight: '1' }}>
                   {exp.skills.map((skill: string, idx: number) => (
                     <span key={idx} style={skillBadgeStyle(color)}>{skill}</span>
                   ))}
@@ -182,7 +141,7 @@ export const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, t, highlig
               <p style={{ fontWeight: 600, fontSize: '12px', color: '#111827', margin: '0 0 3px' }}>{project.name}</p>
               <p style={{ fontSize: '11px', color: '#374151', whiteSpace: 'pre-wrap', margin: 0 }}>{project.description}</p>
               {project.skills && project.skills.length > 0 && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '6px' }}>
+                <div style={{ marginTop: '6px', lineHeight: '1' }}>
                   {project.skills.map((skill: string, idx: number) => (
                     <span key={idx} style={skillBadgeStyle(color)}>{skill}</span>
                   ))}
@@ -215,7 +174,7 @@ export const ModernTemplate: React.FC<ModernTemplateProps> = ({ data, t, highlig
           <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '8px', paddingBottom: '4px', borderBottom: `2px solid ${color}`, color: '#111827' }}>
             {t.skillsTitle}
           </h3>
-          <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+          <div style={{ lineHeight: '1' }}>
             {data.skills.map((skill, index) => (
               <span key={index} style={skillBadgeStyle(color)}>{skill}</span>
             ))}

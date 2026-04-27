@@ -58,35 +58,14 @@ const S = {
   } as React.CSSProperties,
 
   contactRow: {
-    display: 'flex',
-    flexWrap: 'wrap' as const,
-    gap: '0',
+    lineHeight: '1.8',
   } as React.CSSProperties,
 
   contactItem: {
-    display: 'flex',
-    flexDirection: 'row' as const,
-    alignItems: 'center',
-    gap: '4px',
-    marginRight: '12px',
-    marginBottom: '4px',
-    minHeight: '12px',
-  } as React.CSSProperties,
-
-  contactIconBox: {
-    width: '11px',
-    height: '11px',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  } as React.CSSProperties,
-
-  contactText: {
-    display: 'block',
-    fontSize: '10px',
-    color: '#6B7280',
-    lineHeight: 1.1,
+    display: 'inline-block',
+    marginRight: '10px',
+    marginBottom: '2px',
+    verticalAlign: 'top',
   } as React.CSSProperties,
 
   columns: {
@@ -186,22 +165,20 @@ const S = {
   } as React.CSSProperties,
 
   skillsWrap: {
-    display: 'flex',
-    flexWrap: 'wrap' as const,
-    gap: '5px',
     marginTop: '6px',
+    lineHeight: '1',
   } as React.CSSProperties,
 
   skillBadge: (color: string): React.CSSProperties => ({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '18px',
+    display: 'inline-block',
     padding: '0 8px',
+    lineHeight: '16px',
     borderRadius: '9999px',
     fontSize: '10px',
     fontWeight: 500,
-    lineHeight: 1,
+    whiteSpace: 'nowrap',
+    marginRight: '4px',
+    marginBottom: '4px',
     backgroundColor: `${color}18`,
     color: color,
   }),
@@ -211,14 +188,6 @@ const S = {
     outlineOffset: '2px',
     borderRadius: '4px',
   } as React.CSSProperties,
-}
-
-const iconSvgStyle: React.CSSProperties = {
-  display: 'block',
-  width: '11px',
-  height: '11px',
-  flexShrink: 0,
-  verticalAlign: 'middle',
 }
 
 function formatDateRange(item: any): string {
@@ -257,46 +226,18 @@ export const OriginalTemplate: React.FC<OriginalTemplateProps> = ({ data, t, hig
           <h1 style={S.name}>{data.name}</h1>
           <h2 style={{ ...S.titleText, color }}>{data.title}</h2>
           <div style={S.contactRow}>
-            {data.contact?.email && (
-              <span style={S.contactItem}>
-                <span style={S.contactIconBox}>
-                  <Mail size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
-                </span>
-                <span style={S.contactText}>{data.contact.email}</span>
+            {([
+              { icon: <Mail size={10} color="#9CA3AF" />, val: data.contact?.email },
+              { icon: <Phone size={10} color="#9CA3AF" />, val: data.contact?.phone },
+              { icon: <MapPin size={10} color="#9CA3AF" />, val: data.contact?.address },
+              { icon: <Globe size={10} color="#9CA3AF" />, val: data.contact?.website },
+              { icon: <Globe size={10} color="#9CA3AF" />, val: data.contact?.linkedin },
+            ] as const).filter(c => c.val).map((c, i) => (
+              <span key={i} style={{ display: 'inline-block', marginRight: '10px', marginBottom: '2px', whiteSpace: 'nowrap', lineHeight: '14px', verticalAlign: 'middle' }}>
+                <span style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '3px', lineHeight: '1' }}>{c.icon}</span>
+                <span style={{ display: 'inline-block', verticalAlign: 'middle', fontSize: '10px', color: '#6B7280', lineHeight: '14px' }}>{c.val}</span>
               </span>
-            )}
-            {data.contact?.phone && (
-              <span style={S.contactItem}>
-                <span style={S.contactIconBox}>
-                  <Phone size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
-                </span>
-                <span style={S.contactText}>{data.contact.phone}</span>
-              </span>
-            )}
-            {data.contact?.address && (
-              <span style={S.contactItem}>
-                <span style={S.contactIconBox}>
-                  <MapPin size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
-                </span>
-                <span style={S.contactText}>{data.contact.address}</span>
-              </span>
-            )}
-            {data.contact?.website && (
-              <span style={S.contactItem}>
-                <span style={S.contactIconBox}>
-                  <Globe size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
-                </span>
-                <span style={S.contactText}>{data.contact.website}</span>
-              </span>
-            )}
-            {data.contact?.linkedin && (
-              <span style={S.contactItem}>
-                <span style={S.contactIconBox}>
-                  <Globe size={11} style={{ ...iconSvgStyle, color: '#9CA3AF' }} />
-                </span>
-                <span style={S.contactText}>{data.contact.linkedin}</span>
-              </span>
-            )}
+            ))}
           </div>
         </div>
       </div>

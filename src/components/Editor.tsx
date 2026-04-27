@@ -5,7 +5,7 @@ import {
   Plus, X, Upload, Phone, MapPin, Mail, Globe,
   PenLine, Sparkles, ChevronLeft, ChevronRight, FileUp, User, Briefcase,
   GraduationCap, Code2, Languages, FolderGit2, AtSign, Palette,
-  LogIn, LogOut, Crown
+  LogIn, LogOut, Crown, GripVertical
 } from 'lucide-react'
 import AIOptimizer from './AIOptimizer'
 import PDFImporter from './PDFImporter'
@@ -190,8 +190,8 @@ const DarkTextarea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement>> 
 const Label: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <label className="block text-[11px] font-semibold text-white/50 uppercase tracking-wider mb-1.5">{children}</label>
 )
-const SectionCard: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
-  <div className={`bg-[#2C2C2E] border border-[#3A3A3C] rounded-2xl p-4 relative group animate-fade-up ${className}`}>{children}</div>
+const SectionCard: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ children, className = '', ...rest }) => (
+  <div {...rest} className={`bg-[#2C2C2E] border border-[#3A3A3C] rounded-2xl p-4 relative group animate-fade-up ${className}`}>{children}</div>
 )
 
 const tabIcons: Record<string, React.ReactNode> = {
@@ -207,10 +207,10 @@ const tabIcons: Record<string, React.ReactNode> = {
 const Editor: React.FC = () => {
   const {
     portfolioData, updatePortfolioData,
-    addProject, updateProject, removeProject,
-    addExperience, updateExperience, removeExperience,
+    addProject, updateProject, removeProject, reorderProjects,
+    addExperience, updateExperience, removeExperience, reorderExperiences,
     addEducation, updateEducation, removeEducation,
-    addLanguage, updateLanguage, removeLanguage,
+    addLanguage, updateLanguage, removeLanguage, reorderLanguages,
     addSkill, removeSkill, setLanguage, importFromPDF, importFromImage
   } = usePortfolio()
 
@@ -239,6 +239,8 @@ const Editor: React.FC = () => {
   const [showLeftArrow, setShowLeftArrow] = useState(false)
   const [showRightArrow, setShowRightArrow] = useState(false)
   const [showPDFImporter, setShowPDFImporter] = useState(false)
+  const dragRef = useRef<{ type: string; index: number } | null>(null)
+  const [dragOverId, setDragOverId] = useState<string | null>(null)
 
   const checkScrollButtons = () => {
     if (tabsScrollRef.current) {
@@ -330,6 +332,10 @@ const Editor: React.FC = () => {
     : ['Native', 'C2 - Mastery', 'C1 - Advanced', 'B2 - Upper-Intermediate', 'B1 - Intermediate', 'A2 - Pre-Intermediate', 'A1 - Basic']
   const isCustomLevel = (level: string | undefined) => !!level && !optLevels.includes(level)
 
+  const currentLabel = lang === 'es' ? 'Actualidad' : 'Present'
+  const isCurrently = (endMonth: string | undefined) =>
+    endMonth === 'Actualidad' || endMonth === 'Present' || endMonth === 'Currently'
+
   return (
     <div className="flex flex-col h-full bg-[#1C1C1E] overflow-hidden">
 
@@ -337,9 +343,8 @@ const Editor: React.FC = () => {
       <div className="shrink-0 px-4 pt-4 pb-3 border-b border-[#38383A] space-y-3 bg-[#1C1C1E] sticky top-0 z-10">
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <img src="/assets/logonew.png" alt="Logo" className="w-9 h-9 rounded-xl" />
-            <span className="text-sm font-semibold text-white tracking-tight">CV en 1 minuto</span>
+          <div className="flex items-center">
+            <img src="/assets/tucv-logo.svg" alt="TuCV" className="h-14 w-auto" />
           </div>
           <div className="flex items-center gap-2">
             {user ? (
@@ -520,18 +525,37 @@ const Editor: React.FC = () => {
             {/* Projects */}
             {activeTab === 'projects' && (
               <div className="space-y-3 animate-fade-up">
-                {portfolioData.projects.map((project) => (
-                  <SectionCard key={project.id}>
+                {portfolioData.projects.map((project, index) => (
+                  <SectionCard
+                    key={project.id}
+                    draggable
+                    onDragStart={() => { dragRef.current = { type: 'project', index } }}
+                    onDragOver={(e) => { e.preventDefault(); setDragOverId(project.id) }}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      if (dragRef.current?.type === 'project' && dragRef.current.index !== index) {
+                        reorderProjects(dragRef.current.index, index)
+                      }
+                      setDragOverId(null); dragRef.current = null
+                    }}
+                    onDragEnd={() => { setDragOverId(null); dragRef.current = null }}
+                    className={dragOverId === project.id && dragRef.current?.index !== index ? 'ring-1 ring-violet-500/60' : ''}
+                  >
+                    <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-600 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing"><GripVertical size={14} /></div>
                     <button onClick={() => removeProject(project.id)} className="absolute top-3 right-3 p-1.5 text-zinc-600 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"><X size={13} /></button>
-                    <div className="space-y-2.5 pr-6">
+                    <div className="space-y-2.5 pr-6 pl-5">
                       <DarkInput value={project.name} onChange={(e) => updateProject(project.id, { name: e.target.value })} placeholder={t.project_namePlaceholder} />
                       <DarkTextarea value={project.description} onChange={(e) => updateProject(project.id, { description: e.target.value })} placeholder={t.project_descriptionPlaceholder} rows={2} />
                       <div className="grid grid-cols-2 gap-2">
                         <DarkInput value={project.startMonth || ''} onChange={(e) => updateProject(project.id, { startMonth: e.target.value })} placeholder={t.project_monthStartPlaceholder} />
                         <DarkInput value={project.startYear || ''} onChange={(e) => updateProject(project.id, { startYear: e.target.value })} placeholder={t.project_yearStartPlaceholder} />
-                        <DarkInput value={project.endMonth || ''} onChange={(e) => updateProject(project.id, { endMonth: e.target.value })} placeholder={t.project_monthEndPlaceholder} />
-                        <DarkInput value={project.endYear || ''} onChange={(e) => updateProject(project.id, { endYear: e.target.value })} placeholder={t.project_yearEndPlaceholder} />
+                        <DarkInput value={project.endMonth || ''} onChange={(e) => updateProject(project.id, { endMonth: e.target.value })} placeholder={t.project_monthEndPlaceholder} disabled={isCurrently(project.endMonth)} className={isCurrently(project.endMonth) ? 'opacity-40 cursor-not-allowed' : ''} />
+                        <DarkInput value={project.endYear || ''} onChange={(e) => updateProject(project.id, { endYear: e.target.value })} placeholder={t.project_yearEndPlaceholder} disabled={isCurrently(project.endMonth)} className={isCurrently(project.endMonth) ? 'opacity-40 cursor-not-allowed' : ''} />
                       </div>
+                      <label className="flex items-center gap-2 cursor-pointer group/check">
+                        <input type="checkbox" checked={isCurrently(project.endMonth)} onChange={(e) => updateProject(project.id, e.target.checked ? { endMonth: currentLabel, endYear: '' } : { endMonth: '', endYear: '' })} className="w-3.5 h-3.5 rounded accent-violet-500 cursor-pointer" />
+                        <span className="text-xs text-white/40 group-hover/check:text-white/60 transition-colors">{currentLabel}</span>
+                      </label>
                       <div>
                         <div className="flex flex-wrap gap-1.5 mb-2">
                           {(project.skills || []).map((s, i) => (
@@ -579,18 +603,37 @@ const Editor: React.FC = () => {
             {/* Experience */}
             {activeTab === 'experience' && (
               <div className="space-y-3 animate-fade-up">
-                {portfolioData.experience.map((exp) => (
-                  <SectionCard key={exp.id}>
+                {portfolioData.experience.map((exp, index) => (
+                  <SectionCard
+                    key={exp.id}
+                    draggable
+                    onDragStart={() => { dragRef.current = { type: 'experience', index } }}
+                    onDragOver={(e) => { e.preventDefault(); setDragOverId(exp.id) }}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      if (dragRef.current?.type === 'experience' && dragRef.current.index !== index) {
+                        reorderExperiences(dragRef.current.index, index)
+                      }
+                      setDragOverId(null); dragRef.current = null
+                    }}
+                    onDragEnd={() => { setDragOverId(null); dragRef.current = null }}
+                    className={dragOverId === exp.id && dragRef.current?.index !== index ? 'ring-1 ring-violet-500/60' : ''}
+                  >
+                    <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-600 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing"><GripVertical size={14} /></div>
                     <button onClick={() => removeExperience(exp.id)} className="absolute top-3 right-3 p-1.5 text-zinc-600 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"><X size={13} /></button>
-                    <div className="space-y-2.5 pr-6">
+                    <div className="space-y-2.5 pr-6 pl-5">
                       <DarkInput value={exp.company} onChange={(e) => updateExperience(exp.id, { company: e.target.value })} placeholder={t.exp_companyPlaceholder} />
                       <DarkInput value={exp.position} onChange={(e) => updateExperience(exp.id, { position: e.target.value })} placeholder={t.exp_positionPlaceholder} />
                       <div className="grid grid-cols-2 gap-2">
                         <DarkInput value={exp.startMonth || ''} onChange={(e) => updateExperience(exp.id, { startMonth: e.target.value })} placeholder={t.exp_monthStartPlaceholder} />
                         <DarkInput value={exp.startYear || ''} onChange={(e) => updateExperience(exp.id, { startYear: e.target.value })} placeholder={t.exp_yearStartPlaceholder} />
-                        <DarkInput value={exp.endMonth || ''} onChange={(e) => updateExperience(exp.id, { endMonth: e.target.value })} placeholder={t.exp_monthEndPlaceholder} />
-                        <DarkInput value={exp.endYear || ''} onChange={(e) => updateExperience(exp.id, { endYear: e.target.value })} placeholder={t.exp_yearEndPlaceholder} />
+                        <DarkInput value={exp.endMonth || ''} onChange={(e) => updateExperience(exp.id, { endMonth: e.target.value })} placeholder={t.exp_monthEndPlaceholder} disabled={isCurrently(exp.endMonth)} className={isCurrently(exp.endMonth) ? 'opacity-40 cursor-not-allowed' : ''} />
+                        <DarkInput value={exp.endYear || ''} onChange={(e) => updateExperience(exp.id, { endYear: e.target.value })} placeholder={t.exp_yearEndPlaceholder} disabled={isCurrently(exp.endMonth)} className={isCurrently(exp.endMonth) ? 'opacity-40 cursor-not-allowed' : ''} />
                       </div>
+                      <label className="flex items-center gap-2 cursor-pointer group/check">
+                        <input type="checkbox" checked={isCurrently(exp.endMonth)} onChange={(e) => updateExperience(exp.id, e.target.checked ? { endMonth: currentLabel, endYear: '' } : { endMonth: '', endYear: '' })} className="w-3.5 h-3.5 rounded accent-violet-500 cursor-pointer" />
+                        <span className="text-xs text-white/40 group-hover/check:text-white/60 transition-colors">{currentLabel}</span>
+                      </label>
                       <DarkTextarea value={exp.description || ''} onChange={(e) => updateExperience(exp.id, { description: e.target.value })} placeholder={t.exp_descriptionPlaceholder} rows={2} />
                       <div>
                         <div className="flex flex-wrap gap-1.5 mb-2">
@@ -696,12 +739,27 @@ const Editor: React.FC = () => {
             {/* Languages */}
             {activeTab === 'languages' && (
               <div className="space-y-3 animate-fade-up">
-                {(portfolioData.languages || []).map((li) => {
+                {(portfolioData.languages || []).map((li, index) => {
                   const inCustomMode = customLevelIds.has(li.id) || isCustomLevel(li.level)
                   return (
-                    <SectionCard key={li.id}>
+                    <SectionCard
+                      key={li.id}
+                      draggable
+                      onDragStart={() => { dragRef.current = { type: 'language', index } }}
+                      onDragOver={(e) => { e.preventDefault(); setDragOverId(li.id) }}
+                      onDrop={(e) => {
+                        e.preventDefault()
+                        if (dragRef.current?.type === 'language' && dragRef.current.index !== index) {
+                          reorderLanguages(dragRef.current.index, index)
+                        }
+                        setDragOverId(null); dragRef.current = null
+                      }}
+                      onDragEnd={() => { setDragOverId(null); dragRef.current = null }}
+                      className={dragOverId === li.id && dragRef.current?.index !== index ? 'ring-1 ring-violet-500/60' : ''}
+                    >
+                      <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-600 opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing"><GripVertical size={14} /></div>
                       <button onClick={() => { removeLanguage(li.id); setCustomLevelIds(prev => { const s = new Set(prev); s.delete(li.id); return s }) }} className="absolute top-3 right-3 p-1.5 text-zinc-600 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"><X size={13} /></button>
-                      <div className="space-y-2.5 pr-6">
+                      <div className="space-y-2.5 pr-6 pl-5">
                         <DarkInput value={li.name} onChange={(e) => updateLanguage(li.id, { name: e.target.value })} placeholder={t.language_namePlaceholder} />
                         <select
                           value={inCustomMode ? '__custom__' : (li.level || '')}

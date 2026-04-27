@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 220" width="480" height="220">
+  <defs>
+    <style type="text/css"><![CDATA[
+      @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@900&display=swap');
+      .name { font-family: 'Manrope', system-ui, sans-serif; font-weight: 900; font-size: 116px; letter-spacing: -0.06em; }
+      .meta { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10px; letter-spacing: 0.08em; }
+    ]]></style>
+  </defs>
+  <!-- wordmark -->
+  <text x="240" y="80" text-anchor="middle" class="name" fill="#ffffff">tucv<tspan fill="#3bc47d">.</tspan>es</text>
+  <!-- progress track -->
+  <rect x="100" y="110" width="280" height="12" rx="6" fill="#ffffff" fill-opacity="0.08"/>
+  <!-- progress fill -->
+  <rect x="100" y="110" width="280" height="12" rx="6" fill="#3bc47d"/>
+  <!-- timestamps -->
+  <text x="100" y="144" class="meta" fill="#ffffff" fill-opacity="0.6">00:00</text>
+  <text x="380" y="144" text-anchor="end" class="meta" fill="#ffffff" fill-opacity="0.6">01:00</text>
+</svg>

@@ -197,7 +197,6 @@ Extract as much relevant information as possible. If a field is not found, omit 
       const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
       
       if (!jsonMatch) {
-        console.log('AI response:', text);
         throw new Error('La IA no pudo procesar el CV correctamente');
       }
 
@@ -429,7 +428,6 @@ All text fields must be in ${responseLanguage}:
       const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
       
       if (!jsonMatch) {
-        console.log('AI response:', text);
         return createFallbackResponse(currentCV, jobDescription);
       }
 

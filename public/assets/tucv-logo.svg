@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 135" width="448" height="135">
+  <defs>
+    <style type="text/css"><![CDATA[
+      @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');
+      .name { font-family: 'Archivo Black', system-ui, sans-serif; font-weight: 900; font-size: 96px; letter-spacing: -0.05em; }
+    ]]></style>
+  </defs>
+  <text x="40.28481559753419" y="100.14" class="name" fill="#ffffff">tucv</text>
+  <rect x="266.1615955352783" y="59.82" width="17" height="17" fill="#3bc47d"/>
+  <text x="291.1615955352783" y="100.14" class="name" fill="#ffffff">es</text>
+</svg>

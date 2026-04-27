@@ -41,20 +41,11 @@ const formatDuration = (item: any): string => {
 export const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, t, highlightSections = [] }) => {
   const color = data.theme.primaryColor
 
-  const sidebarIconStyle: React.CSSProperties = {
-    display: 'inline-block',
-    width: '12px',
-    height: '12px',
-    verticalAlign: 'middle',
-    flexShrink: 0,
-  }
-
   const sidebarItemStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: '6px',
+    display: 'block',
+    lineHeight: '14px',
     marginBottom: '8px',
+    whiteSpace: 'nowrap',
   }
 
   return (
@@ -89,32 +80,32 @@ export const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, t, highl
           <div>
             {data.contact?.email && (
               <div style={sidebarItemStyle}>
-                <Mail size={12} style={{ ...sidebarIconStyle, color: 'rgba(255,255,255,0.85)' }} />
-                <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.9)', wordBreak: 'break-all', lineHeight: '14px' }}>{data.contact.email}</span>
+                <span style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '5px', lineHeight: '1' }}><Mail size={12} color="rgba(255,255,255,0.85)" /></span>
+                <span style={{ display: 'inline-block', verticalAlign: 'middle', fontSize: '10px', color: 'rgba(255,255,255,0.9)', lineHeight: '14px' }}>{data.contact.email}</span>
               </div>
             )}
             {data.contact?.phone && (
               <div style={sidebarItemStyle}>
-                <Phone size={12} style={{ ...sidebarIconStyle, color: 'rgba(255,255,255,0.85)' }} />
-                <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.9)', lineHeight: '14px' }}>{data.contact.phone}</span>
+                <span style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '5px', lineHeight: '1' }}><Phone size={12} color="rgba(255,255,255,0.85)" /></span>
+                <span style={{ display: 'inline-block', verticalAlign: 'middle', fontSize: '10px', color: 'rgba(255,255,255,0.9)', lineHeight: '14px' }}>{data.contact.phone}</span>
               </div>
             )}
             {data.contact?.address && (
               <div style={sidebarItemStyle}>
-                <MapPin size={12} style={{ ...sidebarIconStyle, color: 'rgba(255,255,255,0.85)' }} />
-                <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.9)', lineHeight: '14px', wordBreak: 'break-word' }}>{data.contact.address}</span>
+                <span style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '5px', lineHeight: '1' }}><MapPin size={12} color="rgba(255,255,255,0.85)" /></span>
+                <span style={{ display: 'inline-block', verticalAlign: 'middle', fontSize: '10px', color: 'rgba(255,255,255,0.9)', lineHeight: '14px' }}>{data.contact.address}</span>
               </div>
             )}
             {data.contact?.website && (
               <div style={sidebarItemStyle}>
-                <Globe size={12} style={{ ...sidebarIconStyle, color: 'rgba(255,255,255,0.85)' }} />
-                <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.9)', wordBreak: 'break-all', lineHeight: '14px' }}>{data.contact.website}</span>
+                <span style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '5px', lineHeight: '1' }}><Globe size={12} color="rgba(255,255,255,0.85)" /></span>
+                <span style={{ display: 'inline-block', verticalAlign: 'middle', fontSize: '10px', color: 'rgba(255,255,255,0.9)', lineHeight: '14px' }}>{data.contact.website}</span>
               </div>
             )}
             {data.contact?.linkedin && (
               <div style={sidebarItemStyle}>
-                <Globe size={12} style={{ ...sidebarIconStyle, color: 'rgba(255,255,255,0.85)' }} />
-                <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.9)', wordBreak: 'break-all', lineHeight: '14px' }}>{data.contact.linkedin}</span>
+                <span style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '5px', lineHeight: '1' }}><Globe size={12} color="rgba(255,255,255,0.85)" /></span>
+                <span style={{ display: 'inline-block', verticalAlign: 'middle', fontSize: '10px', color: 'rgba(255,255,255,0.9)', lineHeight: '14px' }}>{data.contact.linkedin}</span>
               </div>
             )}
           </div>
@@ -190,16 +181,20 @@ export const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, t, highl
                   <p style={{ fontSize: '11px', color: '#374151', whiteSpace: 'pre-wrap', margin: 0 }}>{exp.description}</p>
                 )}
                 {exp.skills && exp.skills.length > 0 && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '5px' }}>
+                  <div style={{ marginTop: '5px', lineHeight: '1' }}>
                     {exp.skills.map((skill: string, idx: number) => (
                       <span
                         key={idx}
                         style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          padding: '2px 8px',
+                          display: 'inline-block',
+                          padding: '0 8px',
+                          lineHeight: '16px',
                           borderRadius: '4px',
                           fontSize: '10px',
+                          fontWeight: 500,
+                          whiteSpace: 'nowrap',
+                          marginRight: '4px',
+                          marginBottom: '4px',
                           backgroundColor: `${color}15`,
                           color: color,
                         }}
@@ -225,16 +220,20 @@ export const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ data, t, highl
                 <p style={{ fontWeight: 600, fontSize: '12px', color: '#111827', margin: '0 0 3px' }}>{project.name}</p>
                 <p style={{ fontSize: '11px', color: '#374151', whiteSpace: 'pre-wrap', margin: '0 0 5px' }}>{project.description}</p>
                 {project.skills && project.skills.length > 0 && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                  <div style={{ lineHeight: '1' }}>
                     {project.skills.map((skill: string, idx: number) => (
                       <span
                         key={idx}
                         style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          padding: '2px 8px',
+                          display: 'inline-block',
+                          padding: '0 8px',
+                          lineHeight: '16px',
                           borderRadius: '4px',
                           fontSize: '10px',
+                          fontWeight: 500,
+                          whiteSpace: 'nowrap',
+                          marginRight: '4px',
+                          marginBottom: '4px',
                           backgroundColor: `${color}15`,
                           color: color,
                         }}

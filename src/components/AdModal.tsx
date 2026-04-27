@@ -242,7 +242,7 @@ export const AdModal: React.FC<AdModalProps> = ({
         <div className="shrink-0 p-6 pb-4 text-center border-b border-white/5">
           <div className="w-12 h-12 bg-[#1e1e1e] border border-[#2a2a2a] rounded-2xl
             flex items-center justify-center mb-3 mx-auto">
-            <img src="/assets/logonew.png" alt="Logo" className="w-8 h-8 rounded-xl" />
+            <img src="/assets/tucv-logo.svg" alt="TuCV" className="w-8 h-8 rounded-xl" />
           </div>
           <h2 className="text-base font-semibold text-white mb-1">{actionContent.title}</h2>
           <p className="text-emerald-400 text-xs font-medium mb-0.5">{t.subtitle}</p>
