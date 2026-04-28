@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+﻿import React, { useState, useEffect } from 'react'
 import { PortfolioProvider, usePortfolio } from './context/PortfolioContext'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Editor from './components/Editor'
@@ -8,12 +8,19 @@ import PrivacyPolicy from './pages/PrivacyPolicy'
 import About from './pages/About'
 import Terms from './pages/Terms'
 import LandingPage from './pages/LandingPage'
+import BlogIndex from './pages/blog/BlogIndex'
+import CvParaAts from './pages/blog/posts/cv-para-ats'
+import ErroresEnElCv from './pages/blog/posts/errores-en-el-cv'
+import CvSinExperiencia from './pages/blog/posts/cv-sin-experiencia'
+import OptimizarCvConIa from './pages/blog/posts/optimizar-cv-con-ia'
+import CvCronologicoVsFuncional from './pages/blog/posts/cv-cronologico-vs-funcional'
+import CvEnIngles from './pages/blog/posts/cv-en-ingles'
 import OnboardingTour, { useOnboarding } from './components/OnboardingTour'
 import { PenLine, Eye, CheckCircle, HelpCircle } from 'lucide-react'
 import subscriptionService from './services/subscriptionService'
 import { activatePremiumForUser } from './lib/supabase'
 
-type Page = 'landing' | 'app' | 'privacy' | 'about' | 'terms'
+type Page = 'landing' | 'app' | 'privacy' | 'about' | 'terms' | 'blog' | 'blog-post'
 
 function getPageFromPath(): Page {
   const path = window.location.pathname
@@ -22,6 +29,8 @@ function getPageFromPath(): Page {
   if (path === '/privacy') return 'privacy'
   if (path === '/about') return 'about'
   if (path === '/terms') return 'terms'
+  if (path === '/blog') return 'blog'
+  if (path.startsWith('/blog/')) return 'blog-post'
   return 'app'
 }
 
@@ -158,6 +167,19 @@ function App() {
   if (page === 'privacy') return <PrivacyPolicy />
   if (page === 'about') return <About />
   if (page === 'terms') return <Terms />
+  if (page === 'blog') return <BlogIndex />
+  if (page === 'blog-post') {
+    const slug = window.location.pathname.replace('/blog/', '')
+    const blogPosts: Record<string, React.ReactElement> = {
+      'como-hacer-cv-para-pasar-filtros-ats': <CvParaAts />,
+      'errores-en-el-cv-que-te-descartan': <ErroresEnElCv />,
+      'como-hacer-cv-sin-experiencia-laboral': <CvSinExperiencia />,
+      'optimizar-cv-con-inteligencia-artificial': <OptimizarCvConIa />,
+      'cv-cronologico-vs-funcional': <CvCronologicoVsFuncional />,
+      'como-traducir-cv-al-ingles': <CvEnIngles />,
+    }
+    return blogPosts[slug] ?? <BlogIndex />
+  }
 
   if (page === 'landing') {
     return (

@@ -398,7 +398,7 @@ const Preview: React.FC = () => {
                 </button>
 
                 {colorPickerOpen && (
-                  <div className="absolute left-0 top-full mt-2 z-50 bg-[#1C1C1E] border border-[#3A3A3C] rounded-2xl p-3 shadow-2xl w-[168px]">
+                  <div className="absolute left-0 bottom-full mb-2 z-[200] bg-[#1C1C1E] border border-[#3A3A3C] rounded-2xl p-3 shadow-2xl w-[168px]">
                     <div className="flex flex-wrap gap-2">
                       {COLOR_PRESETS.map(c => (
                         <button
