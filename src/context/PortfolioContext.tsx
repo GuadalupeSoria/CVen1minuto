@@ -48,7 +48,7 @@ interface Theme {
   primaryColor: string
 }
 
-type CVTemplate = 'original' | 'modern' | 'classic'
+type CVTemplate = 'original' | 'modern' | 'classic' | 'executive'
 
 export type DiffSection = 'about' | 'title' | 'skills'
 

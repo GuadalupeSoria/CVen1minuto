@@ -8,6 +8,7 @@ import { LoginModal } from './LoginModal'
 import { OriginalTemplate } from './templates/OriginalTemplate'
 import { ModernTemplate } from './templates/ModernTemplate'
 import { ClassicTemplate } from './templates/ClassicTemplate'
+import { ExecutiveTemplate } from './templates/ExecutiveTemplate'
 import type { CVTemplate } from '../context/PortfolioContext'
 import subscriptionService from '../services/subscriptionService'
 import { AIService } from '../services/AIService'
@@ -97,11 +98,20 @@ const Preview: React.FC = () => {
 
   const [colorPickerOpen, setColorPickerOpen] = useState(false)
   const colorPickerRef = useRef<HTMLDivElement>(null)
+  const colorButtonRef = useRef<HTMLButtonElement>(null)
+
+  const openColorPicker = () => {
+    setColorPickerOpen(v => !v)
+  }
 
   useEffect(() => {
     if (!colorPickerOpen) return
     const handler = (e: MouseEvent) => {
-      if (colorPickerRef.current && !colorPickerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node
+      if (
+        colorPickerRef.current && !colorPickerRef.current.contains(target) &&
+        colorButtonRef.current && !colorButtonRef.current.contains(target)
+      ) {
         setColorPickerOpen(false)
       }
     }
@@ -378,15 +388,17 @@ const Preview: React.FC = () => {
                   focus:border-violet-500 focus:outline-none cursor-pointer transition-all
                   hover:bg-[#3A3A3C] hover:border-white/20"
               >
-                <option value="original" className="bg-[#1C1C1E]">{lang === 'es' ? 'Original' : 'Original'}</option>
-                <option value="modern"   className="bg-[#1C1C1E]">{lang === 'es' ? 'Moderna'  : 'Modern'}</option>
-                <option value="classic"  className="bg-[#1C1C1E]">{lang === 'es' ? 'Clásica'  : 'Classic'}</option>
+                <option value="original"  className="bg-[#1C1C1E]">{lang === 'es' ? 'Original'   : 'Original'}</option>
+                <option value="modern"    className="bg-[#1C1C1E]">{lang === 'es' ? 'Moderna'    : 'Modern'}</option>
+                <option value="classic"   className="bg-[#1C1C1E]">{lang === 'es' ? 'Clásica'    : 'Classic'}</option>
+                <option value="executive" className="bg-[#1C1C1E]">{lang === 'es' ? 'Ejecutiva'  : 'Executive'}</option>
               </select>
 
               {/* Color picker */}
-              <div ref={colorPickerRef} className="relative">
+              <div className="relative">
                 <button
-                  onClick={() => setColorPickerOpen(v => !v)}
+                  ref={colorButtonRef}
+                  onClick={openColorPicker}
                   title={lang === 'es' ? 'Color del CV' : 'CV color'}
                   className="flex items-center gap-1.5 px-2 py-2 bg-[#2C2C2E] border border-[#3A3A3C] hover:bg-[#3A3A3C] hover:border-white/20 rounded-xl transition-all"
                 >
@@ -398,7 +410,11 @@ const Preview: React.FC = () => {
                 </button>
 
                 {colorPickerOpen && (
-                  <div className="absolute left-0 bottom-full mb-2 z-[200] bg-[#1C1C1E] border border-[#3A3A3C] rounded-2xl p-3 shadow-2xl w-[168px]">
+                  <div
+                    ref={colorPickerRef}
+                    className="absolute left-0 top-full mt-2 bg-[#1C1C1E] border border-[#3A3A3C] rounded-2xl p-3 shadow-2xl w-[168px]"
+                    style={{ zIndex: 9999 }}
+                  >
                     <div className="flex flex-wrap gap-2">
                       {COLOR_PRESETS.map(c => (
                         <button
@@ -617,6 +633,8 @@ const Preview: React.FC = () => {
               <OriginalTemplate data={previewData} t={t} highlightSections={isGeneratingPDF ? [] : (pendingOptimization?.pendingSections ?? [])} />
             ) : currentTemplate === 'modern' ? (
               <ModernTemplate data={previewData} t={t} highlightSections={isGeneratingPDF ? [] : (pendingOptimization?.pendingSections ?? [])} />
+            ) : currentTemplate === 'executive' ? (
+              <ExecutiveTemplate data={previewData} t={t} highlightSections={isGeneratingPDF ? [] : (pendingOptimization?.pendingSections ?? [])} />
             ) : (
               <ClassicTemplate data={previewData} t={t} highlightSections={isGeneratingPDF ? [] : (pendingOptimization?.pendingSections ?? [])} />
             )}
