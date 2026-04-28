@@ -116,7 +116,7 @@ function AppInner() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex overflow-hidden min-h-0">
+        <div className="flex-1 flex overflow-visible min-h-0">
 
           {/* Left Panel — Editor */}
           <div className={`w-full md:w-[390px] lg:w-[420px] xl:w-[440px] bg-[#1C1C1E] border-r border-[#38383A] flex flex-col overflow-hidden ${

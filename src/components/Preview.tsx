@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { usePortfolio } from '../context/PortfolioContext'
 import { Download, LayoutTemplate, Languages, Check, X, Sparkles, Save, BookMarked, Loader2, Palette } from 'lucide-react'
 import { toCanvas } from 'html-to-image'
@@ -97,16 +98,21 @@ const Preview: React.FC = () => {
   }
 
   const [colorPickerOpen, setColorPickerOpen] = useState(false)
+  const [colorPickerPos, setColorPickerPos] = useState({ top: 0, left: 0 })
   const colorPickerRef = useRef<HTMLDivElement>(null)
   const colorButtonRef = useRef<HTMLButtonElement>(null)
 
   const openColorPicker = () => {
+    if (!colorPickerOpen && colorButtonRef.current) {
+      const rect = colorButtonRef.current.getBoundingClientRect()
+      setColorPickerPos({ top: rect.bottom + 8, left: rect.left })
+    }
     setColorPickerOpen(v => !v)
   }
 
   useEffect(() => {
     if (!colorPickerOpen) return
-    const handler = (e: MouseEvent) => {
+    const handler = (e: MouseEvent | TouchEvent) => {
       const target = e.target as Node
       if (
         colorPickerRef.current && !colorPickerRef.current.contains(target) &&
@@ -115,8 +121,8 @@ const Preview: React.FC = () => {
         setColorPickerOpen(false)
       }
     }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    document.addEventListener('pointerdown', handler as EventListener)
+    return () => document.removeEventListener('pointerdown', handler as EventListener)
   }, [colorPickerOpen])
 
   const COLOR_PRESETS = ['#3B82F6','#7C3AED','#10B981','#F59E0B','#EF4444','#EC4899','#6366F1','#14B8A6','#111827','#F97316','#84CC16']
@@ -409,11 +415,16 @@ const Preview: React.FC = () => {
                   <Palette size={12} className="text-white/40" />
                 </button>
 
-                {colorPickerOpen && (
+                {colorPickerOpen && createPortal(
                   <div
                     ref={colorPickerRef}
-                    className="absolute left-0 top-full mt-2 bg-[#1C1C1E] border border-[#3A3A3C] rounded-2xl p-3 shadow-2xl w-[168px]"
-                    style={{ zIndex: 9999 }}
+                    className="bg-[#1C1C1E] border border-[#3A3A3C] rounded-2xl p-3 shadow-2xl w-[168px]"
+                    style={{
+                      position: 'fixed',
+                      top: colorPickerPos.top,
+                      left: colorPickerPos.left,
+                      zIndex: 99999,
+                    }}
                   >
                     <div className="flex flex-wrap gap-2">
                       {COLOR_PRESETS.map(c => (
@@ -440,7 +451,7 @@ const Preview: React.FC = () => {
                       </label>
                     </div>
                   </div>
-                )}
+                , document.body)}
               </div>
             </div>
 
