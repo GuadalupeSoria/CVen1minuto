@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Clock, Play, CheckCircle, Crown, Zap } from 'lucide-react';
+import { ADSENSE_MODAL_SLOT } from '../config/stripe';
+
+const ADSENSE_PUB = 'ca-pub-2152317919633317';
 
 interface AdModalProps {
   visible: boolean;
@@ -31,7 +34,7 @@ const translations = {
     cancelAnytime:   'Cancela cuando quieras',
     features: ['Descargas ilimitadas', 'Traducciones ilimitadas', 'IA ilimitada', 'Sin publicidad'],
     premiumTitle:    'Premium',
-    premiumPrice:    '$4.99',
+    premiumPrice:    '$3.99',
     premiumPeriod:   '/mes',
     subscribeCTA:    'Activar Premium',
   },
@@ -54,7 +57,7 @@ const translations = {
     cancelAnytime:   'Cancel anytime',
     features: ['Unlimited downloads', 'Unlimited translations', 'Unlimited AI', 'No ads'],
     premiumTitle:    'Premium',
-    premiumPrice:    '$4.99',
+    premiumPrice:    '$3.99',
     premiumPeriod:   '/month',
     subscribeCTA:    'Activate Premium',
   },
@@ -91,6 +94,19 @@ export const AdModal: React.FC<AdModalProps> = ({
       setCanUnlock(false);
     }
   }, [visible]);
+
+  // Inject AdSense ad when the countdown starts
+  useEffect(() => {
+    if (!showingAd || !ADSENSE_MODAL_SLOT) return;
+    const t = setTimeout(() => {
+      try {
+        const w = window as Window & { adsbygoogle?: unknown[] };
+        w.adsbygoogle = w.adsbygoogle || [];
+        w.adsbygoogle.push({});
+      } catch { /* noop */ }
+    }, 150);
+    return () => clearTimeout(t);
+  }, [showingAd]);
 
   if (!visible) return null;
 
@@ -174,12 +190,27 @@ export const AdModal: React.FC<AdModalProps> = ({
   /* ── Ad playing view ────────────────────────────────────── */
   const AdView = () => (
     <div className="space-y-4 animate-fade-in">
-      {/* Countdown circle */}
-      <div className="bg-[#111] border border-[#1e1e1e] rounded-2xl p-5 min-h-[180px] flex flex-col items-center justify-center gap-4">
+
+      {/* AdSense banner — solo se muestra si hay slot configurado */}
+      {ADSENSE_MODAL_SLOT && !canUnlock && (
+        <div className="rounded-2xl overflow-hidden bg-[#111] border border-[#1e1e1e] flex items-center justify-center min-h-[100px]">
+          <ins
+            className="adsbygoogle"
+            style={{ display: 'block', width: '100%', height: '100px' }}
+            data-ad-client={ADSENSE_PUB}
+            data-ad-slot={ADSENSE_MODAL_SLOT}
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          />
+        </div>
+      )}
+
+      {/* Countdown / success */}
+      <div className="bg-[#111] border border-[#1e1e1e] rounded-2xl p-5 flex flex-col items-center justify-center gap-3 min-h-[120px]">
         {!canUnlock ? (
           <>
-            <div className="relative w-16 h-16">
-              <svg className="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+            <div className="relative w-14 h-14">
+              <svg className="w-14 h-14 -rotate-90" viewBox="0 0 64 64">
                 <circle cx="32" cy="32" r="28" fill="none" stroke="#2a2a2a" strokeWidth="4" />
                 <circle
                   cx="32" cy="32" r="28" fill="none"
@@ -190,17 +221,15 @@ export const AdModal: React.FC<AdModalProps> = ({
                   style={{ transition: 'stroke-dashoffset 0.9s ease' }}
                 />
               </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-xl font-black text-violet-400">
+              <span className="absolute inset-0 flex items-center justify-center text-lg font-black text-violet-400">
                 {countdown}
               </span>
             </div>
-            <p className="text-zinc-500 text-xs text-center">
-              {t.watchingAd}
-            </p>
+            <p className="text-zinc-500 text-xs text-center">{t.watchingAd}</p>
           </>
         ) : (
           <div className="animate-spring-in flex flex-col items-center gap-2">
-            <CheckCircle size={40} className="text-emerald-400" />
+            <CheckCircle size={36} className="text-emerald-400" />
             <p className="text-emerald-400 text-sm font-semibold">{t.ready}</p>
           </div>
         )}

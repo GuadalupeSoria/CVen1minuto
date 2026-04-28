@@ -8,7 +8,7 @@ export default function Terms() {
       <header className="sticky top-0 z-10 bg-[#0F0F0F]/90 backdrop-blur-xl border-b border-white/6">
         <div className="max-w-3xl mx-auto px-6 py-4 flex items-center gap-3">
           <a
-            href="#"
+            href="/app"
             className="flex items-center gap-1.5 text-white/50 hover:text-white transition-colors text-sm"
           >
             <ArrowLeft size={16} />
@@ -25,7 +25,7 @@ export default function Terms() {
       <main className="max-w-3xl mx-auto px-6 py-12">
         <div className="mb-10">
           <h1 className="text-3xl font-bold mb-3">Términos de Uso</h1>
-          <p className="text-white/50 text-sm">Última actualización: 31 de marzo de 2026</p>
+          <p className="text-white/50 text-sm">Última actualización: 28 de abril de 2026</p>
         </div>
 
         <div className="space-y-10 text-[15px] leading-relaxed text-white/80">
@@ -55,17 +55,18 @@ export default function Terms() {
                   <li className="flex gap-2"><span className="text-emerald-400">✓</span> 1 descarga PDF por día</li>
                   <li className="flex gap-2"><span className="text-emerald-400">✓</span> 1 optimización con IA por día</li>
                   <li className="flex gap-2"><span className="text-emerald-400">✓</span> 1 traducción por día</li>
+                  <li className="flex gap-2"><span className="text-emerald-400">✓</span> Guardado en la nube (con cuenta)</li>
                   <li className="flex gap-2"><span className="text-white/30">·</span> Publicidad de Google AdSense</li>
                 </ul>
               </div>
               <div className="bg-[#1C1C1E] border border-violet-500/30 rounded-2xl p-5">
                 <h3 className="text-sm font-semibold text-white mb-1">Plan Premium</h3>
-                <p className="text-violet-400 text-xs font-bold mb-3">$4.99 / mes</p>
+                <p className="text-violet-400 text-xs font-bold mb-3">$3.99 / mes</p>
                 <ul className="space-y-2 text-sm text-white/60">
                   <li className="flex gap-2"><span className="text-emerald-400">✓</span> Todo lo del plan gratuito</li>
-                  <li className="flex gap-2"><span className="text-emerald-400">✓</span> Descargas ilimitadas</li>
-                  <li className="flex gap-2"><span className="text-emerald-400">✓</span> IA ilimitada</li>
-                  <li className="flex gap-2"><span className="text-emerald-400">✓</span> Traducciones ilimitadas</li>
+                  <li className="flex gap-2"><span className="text-emerald-400">✓</span> Descargas ilimitadas de PDF</li>
+                  <li className="flex gap-2"><span className="text-emerald-400">✓</span> IA y traducciones ilimitadas</li>
+                  <li className="flex gap-2"><span className="text-emerald-400">✓</span> Guardado ilimitado de CVs en la nube</li>
                   <li className="flex gap-2"><span className="text-emerald-400">✓</span> Sin publicidad</li>
                 </ul>
               </div>
@@ -73,18 +74,50 @@ export default function Terms() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">3. Uso aceptable</h2>
+            <h2 className="text-lg font-semibold text-white mb-3">3. Cuentas de usuario</h2>
+            <div className="space-y-4">
+              <div className="bg-[#1C1C1E] border border-white/8 rounded-2xl p-5 space-y-3">
+                <div>
+                  <h3 className="text-sm font-semibold text-white mb-1">Registro opcional</h3>
+                  <p className="text-white/60 text-sm">
+                    No es necesario crear una cuenta para usar el editor. Sin cuenta, todos los datos de tu CV
+                    se guardan exclusivamente en el almacenamiento local de tu navegador y no son accesibles
+                    desde otros dispositivos. Si borras los datos del navegador, perderás el CV.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-white mb-1">Almacenamiento en la nube</h3>
+                  <p className="text-white/60 text-sm">
+                    Al crear una cuenta e iniciar sesión, puedes optar por guardar tu CV en la nube.
+                    Esto te permite acceder a tu CV desde cualquier dispositivo. El plan gratuito incluye
+                    guardado básico; el plan Premium incluye guardado ilimitado de múltiples versiones.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-white mb-1">Responsabilidad de la cuenta</h3>
+                  <p className="text-white/60 text-sm">
+                    Eres responsable de mantener la confidencialidad de tus credenciales de acceso y de
+                    todas las actividades que ocurran bajo tu cuenta.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-semibold text-white mb-3">4. Uso aceptable</h2>
             <p className="mb-4">Al usar este servicio, te comprometes a:</p>
             <ul className="space-y-2 ml-4">
               <li className="flex gap-2"><span className="text-emerald-400 shrink-0">✓</span><span>Ingresar información veraz en tu CV</span></li>
               <li className="flex gap-2"><span className="text-emerald-400 shrink-0">✓</span><span>No usar el servicio para actividades ilegales o fraudulentas</span></li>
               <li className="flex gap-2"><span className="text-emerald-400 shrink-0">✓</span><span>No intentar comprometer la seguridad o el funcionamiento del sistema</span></li>
               <li className="flex gap-2"><span className="text-emerald-400 shrink-0">✓</span><span>No usar scripts automatizados para sobrecargar el servicio</span></li>
+              <li className="flex gap-2"><span className="text-emerald-400 shrink-0">✓</span><span>No crear cuentas falsas ni intentar eludir los límites del plan gratuito</span></li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">4. Propiedad intelectual</h2>
+            <h2 className="text-lg font-semibold text-white mb-3">5. Propiedad intelectual</h2>
             <p className="mb-4">
               El contenido de tu CV (datos personales, experiencia, etc.) es de tu exclusiva propiedad.
               Mantienes todos los derechos sobre el contenido que ingresas en el editor.
@@ -97,61 +130,62 @@ export default function Terms() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">5. Pagos y suscripciones</h2>
+            <h2 className="text-lg font-semibold text-white mb-3">6. Pagos y suscripciones</h2>
             <div className="space-y-4">
               <div className="bg-[#1C1C1E] border border-white/8 rounded-2xl p-5 space-y-3">
                 <div>
                   <h3 className="text-sm font-semibold text-white mb-1">Facturación</h3>
-                  <p className="text-white/60 text-sm">La suscripción Premium se factura mensualmente a $4.99 USD. Los pagos son procesados por Stripe.</p>
+                  <p className="text-white/60 text-sm">La suscripción Premium se factura mensualmente a $3.99 USD. Los pagos son procesados por Stripe de forma segura.</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-white mb-1">Renovación automática</h3>
-                  <p className="text-white/60 text-sm">Tu suscripción se renueva automáticamente cada mes. Puedes cancelarla en cualquier momento.</p>
+                  <p className="text-white/60 text-sm">Tu suscripción se renueva automáticamente cada mes. Puedes cancelarla en cualquier momento desde la sección de Configuración de la app o desde el portal de Stripe.</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-white mb-1">Política de reembolso</h3>
-                  <p className="text-white/60 text-sm">Ofrecemos reembolso completo dentro de los 7 días posteriores al primer pago si no estás satisfecho. Para solicitar un reembolso, contáctanos en tucv.support@gmail.com.</p>
+                  <p className="text-white/60 text-sm">Ofrecemos reembolso completo dentro de los 7 días posteriores al primer pago si no estás satisfecho. Para solicitarlo, contáctanos en tucv.support@gmail.com.</p>
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-white mb-1">Cancelación</h3>
-                  <p className="text-white/60 text-sm">Al cancelar, mantendrás el acceso Premium hasta el final del período facturado. No se realizan cobros adicionales.</p>
+                  <p className="text-white/60 text-sm">Al cancelar, mantendrás el acceso Premium hasta el final del período ya facturado. No se realizan cobros adicionales tras la cancelación.</p>
                 </div>
               </div>
             </div>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">6. Publicidad</h2>
+            <h2 className="text-lg font-semibold text-white mb-3">7. Publicidad</h2>
             <p>
               El plan gratuito está financiado por publicidad de Google AdSense. Al usar el servicio
               gratuito, consientes la visualización de anuncios contextuales. La suscripción Premium
-              elimina toda publicidad.
+              elimina toda publicidad de forma permanente mientras la suscripción esté activa.
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">7. Limitación de responsabilidad</h2>
+            <h2 className="text-lg font-semibold text-white mb-3">8. Limitación de responsabilidad</h2>
             <p>
               TuCV se proporciona "tal como está" sin garantías de ningún tipo. No somos
-              responsables de: pérdida de datos, resultados de procesos de selección, decisiones
-              tomadas basándose en el servicio, ni interrupciones del servicio.
+              responsables de: pérdida de datos almacenados localmente, resultados de procesos de
+              selección, decisiones tomadas basándose en el servicio, ni interrupciones del servicio.
             </p>
             <p className="mt-4">
-              Siempre recomendamos hacer una copia del contenido de tu CV fuera de la plataforma.
+              Siempre recomendamos hacer una copia del contenido de tu CV fuera de la plataforma,
+              especialmente si utilizas el modo anónimo sin cuenta.
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">8. Modificaciones al servicio</h2>
+            <h2 className="text-lg font-semibold text-white mb-3">9. Modificaciones al servicio</h2>
             <p>
               Nos reservamos el derecho de modificar, suspender o discontinuar cualquier aspecto del
               servicio con previo aviso. Los precios pueden cambiar con 30 días de anticipación para
-              usuarios existentes.
+              usuarios con suscripción activa.
             </p>
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">9. Ley aplicable</h2>
+            <h2 className="text-lg font-semibold text-white mb-3">10. Ley aplicable</h2>
             <p>
               Estos términos se rigen por las leyes de Argentina. Cualquier disputa se resolverá
               en los tribunales competentes de Buenos Aires, Argentina.
@@ -159,7 +193,7 @@ export default function Terms() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-white mb-3">10. Contacto</h2>
+            <h2 className="text-lg font-semibold text-white mb-3">11. Contacto</h2>
             <div className="bg-[#1C1C1E] border border-white/8 rounded-2xl p-5">
               <p className="text-white/60 text-sm">Para consultas sobre estos términos:</p>
               <p className="mt-2 text-white font-medium">tucv.support@gmail.com</p>
@@ -173,7 +207,7 @@ export default function Terms() {
         <div className="max-w-3xl mx-auto px-6 flex flex-wrap gap-4 items-center justify-between text-sm text-white/30">
           <span>© {new Date().getFullYear()} TuCV</span>
           <div className="flex gap-4">
-            <a href="/" className="hover:text-white transition-colors">Editor</a>
+            <a href="/app" className="hover:text-white transition-colors">Editor</a>
             <a href="/about" className="hover:text-white transition-colors">Acerca de</a>
             <a href="/privacy" className="hover:text-white transition-colors">Privacidad</a>
           </div>

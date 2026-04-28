@@ -253,7 +253,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, l
                   className="w-full py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
                 >
                   <Crown size={12} />
-                  {lang === 'es' ? 'Activar Premium — $4.99/mes' : 'Activate Premium — $4.99/mo'}
+                  {lang === 'es' ? 'Activar Premium — $3.99/mes' : 'Activate Premium — $3.99/mo'}
                 </button>
               </div>
             )}

@@ -4,7 +4,7 @@ import { ArrowLeft, Sparkles, Download, Languages, Palette, FileText, ChevronDow
 const faqs = [
   {
     q: '¿Es completamente gratuito?',
-    a: 'Sí. Puedes crear, editar y exportar tu CV en PDF de forma gratuita, con 1 descarga diaria. La versión Premium ($4.99/mes) elimina el límite de descargas y permite usar la IA sin restricciones.',
+    a: 'Sí. Puedes crear, editar y exportar tu CV en PDF de forma gratuita, con 1 descarga diaria. La versión Premium ($3.99/mes) elimina el límite de descargas y permite usar la IA sin restricciones.',
   },
   {
     q: '¿Mis datos están seguros?',

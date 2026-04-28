@@ -34,7 +34,7 @@ export function redirectToStripe(email?: string): boolean {
         'Pasos para activar suscripciones:\n' +
         '1. Copia .env.example a .env\n' +
         '2. Ve a https://dashboard.stripe.com/payment-links\n' +
-        '3. Crea un link de $4.99/mes con success_url: ?stripe_paid=1\n' +
+        '3. Crea un link de $3.99/mes con success_url: ?stripe_paid=1\n' +
         '4. Pega la URL en VITE_STRIPE_PAYMENT_LINK\n' +
         '5. Reinicia el servidor de desarrollo (npm run dev)',
         'color: #f59e0b; font-weight: bold',
