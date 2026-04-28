@@ -1,5 +1,5 @@
 // Servicio para gestionar suscripciones y límites de uso
-import { redirectToStripe, STRIPE_SUCCESS_PARAM, STRIPE_SUBSCRIPTION_MONTHS } from '../config/stripe'
+import { redirectToStripe, STRIPE_SUCCESS_PATH, STRIPE_SUBSCRIPTION_MONTHS } from '../config/stripe'
 
 const STORAGE_KEY = 'cv_downloads';
 const TRANSLATIONS_KEY = 'cv_translations';
@@ -47,18 +47,16 @@ class SubscriptionService {
 
   // Redirigir al usuario al checkout de Stripe (Payment Link)
   // Devuelve false si el Payment Link no está configurado
-  redirectToCheckout(): boolean {
-    return redirectToStripe()
+  redirectToCheckout(email?: string): boolean {
+    return redirectToStripe(email)
   }
 
-  // Verificar si la URL tiene el param de éxito de Stripe
-  // En producción el webhook actualiza Supabase directamente; aquí solo limpiamos la URL
-  handleStripeReturn(): boolean {
-    const params = new URLSearchParams(window.location.search)
-    if (params.get(STRIPE_SUCCESS_PARAM) === '1') {
-      // Solo limpiamos la URL; no activamos premium desde el cliente (evita bypass)
-      const clean = window.location.pathname
-      window.history.replaceState({}, '', clean)
+  // Detecta si el usuario volvió desde Stripe (/payment/success) y redirige al app.
+  // Devuelve true si hay que activar premium.
+  detectStripeReturn(): boolean {
+    if (window.location.pathname === STRIPE_SUCCESS_PATH) {
+      // Redirigir al app limpio
+      window.history.replaceState({}, '', '/#app')
       return true
     }
     return false

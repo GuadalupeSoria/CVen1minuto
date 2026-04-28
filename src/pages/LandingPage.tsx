@@ -332,9 +332,9 @@ export default function LandingPage({ onStart }: LandingPageProps) {
       <footer className="border-t border-[#2C2C2E] py-8 text-center text-white/30 text-sm">
         <div className="max-w-5xl mx-auto px-4 flex flex-wrap justify-center gap-6">
           <span>© 2025 TuCV</span>
-          <a href="#privacy" className="hover:text-white/60 transition-colors">Privacidad</a>
-          <a href="#terms" className="hover:text-white/60 transition-colors">Términos</a>
-          <a href="#about" className="hover:text-white/60 transition-colors">Acerca de</a>
+          <a href="/privacy" className="hover:text-white/60 transition-colors">Privacidad</a>
+          <a href="/terms" className="hover:text-white/60 transition-colors">Términos</a>
+          <a href="/about" className="hover:text-white/60 transition-colors">Acerca de</a>
         </div>
       </footer>
     </div>

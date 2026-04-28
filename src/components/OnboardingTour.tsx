@@ -25,8 +25,8 @@ const STEPS: TourStep[] = [
     target: '[data-tour="template-selector"]',
     titleES: 'Elige tu plantilla y color',
     titleEN: 'Choose your template & color',
-    descES: 'Tres diseños profesionales: Original, Moderna y Clásica. Personaliza el color en la pestaña Personal.',
-    descEN: 'Three professional designs: Original, Modern and Classic. Customize color in the Personal tab.',
+    descES: 'Tres diseños profesionales: Original, Moderna y Clásica. Personaliza el color con el selector de paleta.',
+    descEN: 'Three professional designs: Original, Modern and Classic. Customize color with the palette picker.',
     requiresTab: 'preview',
   },
   {

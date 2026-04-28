@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from 'react'
 import { PortfolioProvider, usePortfolio } from './context/PortfolioContext'
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import Editor from './components/Editor'
 import Preview from './components/Preview'
 import Footer from './components/Footer'
@@ -11,37 +11,52 @@ import LandingPage from './pages/LandingPage'
 import OnboardingTour, { useOnboarding } from './components/OnboardingTour'
 import { PenLine, Eye, CheckCircle, HelpCircle } from 'lucide-react'
 import subscriptionService from './services/subscriptionService'
+import { activatePremiumForUser } from './lib/supabase'
 
 type Page = 'landing' | 'app' | 'privacy' | 'about' | 'terms'
 
-const VISITED_KEY = 'cv1m_visited'
-
-function getPageFromHash(): Page {
-  const hash = window.location.hash.replace('#', '')
-  if (hash === 'privacy') return 'privacy'
-  if (hash === 'about') return 'about'
-  if (hash === 'terms') return 'terms'
-  if (hash === 'app') return 'app'
-  // Show landing page only on first visit; returning users go straight to app
-  if (!localStorage.getItem(VISITED_KEY)) return 'landing'
+function getPageFromPath(): Page {
+  const path = window.location.pathname
+  if (path === '/') { window.location.replace('/app'); return 'app' }
+  if (path === '/welcome') return 'landing'
+  if (path === '/privacy') return 'privacy'
+  if (path === '/about') return 'about'
+  if (path === '/terms') return 'terms'
   return 'app'
+}
+
+function navigate(path: string) {
+  window.history.pushState({}, '', path)
 }
 
 function AppInner() {
   const [mobileTab, setMobileTab] = useState<'editor' | 'preview'>('editor')
   const [showStripeSuccess, setShowStripeSuccess] = useState(false)
+  const [pendingPremiumActivation, setPendingPremiumActivation] = useState(false)
   const { portfolioData } = usePortfolio()
   const lang = (portfolioData.language as string) || 'es'
   const { show: showTour, complete: completeTour, reset: resetTour } = useOnboarding()
+  const { user, loading: authLoading, refreshProfile } = useAuth()
 
+  // Paso 1: detectar retorno de Stripe y limpiar URL
   useEffect(() => {
-    // Verificar retorno desde Stripe Payment Link (?stripe_paid=1)
-    const activated = subscriptionService.handleStripeReturn()
-    if (activated) {
-      setShowStripeSuccess(true)
-      setTimeout(() => setShowStripeSuccess(false), 5000)
+    if (subscriptionService.detectStripeReturn()) {
+      setPendingPremiumActivation(true)
     }
   }, [])
+
+  // Paso 2: cuando auth carga y hay activación pendiente, activar
+  // (siempre llega logueado porque login es obligatorio antes de ir a Stripe)
+  useEffect(() => {
+    if (!pendingPremiumActivation || authLoading) return
+    setPendingPremiumActivation(false)
+    if (!user) return  // no debería ocurrir, pero por seguridad
+
+    subscriptionService.activatePremium()                                   // localStorage inmediato
+    activatePremiumForUser(user.id).then(ok => { if (ok) refreshProfile() }) // Supabase
+    setShowStripeSuccess(true)
+    setTimeout(() => setShowStripeSuccess(false), 6000)
+  }, [pendingPremiumActivation, authLoading, user])
 
   return (
     <div className="h-screen flex flex-col bg-[#0F0F0F] overflow-hidden">
@@ -50,7 +65,9 @@ function AppInner() {
         {showStripeSuccess && (
           <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2.5 px-5 py-3 bg-emerald-900/90 border border-emerald-700 text-emerald-200 rounded-2xl shadow-2xl backdrop-blur-xl animate-spring-in">
             <CheckCircle size={16} className="text-emerald-400 shrink-0" />
-            <span className="text-sm font-semibold">¡Premium activado! Acceso ilimitado.</span>
+            <span className="text-sm font-semibold">
+              {lang === 'es' ? '¡Premium activado! Acceso ilimitado.' : 'Premium activated! Unlimited access.'}
+            </span>
           </div>
         )}
 
@@ -123,20 +140,19 @@ function AppInner() {
 }
 
 function App() {
-  const [page, setPage] = useState<Page>(getPageFromHash())
+  const [page, setPage] = useState<Page>(getPageFromPath())
 
   useEffect(() => {
-    const onHashChange = () => {
-      setPage(getPageFromHash())
-      // Re-initialize AdSense ads on navigation
+    const onPopState = () => {
+      setPage(getPageFromPath())
       try {
         (window as Window & { adsbygoogle?: unknown[] }).adsbygoogle =
           (window as Window & { adsbygoogle?: unknown[] }).adsbygoogle || []
         ;((window as Window & { adsbygoogle?: unknown[] }).adsbygoogle as unknown[]).push({})
       } catch { /* noop */ }
     }
-    window.addEventListener('hashchange', onHashChange)
-    return () => window.removeEventListener('hashchange', onHashChange)
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
   }, [])
 
   if (page === 'privacy') return <PrivacyPolicy />
@@ -147,8 +163,7 @@ function App() {
     return (
       <LandingPage
         onStart={() => {
-          localStorage.setItem(VISITED_KEY, '1')
-          window.location.hash = 'app'
+          navigate('/')
           setPage('app')
         }}
       />

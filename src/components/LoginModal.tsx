@@ -5,7 +5,9 @@ import { useAuth } from '../context/AuthContext'
 interface LoginModalProps {
   isOpen: boolean
   onClose: () => void
+  onSuccess?: () => void
   language?: string
+  subtitleOverride?: string
 }
 
 const t = {
@@ -47,7 +49,7 @@ const t = {
 
 const inp = 'w-full px-4 py-3 bg-[#1C1C1E] border border-[#3A3A3C] rounded-xl text-white text-sm placeholder:text-white/30 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/15 transition-all'
 
-export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, language = 'es' }) => {
+export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSuccess, language = 'es', subtitleOverride }) => {
   const tr = t[language as 'es' | 'en'] ?? t.es
   const { signIn, signUp } = useAuth()
 
@@ -68,8 +70,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, languag
     try {
       if (mode === 'signin') {
         const { error } = await signIn(email, password)
-        if (error) setError(error)
-        else onClose()
+        if (error) { setError(error) }
+        else { onSuccess ? onSuccess() : onClose() }
       } else {
         const { error } = await signUp(email, password)
         if (error) setError(error)
@@ -98,7 +100,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, languag
 
         <div className="p-5">
           <h2 className="text-lg font-bold text-white mb-1">{tr.title}</h2>
-          <p className="text-sm text-white/50 mb-5">{tr.subtitle}</p>
+          <p className="text-sm text-white/50 mb-5">{subtitleOverride ?? tr.subtitle}</p>
 
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>

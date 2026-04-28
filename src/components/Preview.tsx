@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { usePortfolio } from '../context/PortfolioContext'
-import { Download, LayoutTemplate, Languages, Check, X, Sparkles, Save, BookMarked, Loader2 } from 'lucide-react'
+import { Download, LayoutTemplate, Languages, Check, X, Sparkles, Save, BookMarked, Loader2, Palette } from 'lucide-react'
 import { toCanvas } from 'html-to-image'
 import jsPDF from 'jspdf'
 import { AdModal } from './AdModal'
+import { LoginModal } from './LoginModal'
 import { OriginalTemplate } from './templates/OriginalTemplate'
 import { ModernTemplate } from './templates/ModernTemplate'
 import { ClassicTemplate } from './templates/ClassicTemplate'
@@ -94,9 +95,26 @@ const Preview: React.FC = () => {
     setTimeout(() => setSaveOk(false), 2500)
   }
 
+  const [colorPickerOpen, setColorPickerOpen] = useState(false)
+  const colorPickerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!colorPickerOpen) return
+    const handler = (e: MouseEvent) => {
+      if (colorPickerRef.current && !colorPickerRef.current.contains(e.target as Node)) {
+        setColorPickerOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [colorPickerOpen])
+
+  const COLOR_PRESETS = ['#3B82F6','#7C3AED','#10B981','#F59E0B','#EF4444','#EC4899','#6366F1','#14B8A6','#111827','#F97316','#84CC16']
+
   const [showAdModal, setShowAdModal] = useState(false)
   const [modalAction, setModalAction] = useState<'download' | 'translate'>('download')
   const [showLimitReached, setShowLimitReached] = useState(false)
+  const [showLoginForSubscribe, setShowLoginForSubscribe] = useState(false)
   const [isTranslating, setIsTranslating] = useState(false)
   const [showLanguageSelector, setShowLanguageSelector] = useState(false)
   const [targetTranslationLang, setTargetTranslationLang] = useState<'es' | 'en'>('en')
@@ -139,14 +157,23 @@ const Preview: React.FC = () => {
     }
   }, [portfolioData, pendingOptimization])
 
-  const handleSubscribe = () => {
-    setShowAdModal(false);
-    const ok = subscriptionService.redirectToCheckout();
+  const goToStripe = () => {
+    const ok = subscriptionService.redirectToCheckout(user?.email ?? undefined)
     if (!ok) {
       alert(lang === 'es'
         ? 'Stripe no configurado. Agrega VITE_STRIPE_PAYMENT_LINK al .env'
-        : 'Stripe not configured. Add VITE_STRIPE_PAYMENT_LINK to .env');
+        : 'Stripe not configured. Add VITE_STRIPE_PAYMENT_LINK to .env')
     }
+  }
+
+  const handleSubscribe = () => {
+    setShowAdModal(false)
+    if (!user) {
+      // Pedir cuenta antes de suscribirse
+      setShowLoginForSubscribe(true)
+      return
+    }
+    goToStripe()
   };
 
   const handleExportPDFClick = () => {
@@ -355,6 +382,50 @@ const Preview: React.FC = () => {
                 <option value="modern"   className="bg-[#1C1C1E]">{lang === 'es' ? 'Moderna'  : 'Modern'}</option>
                 <option value="classic"  className="bg-[#1C1C1E]">{lang === 'es' ? 'Clásica'  : 'Classic'}</option>
               </select>
+
+              {/* Color picker */}
+              <div ref={colorPickerRef} className="relative">
+                <button
+                  onClick={() => setColorPickerOpen(v => !v)}
+                  title={lang === 'es' ? 'Color del CV' : 'CV color'}
+                  className="flex items-center gap-1.5 px-2 py-2 bg-[#2C2C2E] border border-[#3A3A3C] hover:bg-[#3A3A3C] hover:border-white/20 rounded-xl transition-all"
+                >
+                  <span
+                    className="w-3.5 h-3.5 rounded-full border border-white/20 shrink-0"
+                    style={{ backgroundColor: portfolioData.theme.primaryColor }}
+                  />
+                  <Palette size={12} className="text-white/40" />
+                </button>
+
+                {colorPickerOpen && (
+                  <div className="absolute left-0 top-full mt-2 z-50 bg-[#1C1C1E] border border-[#3A3A3C] rounded-2xl p-3 shadow-2xl w-[168px]">
+                    <div className="flex flex-wrap gap-2">
+                      {COLOR_PRESETS.map(c => (
+                        <button
+                          key={c}
+                          onClick={() => { updatePortfolioData({ theme: { ...portfolioData.theme, primaryColor: c } }); setColorPickerOpen(false) }}
+                          style={{ backgroundColor: c }}
+                          className={`w-7 h-7 rounded-full border-2 transition-all hover:scale-110 active:scale-95 ${
+                            portfolioData.theme.primaryColor === c ? 'border-white scale-110' : 'border-transparent'
+                          }`}
+                        />
+                      ))}
+                      <label
+                        className="w-7 h-7 rounded-full border-2 border-dashed border-white/30 hover:border-white/60 flex items-center justify-center cursor-pointer transition-all hover:scale-110 relative overflow-hidden"
+                        title={lang === 'es' ? 'Color personalizado' : 'Custom color'}
+                      >
+                        <Palette size={11} className="text-white/50 pointer-events-none" />
+                        <input
+                          type="color"
+                          value={portfolioData.theme.primaryColor}
+                          onChange={(e) => updatePortfolioData({ theme: { ...portfolioData.theme, primaryColor: e.target.value } })}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Save + Mis CVs — solo visibles con sesión */}
@@ -563,6 +634,22 @@ const Preview: React.FC = () => {
           language={lang}
         />
       )}
+
+      {/* Login requerido para suscribirse */}
+      <LoginModal
+        isOpen={showLoginForSubscribe}
+        onClose={() => setShowLoginForSubscribe(false)}
+        onSuccess={() => {
+          setShowLoginForSubscribe(false)
+          goToStripe()
+        }}
+        language={lang}
+        subtitleOverride={
+          lang === 'es'
+            ? 'Creá una cuenta gratuita para activar Premium sin publicidad.'
+            : 'Create a free account to activate ad-free Premium.'
+        }
+      />
     </div>
   )
 }

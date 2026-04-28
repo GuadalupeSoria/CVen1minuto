@@ -9,6 +9,20 @@ export const supabase = (supabaseUrl && supabaseAnonKey)
   ? createClient(supabaseUrl, supabaseAnonKey)
   : createClient('https://placeholder.supabase.co', 'placeholder-key-for-build')
 
+export async function activatePremiumForUser(userId: string): Promise<boolean> {
+  const expiresAt = new Date()
+  expiresAt.setMonth(expiresAt.getMonth() + 1)
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      is_premium: true,
+      premium_expires_at: expiresAt.toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId)
+  return !error
+}
+
 export interface Profile {
   id: string
   email: string | null

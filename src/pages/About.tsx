@@ -191,9 +191,9 @@ export default function About() {
         <div className="max-w-3xl mx-auto px-6 flex flex-wrap gap-4 items-center justify-between text-sm text-white/30">
           <span>© {new Date().getFullYear()} TuCV</span>
           <div className="flex gap-4">
-            <a href="#" className="hover:text-white transition-colors">Editor</a>
-            <a href="#privacy" className="hover:text-white transition-colors">Privacidad</a>
-            <a href="#terms" className="hover:text-white transition-colors">Términos</a>
+            <a href="/" className="hover:text-white transition-colors">Editor</a>
+            <a href="/privacy" className="hover:text-white transition-colors">Privacidad</a>
+            <a href="/terms" className="hover:text-white transition-colors">Términos</a>
           </div>
         </div>
       </footer>

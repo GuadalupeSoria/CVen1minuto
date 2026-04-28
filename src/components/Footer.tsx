@@ -9,26 +9,11 @@ const Footer: React.FC = () => {
           <span>© {new Date().getFullYear()}</span>
         </div>
         <nav className="flex items-center gap-4">
-          <a
-            href="#about"
-            className="hover:text-white/60 transition-colors"
-          >
-            Acerca de
-          </a>
+          <a href="/about" className="hover:text-white/60 transition-colors">Acerca de</a>
           <span className="text-white/10">·</span>
-          <a
-            href="#privacy"
-            className="hover:text-white/60 transition-colors"
-          >
-            Privacidad
-          </a>
+          <a href="/privacy" className="hover:text-white/60 transition-colors">Privacidad</a>
           <span className="text-white/10">·</span>
-          <a
-            href="#terms"
-            className="hover:text-white/60 transition-colors"
-          >
-            Términos
-          </a>
+          <a href="/terms" className="hover:text-white/60 transition-colors">Términos</a>
         </nav>
       </div>
     </footer>

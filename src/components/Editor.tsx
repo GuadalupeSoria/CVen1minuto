@@ -4,12 +4,14 @@ import { useAuth } from '../context/AuthContext'
 import {
   Plus, X, Upload, Phone, MapPin, Mail, Globe,
   PenLine, Sparkles, ChevronLeft, ChevronRight, FileUp, User, Briefcase,
-  GraduationCap, Code2, Languages, FolderGit2, AtSign, Palette,
-  LogIn, LogOut, Crown, GripVertical
+  GraduationCap, Code2, Languages, FolderGit2, AtSign,
+  LogIn, Crown, GripVertical, Settings
 } from 'lucide-react'
 import AIOptimizer from './AIOptimizer'
 import PDFImporter from './PDFImporter'
 import { LoginModal } from './LoginModal'
+import SettingsPanel from './SettingsPanel'
+import subscriptionService from '../services/subscriptionService'
 
 type TranslationsShape = {
   editorTitle: string
@@ -220,6 +222,7 @@ const Editor: React.FC = () => {
   const t = translations[lang] || translations.es
 
   const [showLoginModal, setShowLoginModal] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const [viewMode, setViewMode] = useState<'editor' | 'optimizer'>('editor')
   const [activeTab, setActiveTab] = useState('personal')
   const [newProject, setNewProject] = useState({ name: '', description: '', startMonth: '', startYear: '', endMonth: '', endYear: '', skills: [] as string[] })
@@ -349,18 +352,13 @@ const Editor: React.FC = () => {
           <div className="flex items-center gap-2">
             {user ? (
               <div className="flex items-center gap-1.5">
-                {isPremium && (
-                  <span className="flex items-center gap-1 px-2 py-1 bg-yellow-500/15 border border-yellow-500/30 rounded-lg text-[10px] font-semibold text-yellow-400">
-                    <Crown size={10} />Premium
-                  </span>
-                )}
                 <button
-                  onClick={() => signOut()}
-                  title={user.email ?? ''}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#2C2C2E] border border-[#3A3A3C] hover:border-red-500/40 hover:text-red-400 rounded-xl text-white/50 text-xs transition-all"
+                  onClick={() => setShowSettings(true)}
+                  title={lang === 'es' ? 'Configuración' : 'Settings'}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#2C2C2E] border border-[#3A3A3C] hover:border-violet-500/40 hover:text-white rounded-xl text-white/50 text-xs transition-all"
                 >
-                  <LogOut size={12} />
-                  <span className="max-w-[80px] truncate hidden sm:inline">{user.email}</span>
+                  {isPremium && <Crown size={11} className="text-yellow-400" />}
+                  <Settings size={13} />
                 </button>
               </div>
             ) : (
@@ -455,46 +453,6 @@ const Editor: React.FC = () => {
                   </div>
                 </SectionCard>
 
-                <SectionCard>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Palette size={14} className="text-white/40" />
-                    <Label>{t.personal_colorLabel}</Label>
-                  </div>
-                  <div className="flex flex-wrap gap-2 items-center">
-                    {['#3B82F6','#7C3AED','#10B981','#F59E0B','#EF4444','#EC4899','#0EA5E9','#6366F1','#14B8A6','#111827'].map(preset => (
-                      <button
-                        key={preset}
-                        onClick={() => updatePortfolioData({ theme: { ...portfolioData.theme, primaryColor: preset } })}
-                        title={preset}
-                        style={{ backgroundColor: preset }}
-                        className={`w-7 h-7 rounded-full border-2 transition-all hover:scale-110 active:scale-95 ${
-                          portfolioData.theme.primaryColor === preset
-                            ? 'border-white scale-110 shadow-lg'
-                            : 'border-transparent'
-                        }`}
-                      />
-                    ))}
-                    <label
-                      className="w-7 h-7 rounded-full border-2 border-dashed border-white/30 hover:border-white/60 flex items-center justify-center cursor-pointer transition-all hover:scale-110 active:scale-95"
-                      title={lang === 'es' ? 'Color personalizado' : 'Custom color'}
-                      style={{ position: 'relative', overflow: 'hidden' }}
-                    >
-                      <Palette size={12} className="text-white/50" />
-                      <input
-                        type="color"
-                        value={portfolioData.theme.primaryColor}
-                        onChange={(e) => updatePortfolioData({ theme: { ...portfolioData.theme, primaryColor: e.target.value } })}
-                        style={{ position: 'absolute', opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
-                        aria-label={t.personal_colorLabel}
-                      />
-                    </label>
-                    <div
-                      className="w-7 h-7 rounded-full border-2 border-white/20 shadow-sm"
-                      style={{ backgroundColor: portfolioData.theme.primaryColor }}
-                      title={portfolioData.theme.primaryColor}
-                    />
-                  </div>
-                </SectionCard>
               </div>
             )}
 
@@ -837,6 +795,13 @@ const Editor: React.FC = () => {
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
         language={lang}
+      />
+
+      <SettingsPanel
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        language={lang}
+        onSubscribe={() => subscriptionService.redirectToCheckout(user?.email ?? undefined)}
       />
 
     </div>
