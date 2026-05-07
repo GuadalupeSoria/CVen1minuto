@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-03-31.basil' })
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-03-25.dahlia' })
 const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

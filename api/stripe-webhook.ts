@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-03-31.basil' })
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-03-25.dahlia' })
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -82,7 +82,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (!subscriptionId) break
 
         const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-        const periodEnd = new Date((subscription as { current_period_end: number }).current_period_end * 1000)
+        const periodEnd = new Date((subscription as unknown as { current_period_end: number }).current_period_end * 1000)
 
         // Update subscription record by customer ID
         await supabase.from('subscriptions')
