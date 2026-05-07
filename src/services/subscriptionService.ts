@@ -5,9 +5,12 @@ const STORAGE_KEY = 'cv_downloads';
 const TRANSLATIONS_KEY = 'cv_translations';
 const OPTIMIZATIONS_KEY = 'cv_optimizations';
 const PREMIUM_KEY = 'cv_premium_user';
-const MAX_FREE_DOWNLOADS = 1; // Descargas gratis por día
-const MAX_FREE_TRANSLATIONS = 1; // Traducciones gratis por día
-const MAX_FREE_OPTIMIZATIONS = 1; // Optimizaciones con IA gratis por día
+const ANON_DOWNLOADS_KEY = 'cv_anon_dl';
+const ANON_TRANSLATIONS_KEY = 'cv_anon_tr';
+const ANON_OPTIMIZATIONS_KEY = 'cv_anon_op';
+const MAX_FREE_DOWNLOADS = 1; // Descargas gratis por día (usuarios registrados)
+const MAX_FREE_TRANSLATIONS = 1; // Traducciones gratis por día (usuarios registrados)
+const MAX_FREE_OPTIMIZATIONS = 1; // Optimizaciones con IA gratis por día (usuarios registrados)
 
 interface DownloadRecord {
   count: number;
@@ -94,98 +97,87 @@ class SubscriptionService {
   }
 
   // Verificar si puede descargar
-  canDownload(): { allowed: boolean; remaining: number; isNewDay: boolean } {
-    // Premium puede descargar ilimitado
-    if (this.isPremium()) {
-      return { allowed: true, remaining: -1, isNewDay: false }; // -1 = ilimitado
+  // isLoggedIn: false = anónimo (1 vez total), true = registrado (1 por día)
+  canDownload(isLoggedIn = false): { allowed: boolean; remaining: number; isNewDay: boolean } {
+    if (this.isPremium()) return { allowed: true, remaining: -1, isNewDay: false };
+
+    if (!isLoggedIn) {
+      const used = localStorage.getItem(ANON_DOWNLOADS_KEY) === '1';
+      return { allowed: !used, remaining: used ? 0 : 1, isNewDay: false };
     }
 
     const record = this.getDownloadRecord();
     const isNewDay = this.isNewDay(record.lastDownload);
-
-    // Si es un nuevo día, resetear contador
-    if (isNewDay) {
-      return { allowed: true, remaining: MAX_FREE_DOWNLOADS - 1, isNewDay: true };
-    }
-
-    // Verificar si alcanzó el límite
+    if (isNewDay) return { allowed: true, remaining: MAX_FREE_DOWNLOADS - 1, isNewDay: true };
     const allowed = record.count < MAX_FREE_DOWNLOADS;
-    const remaining = Math.max(0, MAX_FREE_DOWNLOADS - record.count);
-
-    return { allowed, remaining, isNewDay: false };
+    return { allowed, remaining: Math.max(0, MAX_FREE_DOWNLOADS - record.count), isNewDay: false };
   }
 
   // Registrar una descarga
-  recordDownload(): void {
-    if (this.isPremium()) {
-      return; // Premium no tiene límites
+  recordDownload(isLoggedIn = false): void {
+    if (this.isPremium()) return;
+    if (!isLoggedIn) {
+      localStorage.setItem(ANON_DOWNLOADS_KEY, '1');
+      return;
     }
-
     const record = this.getDownloadRecord();
     const isNewDay = this.isNewDay(record.lastDownload);
-
     if (isNewDay) {
-      // Nuevo día, resetear contador
-      this.saveDownloadRecord({
-        count: 1,
-        lastDownload: new Date().toISOString()
-      });
+      this.saveDownloadRecord({ count: 1, lastDownload: new Date().toISOString() });
     } else {
-      // Mismo día, incrementar contador
-      this.saveDownloadRecord({
-        count: record.count + 1,
-        lastDownload: new Date().toISOString()
-      });
+      this.saveDownloadRecord({ count: record.count + 1, lastDownload: new Date().toISOString() });
     }
   }
 
   // Verificar si puede traducir
-  canTranslate(): { allowed: boolean; remaining: number; isNewDay: boolean } {
-    if (this.isPremium()) {
-      return { allowed: true, remaining: -1, isNewDay: false };
+  canTranslate(isLoggedIn = false): { allowed: boolean; remaining: number; isNewDay: boolean } {
+    if (this.isPremium()) return { allowed: true, remaining: -1, isNewDay: false };
+
+    if (!isLoggedIn) {
+      const used = localStorage.getItem(ANON_TRANSLATIONS_KEY) === '1';
+      return { allowed: !used, remaining: used ? 0 : 1, isNewDay: false };
     }
 
     const record = this.getActionRecord(TRANSLATIONS_KEY);
     const isNewDay = this.isNewDay(record.lastDownload);
-
-    if (isNewDay) {
-      return { allowed: true, remaining: MAX_FREE_TRANSLATIONS - 1, isNewDay: true };
-    }
-
+    if (isNewDay) return { allowed: true, remaining: MAX_FREE_TRANSLATIONS - 1, isNewDay: true };
     const allowed = record.count < MAX_FREE_TRANSLATIONS;
-    const remaining = Math.max(0, MAX_FREE_TRANSLATIONS - record.count);
-
-    return { allowed, remaining, isNewDay: false };
+    return { allowed, remaining: Math.max(0, MAX_FREE_TRANSLATIONS - record.count), isNewDay: false };
   }
 
   // Registrar una traducción
-  recordTranslation(): void {
+  recordTranslation(isLoggedIn = false): void {
     if (this.isPremium()) return;
+    if (!isLoggedIn) {
+      localStorage.setItem(ANON_TRANSLATIONS_KEY, '1');
+      return;
+    }
     this.recordAction(TRANSLATIONS_KEY);
   }
 
   // Verificar si puede optimizar con IA
-  canOptimize(): { allowed: boolean; remaining: number; isNewDay: boolean } {
-    if (this.isPremium()) {
-      return { allowed: true, remaining: -1, isNewDay: false };
+  canOptimize(isLoggedIn = false): { allowed: boolean; remaining: number; isNewDay: boolean } {
+    if (this.isPremium()) return { allowed: true, remaining: -1, isNewDay: false };
+
+    if (!isLoggedIn) {
+      const used = localStorage.getItem(ANON_OPTIMIZATIONS_KEY) === '1';
+      return { allowed: !used, remaining: used ? 0 : 1, isNewDay: false };
     }
 
     const record = this.getActionRecord(OPTIMIZATIONS_KEY);
     const isNewDay = this.isNewDay(record.lastDownload);
-
-    if (isNewDay) {
-      return { allowed: true, remaining: MAX_FREE_OPTIMIZATIONS - 1, isNewDay: true };
-    }
-
+    if (isNewDay) return { allowed: true, remaining: MAX_FREE_OPTIMIZATIONS - 1, isNewDay: true };
     const allowed = record.count < MAX_FREE_OPTIMIZATIONS;
-    const remaining = Math.max(0, MAX_FREE_OPTIMIZATIONS - record.count);
-
-    return { allowed, remaining, isNewDay: false };
+    return { allowed, remaining: Math.max(0, MAX_FREE_OPTIMIZATIONS - record.count), isNewDay: false };
   }
 
   // Registrar una optimización
-  recordOptimization(): void {
+  recordOptimization(isLoggedIn = false): void {
     if (this.isPremium()) return;
+    if (!isLoggedIn) {
+      localStorage.setItem(ANON_OPTIMIZATIONS_KEY, '1');
+      return;
+    }
     this.recordAction(OPTIMIZATIONS_KEY);
   }
 

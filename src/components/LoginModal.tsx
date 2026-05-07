@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { X, Mail, Lock, LogIn, UserPlus, Loader2, Crown } from 'lucide-react'
+import { X, Mail, Lock, LogIn, UserPlus, Loader2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 interface LoginModalProps {
@@ -8,6 +8,7 @@ interface LoginModalProps {
   onSuccess?: () => void
   language?: string
   subtitleOverride?: string
+  initialMode?: 'signin' | 'signup'
 }
 
 const t = {
@@ -17,13 +18,11 @@ const t = {
     emailLabel: 'Correo electrónico',
     passwordLabel: 'Contraseña',
     signIn: 'Iniciar sesión',
-    signUp: 'Crear cuenta',
-    switchToSignUp: '¿No tenés cuenta? Registrate',
+    signUp: 'Crear cuenta gratis',
+    switchToSignUp: '¿No tenés cuenta? Registrate gratis',
     switchToSignIn: '¿Ya tenés cuenta? Iniciá sesión',
     orContinue: 'o continuá sin cuenta',
-    premiumBadge: 'Premium sin publicidad',
     errorGeneric: 'Ocurrió un error. Intentá nuevamente.',
-    successSignUp: 'Revisá tu email para confirmar tu cuenta.',
     emailPlaceholder: 'tu@email.com',
     passwordPlaceholder: 'Contraseña',
     close: 'Cerrar',
@@ -34,13 +33,11 @@ const t = {
     emailLabel: 'Email',
     passwordLabel: 'Password',
     signIn: 'Sign in',
-    signUp: 'Create account',
-    switchToSignUp: "Don't have an account? Sign up",
+    signUp: 'Create free account',
+    switchToSignUp: "Don't have an account? Sign up for free",
     switchToSignIn: 'Already have an account? Sign in',
     orContinue: 'or continue without account',
-    premiumBadge: 'Premium — no ads',
     errorGeneric: 'Something went wrong. Please try again.',
-    successSignUp: 'Check your email to confirm your account.',
     emailPlaceholder: 'you@email.com',
     passwordPlaceholder: 'Password',
     close: 'Close',
@@ -49,23 +46,21 @@ const t = {
 
 const inp = 'w-full px-4 py-3 bg-[#1C1C1E] border border-[#3A3A3C] rounded-xl text-white text-sm placeholder:text-white/30 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/15 transition-all'
 
-export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSuccess, language = 'es', subtitleOverride }) => {
+export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSuccess, language = 'es', subtitleOverride, initialMode = 'signin' }) => {
   const tr = t[language as 'es' | 'en'] ?? t.es
   const { signIn, signUp } = useAuth()
 
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
+  const [mode, setMode] = useState<'signin' | 'signup'>(initialMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
 
   if (!isOpen) return null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
-    setSuccess(null)
     setLoading(true)
     try {
       if (mode === 'signin') {
@@ -75,7 +70,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSucce
       } else {
         const { error } = await signUp(email, password)
         if (error) setError(error)
-        else setSuccess(tr.successSignUp)
+        else { onSuccess ? onSuccess() : onClose() }
       }
     } finally {
       setLoading(false)
@@ -86,13 +81,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSucce
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div className="bg-[#1C1C1E] border border-[#3A3A3C] rounded-2xl w-full max-w-sm shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 pb-0">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-violet-600/20 flex items-center justify-center">
-              <Crown size={16} className="text-violet-400" />
-            </div>
-            <span className="text-[11px] font-semibold text-violet-400 uppercase tracking-wider">{tr.premiumBadge}</span>
-          </div>
+        <div className="flex items-center justify-end p-5 pb-0">
           <button onClick={onClose} className="p-1.5 text-white/40 hover:text-white hover:bg-[#2C2C2E] rounded-lg transition-all" aria-label={tr.close}>
             <X size={16} />
           </button>
@@ -142,9 +131,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSucce
 
             {error && (
               <p className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">{error}</p>
-            )}
-            {success && (
-              <p className="text-xs text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-lg px-3 py-2">{success}</p>
             )}
 
             <button

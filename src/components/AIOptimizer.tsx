@@ -4,6 +4,7 @@ import { usePortfolio } from '../context/PortfolioContext';
 import { AIService } from '../services/AIService';
 import subscriptionService from '../services/subscriptionService';
 import { AdModal } from './AdModal';
+import { LoginModal } from './LoginModal';
 import { useAuth } from '../context/AuthContext';
 import type { PendingOptimization, DiffSection } from '../context/PortfolioContext';
 
@@ -128,7 +129,7 @@ const AIOptimizer: React.FC = () => {
     rejectAllPending,
   } = usePortfolio();
 
-  const { isPremium: supabasePremium } = useAuth()
+  const { isPremium: supabasePremium, user } = useAuth()
   const isPremiumUser = supabasePremium || subscriptionService.isPremium()
   const lang = ((portfolioData as unknown as { language?: string }).language as 'es' | 'en') ?? 'es';
   const t = LABELS[lang];
@@ -141,6 +142,7 @@ const AIOptimizer: React.FC = () => {
   const [localResult, setLocalResult] = useState<OptimizationResult | null>(null);
   const [showAdModal, setShowAdModal] = useState(false);
   const [showLimitReached, setShowLimitReached] = useState(false);
+  const [showLoginForFreeAccount, setShowLoginForFreeAccount] = useState(false);
   const [sentToPreview, setSentToPreview] = useState(false);
 
   const handleOptimize = async () => {
@@ -153,8 +155,10 @@ const AIOptimizer: React.FC = () => {
       return;
     }
     if (!isPremiumUser) {
-      const status = subscriptionService.canOptimize();
+      const isLoggedIn = !!user;
+      const status = subscriptionService.canOptimize(isLoggedIn);
       if (!status.allowed) {
+        if (!isLoggedIn) { setShowLoginForFreeAccount(true); return; }
         setShowLimitReached(true);
         setShowAdModal(true);
         return;
@@ -195,7 +199,7 @@ const AIOptimizer: React.FC = () => {
     };
     setPendingOptimization(pending);
     setSentToPreview(true);
-    subscriptionService.recordOptimization();
+    subscriptionService.recordOptimization(!!user);
   };
 
   const applyDirect = () => {
@@ -205,7 +209,7 @@ const AIOptimizer: React.FC = () => {
     (localResult.suggestedSkills ?? []).forEach((skill: string) => {
       if (!portfolioData.skills.includes(skill)) addSkill(skill);
     });
-    subscriptionService.recordOptimization();
+    subscriptionService.recordOptimization(!!user);
     setPendingOptimization(null);
     setLocalResult(null);
     setSentToPreview(false);
@@ -248,6 +252,19 @@ const AIOptimizer: React.FC = () => {
         action="optimize"
         language={lang}
         showLimitReached={showLimitReached}
+      />
+
+      <LoginModal
+        isOpen={showLoginForFreeAccount}
+        onClose={() => setShowLoginForFreeAccount(false)}
+        onSuccess={() => setShowLoginForFreeAccount(false)}
+        language={lang}
+        initialMode="signup"
+        subtitleOverride={
+          lang === 'es'
+            ? 'Obtené más funcionalidades gratuitas.'
+            : 'Get more free features.'
+        }
       />
 
       {/* Header */}

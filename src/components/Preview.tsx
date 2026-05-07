@@ -131,6 +131,7 @@ const Preview: React.FC = () => {
   const [modalAction, setModalAction] = useState<'download' | 'translate'>('download')
   const [showLimitReached, setShowLimitReached] = useState(false)
   const [showLoginForSubscribe, setShowLoginForSubscribe] = useState(false)
+  const [showLoginForFreeAccount, setShowLoginForFreeAccount] = useState(false)
   const [isTranslating, setIsTranslating] = useState(false)
   const [showLanguageSelector, setShowLanguageSelector] = useState(false)
   const [targetTranslationLang, setTargetTranslationLang] = useState<'es' | 'en'>('en')
@@ -194,8 +195,10 @@ const Preview: React.FC = () => {
 
   const handleExportPDFClick = () => {
     if (isPremiumUser) { generatePDF(); return; }
-    const downloadStatus = subscriptionService.canDownload();
+    const isLoggedIn = !!user;
+    const downloadStatus = subscriptionService.canDownload(isLoggedIn);
     if (!downloadStatus.allowed) {
+      if (!isLoggedIn) { setShowLoginForFreeAccount(true); return; }
       setShowLimitReached(true);
       setModalAction('download');
       setShowAdModal(true);
@@ -208,8 +211,10 @@ const Preview: React.FC = () => {
 
   const handleTranslateClick = async () => {
     if (isPremiumUser) { setShowLanguageSelector(true); return; }
-    const translateStatus = subscriptionService.canTranslate();
+    const isLoggedIn = !!user;
+    const translateStatus = subscriptionService.canTranslate(isLoggedIn);
     if (!translateStatus.allowed) {
+      if (!isLoggedIn) { setShowLoginForFreeAccount(true); return; }
       setShowLimitReached(true);
       setModalAction('translate');
       setShowAdModal(true);
@@ -252,7 +257,7 @@ const Preview: React.FC = () => {
           projects: translated.projects,
           education: translated.education
         });
-        subscriptionService.recordTranslation();
+        subscriptionService.recordTranslation(!!user);
         
         // Mostrar confirmación
         setTimeout(() => {
@@ -313,7 +318,7 @@ const Preview: React.FC = () => {
       }
 
       pdf.save(`cv-${portfolioData.name.toLowerCase().replace(/\s+/g, '-')}.pdf`)
-      subscriptionService.recordDownload()
+      subscriptionService.recordDownload(!!user)
     } catch (error) {
       console.error('Error generating PDF:', error)
       alert(lang === 'es' ? 'Error al generar el PDF' : 'Error generating PDF')
@@ -675,8 +680,22 @@ const Preview: React.FC = () => {
         language={lang}
         subtitleOverride={
           lang === 'es'
-            ? 'Creá una cuenta gratuita para activar Premium sin publicidad.'
-            : 'Create a free account to activate ad-free Premium.'
+            ? 'Iniciá sesión para continuar con tu suscripción Premium.'
+            : 'Sign in to continue with your Premium subscription.'
+        }
+      />
+
+      {/* Prompt para crear cuenta gratis tras usar la acción gratuita */}
+      <LoginModal
+        isOpen={showLoginForFreeAccount}
+        onClose={() => setShowLoginForFreeAccount(false)}
+        onSuccess={() => setShowLoginForFreeAccount(false)}
+        language={lang}
+        initialMode="signup"
+        subtitleOverride={
+          lang === 'es'
+            ? 'Obtené más funcionalidades gratuitas.'
+            : 'Get more free features.'
         }
       />
     </div>
